@@ -9,12 +9,15 @@ export interface BoxItemProps {
   image: string;
   title: string;
   onPress?: () => void;
+  width?: number;
 }
 
 const BOX_ITEM_WIDTH = scaleWidth(120);
 
-export const BoxItem: React.FC<BoxItemProps> = ({image, title, onPress}) => {
+export const BoxItem: React.FC<BoxItemProps> = ({image, title, onPress, width}) => {
   const {theme} = useTheme();
+  const itemWidth = width || BOX_ITEM_WIDTH;
+  const itemHeight = itemWidth + moderateScale(40); // Add extra height for title text
 
   return (
     <TouchableOpacity
@@ -23,11 +26,13 @@ export const BoxItem: React.FC<BoxItemProps> = ({image, title, onPress}) => {
         {
           backgroundColor: theme.colors.card,
           borderColor: theme.colors.border,
+          width: itemWidth,
+          height: itemHeight,
         },
       ]}
       activeOpacity={0.7}
       onPress={onPress}>
-      <View style={styles.imageContainer}>
+      <View style={[styles.imageContainer, {width: itemWidth - moderateScale(32), height: itemWidth - moderateScale(32)}]}>
         <CustomImage
           source={{uri: image}}
           type="fast"
@@ -44,15 +49,12 @@ export const BoxItem: React.FC<BoxItemProps> = ({image, title, onPress}) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: BOX_ITEM_WIDTH,
     borderRadius: moderateScale(12),
-    padding: moderateScale(12),
+    padding: moderateScale(16),
     alignItems: 'center',
     borderWidth: moderateScale(1),
   },
   imageContainer: {
-    width: BOX_ITEM_WIDTH - moderateScale(24),
-    height: BOX_ITEM_WIDTH - moderateScale(24),
     borderRadius: moderateScale(8),
     overflow: 'hidden',
     marginBottom: moderateVerticalScale(8),

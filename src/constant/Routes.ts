@@ -4,8 +4,6 @@ import ServiceScreen from '../screens/service/ServiceScreen';
 import PujaScreen from '../screens/puja/PujaScreen';
 import ServicemanScreen from '../screens/serviceman/ServicemanScreen';
 import BrahmanScreen from '../screens/brahman/BrahmanScreen';
-import ServiceCategoryScreen from '../screens/service/ServiceCategoryScreen';
-import PujaTypeScreen from '../screens/puja/PujaTypeScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;

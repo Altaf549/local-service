@@ -9,6 +9,8 @@ export interface ServiceCategory {
   id: number;
   category_name: string;
   image: string;
+  status: string;
+  services_count: number;
 }
 
 export interface Service {
@@ -29,6 +31,8 @@ export interface PujaType {
   id: number;
   type_name: string;
   image: string;
+  status: string;
+  pujas_count: number;
 }
 
 export interface Puja {
