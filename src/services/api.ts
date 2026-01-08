@@ -1,6 +1,6 @@
 import axios from '../network/axiosConfig';
 import {API_ENDPOINTS} from '../constant/ApiEndpoints';
-import {HomeData, HomeApiResponse, ServiceCategory, PujaType, Service} from '../types/home';
+import {HomeData, HomeApiResponse, ServiceCategory, PujaType, Service, Puja, Serviceman, Brahman} from '../types/home';
 
 export type {
   Banner,
@@ -57,6 +57,42 @@ export const getPujaTypes = async (): Promise<PujaType[]> => {
       return response.data.data;
     }
     throw new Error('Failed to fetch puja types');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPujas = async (): Promise<Puja[]> => {
+  try {
+    const response = await axios.get<{success: boolean; data: Puja[]}>(API_ENDPOINTS.PUJAS);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch pujas');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getServicemen = async (): Promise<Serviceman[]> => {
+  try {
+    const response = await axios.get<{success: boolean; data: Serviceman[]}>(API_ENDPOINTS.SERVICEMEN);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch servicemen');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getBrahmans = async (): Promise<Brahman[]> => {
+  try {
+    const response = await axios.get<{success: boolean; data: Brahman[]}>(API_ENDPOINTS.BRAHMANS);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch brahmans');
   } catch (error) {
     throw error;
   }

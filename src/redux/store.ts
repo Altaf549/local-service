@@ -4,6 +4,9 @@ import homeReducer from './slices/homeSlice';
 import serviceCategoryReducer from './slices/serviceCategorySlice';
 import serviceReducer from './slices/serviceSlice';
 import pujaTypeReducer from './slices/pujaTypeSlice';
+import pujaReducer from './slices/pujaSlice';
+import servicemanReducer from './slices/servicemanSlice';
+import brahmanReducer from './slices/brahmanSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +15,9 @@ export const store = configureStore({
     serviceCategory: serviceCategoryReducer,
     service: serviceReducer,
     pujaType: pujaTypeReducer,
+    puja: pujaReducer,
+    serviceman: servicemanReducer,
+    brahman: brahmanReducer,
   },
 });
 
