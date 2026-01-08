@@ -38,6 +38,18 @@ export const getServiceCategories = async (): Promise<ServiceCategory[]> => {
   }
 };
 
+export const getServiceCategoryDetails = async (id: number): Promise<ServiceCategory> => {
+  try {
+    const response = await axios.get<{success: boolean; data: ServiceCategory}>(`${API_ENDPOINTS.SERVICE_CATEGORY_DETAILS}/${id}`);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch service category details');
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getServices = async (): Promise<Service[]> => {
   try {
     const response = await axios.get<{success: boolean; data: Service[]}>(API_ENDPOINTS.SERVICES);
@@ -57,6 +69,18 @@ export const getPujaTypes = async (): Promise<PujaType[]> => {
       return response.data.data;
     }
     throw new Error('Failed to fetch puja types');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPujaTypeDetails = async (id: number): Promise<PujaType> => {
+  try {
+    const response = await axios.get<{success: boolean; data: PujaType}>(`${API_ENDPOINTS.PUJA_TYPE_DETAILS}/${id}`);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch puja type details');
   } catch (error) {
     throw error;
   }

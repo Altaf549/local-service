@@ -10,15 +10,18 @@ export interface ServiceCategory {
   category_name: string;
   image: string;
   status: string;
-  services_count: number;
+  services_count?: number;
+  services?: Service[];
 }
 
 export interface Service {
   id: number;
   service_name: string;
-  category_name: string;
+  category_name?: string;
   price: string;
+  description?: string;
   image: string;
+  status?: string;
 }
 
 export interface Serviceman {
@@ -41,7 +44,8 @@ export interface PujaType {
   type_name: string;
   image: string;
   status: string;
-  pujas_count: number;
+  pujas_count?: number;
+  pujas?: Puja[];
 }
 
 export interface Puja {
