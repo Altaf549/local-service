@@ -2,6 +2,7 @@ import UIKit
 import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
+import RNBootSplash
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -28,6 +29,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       in: window,
       launchOptions: launchOptions
     )
+
+    // Initialize boot splash
+    if let rootViewController = window?.rootViewController {
+      RNBootSplash.initWithStoryboard("LaunchScreen", rootViewController: rootViewController)
+    }
 
     return true
   }
