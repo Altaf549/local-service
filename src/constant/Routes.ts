@@ -1,9 +1,11 @@
 import React from 'react';
-import HomeScreen from '../screens/HomeScreen';
-import ServiceScreen from '../screens/ServiceScreen';
-import PujaScreen from '../screens/PujaScreen';
-import ServicemanScreen from '../screens/ServicemanScreen';
-import BrahmanScreen from '../screens/BrahmanScreen';
+import HomeScreen from '../screens/home/HomeScreen';
+import ServiceScreen from '../screens/service/ServiceScreen';
+import PujaScreen from '../screens/puja/PujaScreen';
+import ServicemanScreen from '../screens/serviceman/ServicemanScreen';
+import BrahmanScreen from '../screens/brahman/BrahmanScreen';
+import ServiceCategoryScreen from '../screens/service/ServiceCategoryScreen';
+import PujaTypeScreen from '../screens/puja/PujaTypeScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -22,6 +24,8 @@ export type BottomTabParamList = {
   Puja: undefined;
   Serviceman: undefined;
   Brahman: undefined;
+  ServiceCategory: undefined;
+  PujaType: undefined;
 };
 
 export type TabConfig = {
@@ -31,35 +35,44 @@ export type TabConfig = {
   component: React.ComponentType<any>;
 };
 
+export const HOME = 'Home';
+export const SERVICE = 'Service';
+export const PUJA = 'Puja';
+export const SERVICEMAN = 'Serviceman';
+export const BRAHMAN = 'Brahman';
+export const SERVICE_CATEGORY = 'ServiceCategory';
+export const PUJA_TYPE = 'PujaType';
+
+// Tab configuration array with proper typing
 export const tabConfig: TabConfig[] = [
   {
-    name: 'Home',
+    name: HOME,
     label: 'Home',
     icon: 'home',
     component: HomeScreen,
   },
   {
-    name: 'Service',
+    name: SERVICE,
     label: 'Service',
-    icon: 'handyman',
+    icon: 'home-repair-service',
     component: ServiceScreen,
   },
   {
-    name: 'Puja',
+    name: PUJA,
     label: 'Puja',
     icon: 'temple-hindu',
     component: PujaScreen,
   },
   {
-    name: 'Serviceman',
+    name: SERVICEMAN,
     label: 'Serviceman',
     icon: 'engineering',
     component: ServicemanScreen,
   },
   {
-    name: 'Brahman',
+    name: BRAHMAN,
     label: 'Brahman',
-    icon: 'self-improvement',
+    icon: 'person',
     component: BrahmanScreen,
   },
 ];

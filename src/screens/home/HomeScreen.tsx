@@ -3,20 +3,20 @@ import {StyleSheet, ScrollView, ActivityIndicator, RefreshControl} from 'react-n
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
-import {useTheme} from '../theme/ThemeContext';
-import {Header} from '../components/Header/Header';
+import {useTheme} from '../../theme/ThemeContext';
+import {Header} from '../../components/Header/Header';
 import {
   BannerSection,
   BoxItem,
   CircleItem,
   HorizontalListSection,
-} from '../components/index';
-import {Spacer} from '../components/Spacer/Spacer';
+} from '../../components/index';
+import {Spacer} from '../../components/Spacer/Spacer';
 
-import {BottomTabParamList} from '../constant/Routes';
-import {useAppDispatch, useAppSelector} from '../redux/hooks';
-import {fetchHomeData} from '../redux/slices/homeSlice';
-import {moderateVerticalScale, moderateScale} from '../utils/scaling';
+import {BottomTabParamList, BRAHMAN, PUJA, PUJA_TYPE, SERVICE, SERVICE_CATEGORY, SERVICEMAN} from '../../constant/Routes';
+import {useAppDispatch, useAppSelector} from '../../redux/hooks';
+import {fetchHomeData} from '../../redux/slices/homeSlice';
+import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
 
 type HomeScreenNavigationProp = BottomTabNavigationProp<BottomTabParamList, 'Home'>;
 
@@ -100,12 +100,16 @@ const HomeScreen: React.FC = () => {
             <BoxItem
               image={item.image}
               title={item.category_name}
-              onPress={() => navigation.navigate('Service')}
+              onPress={() => {
+                // TODO: Navigate to puja details
+              }}
             />
           )}
           keyExtractor={item => item.id.toString()}
           showSeeAll={service_categories.length > 3}
-          onSeeAllPress={() => navigation.navigate('Service')}
+          onSeeAllPress={() => {
+            navigation.navigate(SERVICE_CATEGORY);
+          }}
         />
 
         {/* Services Section */}
@@ -124,7 +128,9 @@ const HomeScreen: React.FC = () => {
           )}
           keyExtractor={item => item.id.toString()}
           showSeeAll={services.length > 3}
-          onSeeAllPress={() => navigation.navigate('Service')}
+          onSeeAllPress={() => {
+            navigation.navigate(SERVICE); 
+          }}
         />
 
         {/* Servicemen Section */}
@@ -135,12 +141,16 @@ const HomeScreen: React.FC = () => {
             <BoxItem
               image={item.profile_photo}
               title={item.name}
-              onPress={() => navigation.navigate('Serviceman')}
+              onPress={() => {
+                // TODO: Navigate to serviceman details
+              }}
             />
           )}
           keyExtractor={item => item.id.toString()}
           showSeeAll={servicemen.length > 3}
-          onSeeAllPress={() => navigation.navigate('Serviceman')}
+          onSeeAllPress={() => {
+            navigation.navigate(SERVICEMAN); 
+          }}
         />
 
         {/* Puja Types Section */}
@@ -151,12 +161,16 @@ const HomeScreen: React.FC = () => {
             <BoxItem
               image={item.image}
               title={item.type_name}
-              onPress={() => navigation.navigate('Puja')}
+              onPress={() => {
+                // TODO: Navigate to puja details
+              }}
             />
           )}
           keyExtractor={item => item.id.toString()}
           showSeeAll={puja_types.length > 3}
-          onSeeAllPress={() => navigation.navigate('Puja')}
+          onSeeAllPress={() => {
+            navigation.navigate(PUJA_TYPE)
+          }}
         />
 
         {/* Pujas Section */}
@@ -168,12 +182,16 @@ const HomeScreen: React.FC = () => {
               image={item.image}
               title={item.puja_name}
               price={item.price}
-              onPress={() => navigation.navigate('Puja')}
+              onPress={() => {
+                // TODO: Navigate to puja details
+              }}
             />
           )}
           keyExtractor={item => item.id.toString()}
           showSeeAll={pujas.length > 3}
-          onSeeAllPress={() => navigation.navigate('Puja')}
+          onSeeAllPress={() =>{
+            navigation.navigate(PUJA);
+          }}
         />
 
         {/* Brahmans Section */}
@@ -185,12 +203,16 @@ const HomeScreen: React.FC = () => {
               <BoxItem
                 image={item.profile_photo}
                 title={item.name}
-                onPress={() => navigation.navigate('Brahman')}
+                onPress={() => {
+                // TODO: Navigate to puja details
+              }}
               />
             )}
             keyExtractor={item => item.id.toString()}
             showSeeAll={brahmans.length > 3}
-            onSeeAllPress={() => navigation.navigate('Brahman')}
+            onSeeAllPress={() => {
+              navigation.navigate(BRAHMAN);
+            }}
           />
         )}
       </ScrollView>

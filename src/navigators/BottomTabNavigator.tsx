@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {Suspense} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BottomTabParamList, tabConfig} from '../constant/Routes';
 import MaterialIcon from '@react-native-vector-icons/material-icons';
 import {useTheme} from '../theme/ThemeContext';
+import {View, ActivityIndicator} from 'react-native';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 

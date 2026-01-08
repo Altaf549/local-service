@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import {Title} from '../components/Typography/Title';
+import {Title} from '../../components/Typography/Title';
 
 const PujaScreen: React.FC = () => {
   return (

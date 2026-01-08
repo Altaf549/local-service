@@ -63,7 +63,7 @@ const lightTheme: Theme = {
     primary: '#1cadc9',
     secondary: '#14829a',
     whiteBackground: '#FFFFFF',
-    background: '#d3d2d2ff',
+    background: '#e0e0e0ff',
     surface: '#fffefeff',
     text: '#000000',
     textSecondary: '#666666',
