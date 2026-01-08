@@ -1,30 +1,35 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, ScrollView, ActivityIndicator, RefreshControl} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
-import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
-import {useTheme} from '../../theme/ThemeContext';
-import {Header} from '../../components/Header/Header';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { CompositeNavigationProp } from '@react-navigation/native';
+import { useTheme } from '../../theme/ThemeContext';
+import { Header } from '../../components/Header/Header';
 import {
   BannerSection,
   BoxItem,
   CircleItem,
   HorizontalListSection,
 } from '../../components/index';
-import {Spacer} from '../../components/Spacer/Spacer';
+import { Spacer } from '../../components/Spacer/Spacer';
 
-import {BottomTabParamList, BRAHMAN, PUJA, PUJA_TYPE, SERVICE, SERVICE_CATEGORY, SERVICEMAN} from '../../constant/Routes';
-import {useAppDispatch, useAppSelector} from '../../redux/hooks';
-import {fetchHomeData} from '../../redux/slices/homeSlice';
-import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
+import { BottomTabParamList, AppStackParamList, BRAHMAN, PUJA, PUJA_TYPE, SERVICE, SERVICE_CATEGORY, SERVICEMAN, SERVICE_CATEGORY_DETAILS, SERVICE_DETAILS, SERVICEMAN_DETAILS, PUJA_TYPE_DETAILS, PUJA_DETAILS, BRAHMAN_DETAILS } from '../../constant/Routes';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { fetchHomeData } from '../../redux/slices/homeSlice';
+import { moderateVerticalScale, moderateScale } from '../../utils/scaling';
 
-type HomeScreenNavigationProp = BottomTabNavigationProp<BottomTabParamList, 'Home'>;
+type HomeScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<BottomTabParamList, 'Home'>,
+  StackNavigationProp<AppStackParamList>
+>;
 
 const HomeScreen: React.FC = () => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const dispatch = useAppDispatch();
-  const {banners, service_categories, services, servicemen, puja_types, pujas, brahmans, loading, error} =
+  const { banners, service_categories, services, servicemen, puja_types, pujas, brahmans, loading, error } =
     useAppSelector(state => state.home);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -55,7 +60,7 @@ const HomeScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Home" />
         <SafeAreaView edges={[]} style={styles.loadingContainer}>
@@ -70,7 +75,7 @@ const HomeScreen: React.FC = () => {
       edges={['left', 'right']}
       style={[
         styles.container,
-        {backgroundColor: theme.colors.background},
+        { backgroundColor: theme.colors.background },
       ]}>
       <Header title="Home" />
       <ScrollView
@@ -96,12 +101,12 @@ const HomeScreen: React.FC = () => {
         <HorizontalListSection
           title="Service Category"
           data={service_categories}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <BoxItem
               image={item.image}
               title={item.category_name}
               onPress={() => {
-                // TODO: Navigate to puja details
+                navigation.navigate(SERVICE_CATEGORY_DETAILS, { id: item.id });
               }}
             />
           )}
@@ -116,20 +121,20 @@ const HomeScreen: React.FC = () => {
         <HorizontalListSection
           title="Service"
           data={services}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <CircleItem
               image={item.image}
               title={item.service_name}
               price={item.price}
               onPress={() => {
-                // TODO: Navigate to service details
+                navigation.navigate(SERVICE_DETAILS, { id: item.id });
               }}
             />
           )}
           keyExtractor={item => item.id.toString()}
           showSeeAll={services.length > 3}
           onSeeAllPress={() => {
-            navigation.navigate(SERVICE); 
+            navigation.navigate(SERVICE);
           }}
         />
 
@@ -137,19 +142,19 @@ const HomeScreen: React.FC = () => {
         <HorizontalListSection
           title="Serviceman"
           data={servicemen}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <BoxItem
               image={item.profile_photo}
               title={item.name}
               onPress={() => {
-                // TODO: Navigate to serviceman details
+                navigation.navigate(SERVICEMAN_DETAILS, { id: item.id });
               }}
             />
           )}
           keyExtractor={item => item.id.toString()}
           showSeeAll={servicemen.length > 3}
           onSeeAllPress={() => {
-            navigation.navigate(SERVICEMAN); 
+            navigation.navigate(SERVICEMAN);
           }}
         />
 
@@ -157,12 +162,12 @@ const HomeScreen: React.FC = () => {
         <HorizontalListSection
           title="Puja Type"
           data={puja_types}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <BoxItem
               image={item.image}
               title={item.type_name}
               onPress={() => {
-                // TODO: Navigate to puja details
+                navigation.navigate(PUJA_TYPE_DETAILS, { id: item.id });
               }}
             />
           )}
@@ -177,19 +182,19 @@ const HomeScreen: React.FC = () => {
         <HorizontalListSection
           title="Puja"
           data={pujas}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <CircleItem
               image={item.image}
               title={item.puja_name}
               price={item.price}
               onPress={() => {
-                // TODO: Navigate to puja details
+                navigation.navigate(PUJA_DETAILS, { id: item.id });
               }}
             />
           )}
           keyExtractor={item => item.id.toString()}
           showSeeAll={pujas.length > 3}
-          onSeeAllPress={() =>{
+          onSeeAllPress={() => {
             navigation.navigate(PUJA);
           }}
         />
@@ -199,13 +204,13 @@ const HomeScreen: React.FC = () => {
           <HorizontalListSection
             title="Brahman"
             data={brahmans}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <BoxItem
                 image={item.profile_photo}
                 title={item.name}
                 onPress={() => {
-                // TODO: Navigate to puja details
-              }}
+                  navigation.navigate(BRAHMAN_DETAILS, { id: item.id });
+                }}
               />
             )}
             keyExtractor={item => item.id.toString()}

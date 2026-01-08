@@ -4,10 +4,19 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '../../theme/ThemeContext';
 import {Header} from '../../components/Header/Header';
 import {CircleItem} from '../../components/index';
-import {Spacer} from '../../components/Spacer/Spacer';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {fetchPujas} from '../../redux/slices/pujaSlice';
 import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
+import {CompositeNavigationProp} from '@react-navigation/native';
+import {AppStackParamList, BottomTabParamList, PUJA_DETAILS} from '../../constant/Routes';
+
+type PujaScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<BottomTabParamList, 'Puja'>,
+  StackNavigationProp<AppStackParamList>
+>;
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -16,6 +25,7 @@ const PujaScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const {pujas, loading, error} = useAppSelector(state => state.puja);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<PujaScreenNavigationProp>();
 
   useEffect(() => {
     dispatch(fetchPujas());
@@ -85,7 +95,7 @@ const PujaScreen: React.FC = () => {
                     image={item.image}
                     title={item.puja_name}
                     onPress={() => {
-                      // TODO: Navigate to puja details
+                      navigation.navigate(PUJA_DETAILS, { id: item.id });
                     }}
                   />
                 </View>

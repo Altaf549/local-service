@@ -10,6 +10,18 @@ export type RootStackParamList = {
   AppStack: undefined;
 };
 
+export type AppStackParamList = {
+  MainTabs: undefined;
+  ServiceCategory: undefined;
+  PujaType: undefined;
+  ServiceCategoryDetails: { id: number };
+  PujaTypeDetails: { id: number };
+  ServiceDetails: { id: number };
+  PujaDetails: { id: number };
+  ServicemanDetails: { id: number };
+  BrahmanDetails: { id: number };
+};
+
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
@@ -40,6 +52,14 @@ export const SERVICEMAN = 'Serviceman';
 export const BRAHMAN = 'Brahman';
 export const SERVICE_CATEGORY = 'ServiceCategory';
 export const PUJA_TYPE = 'PujaType';
+
+// Detail screen routes
+export const SERVICE_CATEGORY_DETAILS = 'ServiceCategoryDetails';
+export const PUJA_TYPE_DETAILS = 'PujaTypeDetails';
+export const SERVICE_DETAILS = 'ServiceDetails';
+export const PUJA_DETAILS = 'PujaDetails';
+export const SERVICEMAN_DETAILS = 'ServicemanDetails';
+export const BRAHMAN_DETAILS = 'BrahmanDetails';
 
 // Tab configuration array with proper typing
 export const tabConfig: TabConfig[] = [

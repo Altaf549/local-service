@@ -8,6 +8,11 @@ import {Spacer} from '../../components/Spacer/Spacer';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {fetchServiceCategories} from '../../redux/slices/serviceCategorySlice';
 import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AppStackParamList, SERVICE_CATEGORY_DETAILS} from '../../constant/Routes';
+
+type ServiceCategoryScreenNavigationProp = StackNavigationProp<AppStackParamList, 'ServiceCategory'>;
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -16,6 +21,7 @@ const ServiceCategoryScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const {categories, loading, error} = useAppSelector(state => state.serviceCategory);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<ServiceCategoryScreenNavigationProp>();
   
   // Calculate item width for 3-column grid with spacing
   const itemWidth = (screenWidth - moderateScale(32) - moderateScale(16)) / 3; // 32 padding, 16 spacing between items
@@ -89,7 +95,7 @@ const ServiceCategoryScreen: React.FC = () => {
                     title={item.category_name}
                     width={itemWidth}
                     onPress={() => {
-                      // TODO: Navigate to category details or services list
+                      navigation.navigate(SERVICE_CATEGORY_DETAILS, { id: item.id });
                     }}
                   />
                 </View>

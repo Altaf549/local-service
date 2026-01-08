@@ -4,10 +4,19 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '../../theme/ThemeContext';
 import {Header} from '../../components/Header/Header';
 import {BoxItem} from '../../components/index';
-import {Spacer} from '../../components/Spacer/Spacer';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {fetchBrahmans} from '../../redux/slices/brahmanSlice';
 import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
+import {useNavigation} from '@react-navigation/native';
+import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {CompositeNavigationProp} from '@react-navigation/native';
+import {AppStackParamList, BottomTabParamList, BRAHMAN_DETAILS} from '../../constant/Routes';
+
+type BrahmanScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<BottomTabParamList, 'Brahman'>,
+  StackNavigationProp<AppStackParamList>
+>;
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -16,6 +25,7 @@ const BrahmanScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const {brahmans, loading, error} = useAppSelector(state => state.brahman);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<BrahmanScreenNavigationProp>();
   
   // Calculate item width for 3-column grid with spacing
   const itemWidth = (screenWidth - moderateScale(32) - moderateScale(16)) / 3; // 32 padding, 16 spacing between items
@@ -89,7 +99,7 @@ const BrahmanScreen: React.FC = () => {
                     title={item.name}
                     width={itemWidth}
                     onPress={() => {
-                      // TODO: Navigate to brahman details
+                      navigation.navigate(BRAHMAN_DETAILS, { id: item.id });
                     }}
                   />
                 </View>

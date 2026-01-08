@@ -4,10 +4,14 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '../../theme/ThemeContext';
 import {Header} from '../../components/Header/Header';
 import {BoxItem} from '../../components/index';
-import {Spacer} from '../../components/Spacer/Spacer';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {fetchPujaTypes} from '../../redux/slices/pujaTypeSlice';
 import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';;
+import {AppStackParamList, PUJA_TYPE_DETAILS} from '../../constant/Routes';
+
+type PujaTypeScreenNavigationProp = StackNavigationProp<AppStackParamList, 'PujaType'>;
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -16,6 +20,7 @@ const PujaTypeScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const {pujaTypes, loading, error} = useAppSelector(state => state.pujaType);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<PujaTypeScreenNavigationProp>();
   
   // Calculate item width for 3-column grid with spacing
   const itemWidth = (screenWidth - moderateScale(32) - moderateScale(16)) / 3; // 32 padding, 16 spacing between items
@@ -89,7 +94,7 @@ const PujaTypeScreen: React.FC = () => {
                     title={item.type_name}
                     width={itemWidth}
                     onPress={() => {
-                      // TODO: Navigate to puja type details or pujas list
+                      navigation.navigate(PUJA_TYPE_DETAILS, { id: item.id });
                     }}
                   />
                 </View>

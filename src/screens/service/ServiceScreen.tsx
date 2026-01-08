@@ -8,6 +8,16 @@ import {Spacer} from '../../components/Spacer/Spacer';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {fetchServices} from '../../redux/slices/serviceSlice';
 import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
+import {useNavigation} from '@react-navigation/native';
+import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {CompositeNavigationProp} from '@react-navigation/native';
+import {AppStackParamList, BottomTabParamList, SERVICE_DETAILS} from '../../constant/Routes';
+
+type ServiceScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<BottomTabParamList, 'Service'>,
+  StackNavigationProp<AppStackParamList>
+>;
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -16,6 +26,7 @@ const ServiceScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const {services, loading, error} = useAppSelector(state => state.service);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<ServiceScreenNavigationProp>();
 
   useEffect(() => {
     dispatch(fetchServices());
@@ -85,7 +96,7 @@ const ServiceScreen: React.FC = () => {
                     image={item.image}
                     title={item.service_name}
                     onPress={() => {
-                      // TODO: Navigate to service details
+                      navigation.navigate(SERVICE_DETAILS, { id: item.id });
                     }}
                   />
                 </View>

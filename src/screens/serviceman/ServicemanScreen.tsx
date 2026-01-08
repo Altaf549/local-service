@@ -4,10 +4,19 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '../../theme/ThemeContext';
 import {Header} from '../../components/Header/Header';
 import {BoxItem} from '../../components/index';
-import {Spacer} from '../../components/Spacer/Spacer';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {fetchServicemen} from '../../redux/slices/servicemanSlice';
 import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
+import {useNavigation} from '@react-navigation/native';
+import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {CompositeNavigationProp} from '@react-navigation/native';
+import {AppStackParamList, BottomTabParamList, SERVICEMAN_DETAILS} from '../../constant/Routes';
+
+type ServicemanScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<BottomTabParamList, 'Serviceman'>,
+  StackNavigationProp<AppStackParamList>
+>;
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -16,6 +25,7 @@ const ServicemanScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const {servicemen, loading, error} = useAppSelector(state => state.serviceman);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<ServicemanScreenNavigationProp>();
   
   // Calculate item width for 3-column grid with spacing
   const itemWidth = (screenWidth - moderateScale(32) - moderateScale(16)) / 3; // 32 padding, 16 spacing between items
@@ -89,7 +99,7 @@ const ServicemanScreen: React.FC = () => {
                     title={item.name}
                     width={itemWidth}
                     onPress={() => {
-                      // TODO: Navigate to serviceman details
+                      navigation.navigate(SERVICEMAN_DETAILS, { id: item.id });
                     }}
                   />
                 </View>
