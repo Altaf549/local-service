@@ -1,15 +1,11 @@
 import React, {useEffect} from 'react';
 import {NavigationContainer, NavigationContainerRef} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import RNBootSplash from 'react-native-bootsplash';
 import FlashMessage from 'react-native-flash-message';
 import {AppDispatch} from '../redux/store';
-import {setUserData, setIsUser} from '../redux/slices/userSlice';
 import {RootStackParamList} from '../constant/Routes';
 import AppStack from './AppStack';
-import Console from '../utils/Console';
 
 export const navigationRef =
   React.createRef<NavigationContainerRef<RootStackParamList>>();
@@ -21,28 +17,7 @@ const RootNavigator = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const token = await AsyncStorage.getItem('urser_token');
-        if (token) {
-          const tokenParseValue = JSON.parse(token);
-          axios.defaults.headers.common['Authorization'] = `Bearer ${tokenParseValue}`;
-          const getUserData = await AsyncStorage.getItem('user_info');
-          if (getUserData) {
-            const userData = JSON.parse(getUserData);
-            dispatch(setUserData(userData));
-            dispatch(setIsUser(true));
-          }
-        }
-      } catch (error) {
-        Console.error('Error initializing app:', error);
-      }
-    };
-
-    init().finally(async () => {
-      Console.log('bootsplash hide');
-      await RNBootSplash.hide({fade: true});
-    });
+    RNBootSplash.hide({fade: true});
   }, [dispatch]);
 
   return (
