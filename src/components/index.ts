@@ -65,3 +65,11 @@ export {HorizontalListSection} from './Home/HorizontalListSection';
 export type {HorizontalListSectionProps} from './Home/HorizontalListSection';
 export {ProviderCard} from './ProviderCard/ProviderCard';
 export type {ProviderCardProps} from './ProviderCard/ProviderCard';
+
+// Achievement Card
+export {AchievementCard} from './AchievementCard/AchievementCard';
+export type {AchievementCardProps} from './AchievementCard/AchievementCard';
+
+// Experience Card
+export {ExperienceCard} from './ExperienceCard/ExperienceCard';
+export type {ExperienceCardProps} from './ExperienceCard/ExperienceCard';

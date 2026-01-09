@@ -1702,6 +1702,276 @@ Logout and revoke current access token.
 
 ---
 
+## 32. Get Brahman Details (Full Profile)
+
+Get complete brahman profile including experiences, achievements, and services with pricing.
+
+**Endpoint:** `GET /api/brahmans/details/{id}`
+
+**Authentication:** Not required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "Brahman Name",
+        "email": "brahman@example.com",
+        "mobile_number": "9876543211",
+        "specialization": "Vedic Rituals",
+        "languages": "Hindi, English",
+        "experience": 10,
+        "charges": "2000.00",
+        "availability_status": "available",
+        "government_id": "PAN123456",
+        "address": "456 Temple Street, City, State",
+        "profile_photo": "http://your-domain.com/storage/brahmans/profiles/photo.jpg",
+        "id_proof_image": "http://your-domain.com/storage/brahmans/id-proofs/image.jpg",
+        "experiences": [
+            {
+                "id": 1,
+                "title": "Vedic Scholar",
+                "description": "Specialized in Vedic rituals and ceremonies",
+                "years": 12,
+                "organization": "Temple Trust",
+                "start_date": "2012-01-01",
+                "end_date": "2024-01-01",
+                "is_current": false
+            }
+        ],
+        "achievements": [
+            {
+                "id": 1,
+                "title": "Vedic Scholar Award 2024",
+                "description": "Recognized for excellence in Vedic rituals",
+                "achieved_date": "2024-12-31"
+            }
+        ],
+       "services": [
+            {
+                "id": 2,
+                "puja_id": 2,
+                "puja_name": "Griha Pravesh Puja",
+                "image": "http://192.168.1.36:8000/storage/pujas/yjAEory35SdU3XDtWACzu0rOIB8zhTwYwdokdJrU.jpg",
+                "puja_type": "Home Puja",
+                "duration": "2hr",
+                "price": "16300.00",
+                "description": "Griha Pravesh Puja",
+                "material_file": "http://192.168.1.36:8000/storage/pujas/materials/5kUGNpPttTDhUIboohCbawzgaxDEwCkJKZtdjKIH.pdf"
+            }
+        ]
+    }
+}
+```
+
+**Note:**
+- Returns complete profile information for the specified brahman.
+- Includes all experiences and achievements.
+- Includes all services/pujas the brahman offers with their specific pricing.
+- Only returns brahmans with `status: "active"`.
+
+---
+
+## 33. Get Pujas by Type
+
+Get all pujas belonging to a specific puja type.
+
+**Endpoint:** `GET /api/pujas/by-type/{typeId}`
+
+**Authentication:** Not required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "puja_name": "Ganesh Puja",
+            "puja_type": "Festival",
+            "duration": "2 hours",
+            "price": "1000.00",
+            "description": "Ganesh Puja description",
+            "image": "http://your-domain.com/storage/pujas/image.jpg"
+        },
+        {
+            "id": 2,
+            "puja_name": "Lakshmi Puja",
+            "puja_type": "Festival",
+            "duration": "1.5 hours",
+            "price": "800.00",
+            "description": "Lakshmi Puja description",
+            "image": "http://your-domain.com/storage/pujas/image2.jpg"
+        }
+    ]
+}
+```
+
+**Note:**
+- Returns all active pujas for the specified puja type.
+- Only returns pujas with `status: "active"`.
+
+---
+
+## 34. Get Puja Types
+
+Get all available puja types.
+
+**Endpoint:** `GET /api/puja-types`
+
+**Authentication:** Not required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "type_name": "Festival",
+            "description": "Festival special pujas and ceremonies"
+        },
+        {
+            "id": 2,
+            "type_name": "Daily",
+            "description": "Daily worship and regular pujas"
+        },
+        {
+            "id": 3,
+            "type_name": "Special Occasion",
+            "description": "Weddings, birthdays, and other special occasions"
+        }
+    ]
+}
+```
+
+**Note:**
+- Returns all active puja types.
+- Only returns puja types with `status: "active"`.
+
+---
+
+## 35. Get Serviceman Details (Full Profile)
+
+Get complete serviceman profile including experiences, achievements, and services with pricing.
+
+**Endpoint:** `GET /api/servicemen/details/{id}`
+
+**Authentication:** Not required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "Service Provider",
+        "email": "serviceman@example.com",
+        "phone": "9876543210",
+        "mobile_number": "9876543210",
+        "category": {
+            "id": 1,
+            "category_name": "Home Services"
+        },
+        "experience": 5,
+        "availability_status": "available",
+        "government_id": "AADHAAR123456",
+        "address": "123 Main Street, City, State",
+        "profile_photo": "http://your-domain.com/storage/servicemen/profiles/photo.jpg",
+        "id_proof_image": "http://your-domain.com/storage/servicemen/id-proofs/image.jpg",
+        "experiences": [
+            {
+                "id": 1,
+                "title": "Senior Plumber",
+                "description": "Worked as senior plumber for 5 years",
+                "years": 5,
+                "company": "ABC Plumbing Services",
+                "start_date": "2019-01-01",
+                "end_date": "2024-01-01",
+                "is_current": false
+            }
+        ],
+        "achievements": [
+            {
+                "id": 1,
+                "title": "Best Service Provider 2024",
+                "description": "Awarded for outstanding service quality",
+                "achieved_date": "2024-12-31"
+            }
+        ],
+        "services": [
+            {
+                "id": 1,
+                "service_id": 1,
+                "service_name": "Plumbing",
+                "category": {
+                    "id": 1,
+                    "category_name": "Home Services"
+                },
+                "duration": "Professional plumbing services",
+                "price": "750.00",
+                "description": "Professional plumbing services",
+                "image": "http://your-domain.com/storage/services/image.jpg"
+            }
+        ]
+    }
+}
+```
+
+**Note:**
+- Returns complete profile information for the specified serviceman.
+- Includes all experiences and achievements.
+- Includes all services the serviceman offers with their specific pricing.
+- Only returns servicemen with `status: "active"`.
+
+---
+
+## 36. Get Services by Category
+
+Get all services belonging to a specific service category.
+
+**Endpoint:** `GET /api/services/by-category/{categoryId}`
+
+**Authentication:** Not required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "service_name": "Plumbing",
+            "category": {
+                "id": 1,
+                "category_name": "Home Services"
+            },
+            "price": "500.00",
+            "description": "Professional plumbing services",
+            "image": "http://your-domain.com/storage/services/image.jpg"
+        },
+        {
+            "id": 2,
+            "service_name": "Electrical Work",
+            "category": {
+                "id": 1,
+                "category_name": "Home Services"
+            },
+            "price": "600.00",
+            "description": "Professional electrical services",
+            "image": "http://your-domain.com/storage/services/image2.jpg"
+        }
+    ]
+}
+```
+
+**Note:**
+- Returns all active services for the specified category.
+- Only returns services with `status: "active"`.
+
+---
+
 ## Notes
 
 1. **File Uploads**: For image uploads, use `multipart/form-data` content type. Supported formats:

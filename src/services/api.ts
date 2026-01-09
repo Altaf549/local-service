@@ -135,6 +135,18 @@ export const getServicemen = async (): Promise<Serviceman[]> => {
   }
 };
 
+export const getServicemanDetails = async (id: number): Promise<any> => {
+  try {
+    const response = await axios.get<{success: boolean; data: any}>(`${API_ENDPOINTS.SERVICEMEN}/details/${id}`);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch serviceman details');
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getBrahmans = async (): Promise<Brahman[]> => {
   try {
     const response = await axios.get<{success: boolean; data: Brahman[]}>(API_ENDPOINTS.BRAHMANS);
@@ -142,6 +154,18 @@ export const getBrahmans = async (): Promise<Brahman[]> => {
       return response.data.data;
     }
     throw new Error('Failed to fetch brahmans');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getBrahmanDetails = async (id: number): Promise<any> => {
+  try {
+    const response = await axios.get<{success: boolean; data: any}>(`${API_ENDPOINTS.BRAHMANS}/details/${id}`);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch brahman details');
   } catch (error) {
     throw error;
   }
