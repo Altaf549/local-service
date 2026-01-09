@@ -4,6 +4,10 @@ import {useTheme} from '../../theme/ThemeContext';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import {useAppSelector} from '../../redux/hooks';
 import {RootState} from '../../redux/store';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AppStackParamList} from '../../constant/Routes';
+import {LOGIN} from '../../constant/Routes';
 
 interface ProfileMenuProps {
   visible: boolean;
@@ -40,6 +44,7 @@ const MenuItem: React.FC<MenuItemProps> = ({icon, title, onPress, color}) => {
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
   const {theme} = useTheme();
   const {userData} = useAppSelector((state: RootState) => state.user);
+  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
   
   const isLoggedIn = !!userData?.token;
 
@@ -61,6 +66,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
   const handleLogin = () => {
     console.log('Login pressed');
     onClose();
+    navigation.navigate(LOGIN);
   };
 
   const handleLogout = () => {

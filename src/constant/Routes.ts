@@ -4,6 +4,8 @@ import ServiceScreen from '../screens/service/ServiceScreen';
 import PujaScreen from '../screens/puja/PujaScreen';
 import ServicemanScreen from '../screens/serviceman/ServicemanScreen';
 import BrahmanScreen from '../screens/brahman/BrahmanScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
+import RegisterScreen from '../screens/auth/RegisterScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -12,6 +14,8 @@ export type RootStackParamList = {
 
 export type AppStackParamList = {
   MainTabs: undefined;
+  Login: undefined;
+  Register: undefined;
   ServiceCategory: undefined;
   PujaType: undefined;
   ServiceCategoryDetails: { id: number };
@@ -52,6 +56,8 @@ export const SERVICEMAN = 'Serviceman';
 export const BRAHMAN = 'Brahman';
 export const SERVICE_CATEGORY = 'ServiceCategory';
 export const PUJA_TYPE = 'PujaType';
+export const LOGIN = 'Login';
+export const REGISTER = 'Register';
 
 // Detail screen routes
 export const SERVICE_CATEGORY_DETAILS = 'ServiceCategoryDetails';
