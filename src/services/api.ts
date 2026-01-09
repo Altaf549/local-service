@@ -111,6 +111,18 @@ export const getPujas = async (): Promise<Puja[]> => {
   }
 };
 
+export const getPujaDetails = async (id: number): Promise<any> => {
+  try {
+    const response = await axios.get<{success: boolean; data: any}>(`${API_ENDPOINTS.PUJA_DETAILS}/${id}`);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch puja details');
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getServicemen = async (): Promise<Serviceman[]> => {
   try {
     const response = await axios.get<{success: boolean; data: Serviceman[]}>(API_ENDPOINTS.SERVICEMEN);

@@ -35,6 +35,7 @@ export interface ProviderCardProps {
   availabilityStatus?: string;
   onCall?: (phone: string) => void;
   onBook?: (id: number) => void;
+  onDownload?: (fileUrl: string) => void;
   onPress?: (id: number) => void;
   showBookButton?: boolean;
   type?: 'serviceman' | 'brahman' | 'provider';
@@ -54,6 +55,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
   availabilityStatus,
   onCall,
   onBook,
+  onDownload,
   onPress,
   showBookButton = true,
   type = 'provider',
@@ -63,6 +65,12 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
   const handleCardPress = () => {
     if (onPress) {
       onPress(id);
+    }
+  };
+
+  const handleDownloadPress = () => {
+    if (materialFile && onDownload) {
+      onDownload(materialFile);
     }
   };
 
@@ -138,7 +146,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
           {materialFile && (
             <TouchableOpacity
               style={[styles.callButton, { backgroundColor: theme.colors.primary }]}
-              onPress={handleCallPress}>
+              onPress={handleDownloadPress}>
               <MaterialIcons name="download" size={scaleSize(20)} color={theme.colors.background} />
             </TouchableOpacity>
           )}

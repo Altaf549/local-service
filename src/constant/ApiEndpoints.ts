@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   PUJA_TYPES: '/puja-types',
   PUJA_TYPE_DETAILS: '/puja-types',
   PUJAS: '/pujas',
+  PUJA_DETAILS: '/pujas',
   SERVICEMEN: '/servicemen',
   BRAHMANS: '/brahmans',
 } as const;

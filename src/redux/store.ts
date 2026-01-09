@@ -10,6 +10,7 @@ import brahmanReducer from './slices/brahmanSlice';
 import serviceCategoryDetailsReducer from './slices/serviceCategoryDetailsSlice';
 import pujaTypeDetailsReducer from './slices/pujaTypeDetailsSlice';
 import serviceDetailsReducer from './slices/serviceDetailsSlice';
+import pujaDetailsReducer from './slices/pujaDetailsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     serviceCategoryDetails: serviceCategoryDetailsReducer,
     pujaTypeDetails: pujaTypeDetailsReducer,
     serviceDetails: serviceDetailsReducer,
+    pujaDetails: pujaDetailsReducer,
   },
 });
 

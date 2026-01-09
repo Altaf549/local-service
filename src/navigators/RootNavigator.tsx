@@ -9,6 +9,7 @@ import {AppDispatch} from '../redux/store';
 import {setUserData, setIsUser} from '../redux/slices/userSlice';
 import {RootStackParamList} from '../constant/Routes';
 import AppStack from './AppStack';
+import Console from '../utils/Console';
 
 export const navigationRef =
   React.createRef<NavigationContainerRef<RootStackParamList>>();
@@ -34,12 +35,12 @@ const RootNavigator = () => {
           }
         }
       } catch (error) {
-        console.error('Error initializing app:', error);
+        Console.error('Error initializing app:', error);
       }
     };
 
     init().finally(async () => {
-      console.log('bootsplash hide');
+      Console.log('bootsplash hide');
       await RNBootSplash.hide({fade: true});
     });
   }, [dispatch]);
