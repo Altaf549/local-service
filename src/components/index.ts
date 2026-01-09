@@ -73,3 +73,6 @@ export type {AchievementCardProps} from './AchievementCard/AchievementCard';
 // Experience Card
 export {ExperienceCard} from './ExperienceCard/ExperienceCard';
 export type {ExperienceCardProps} from './ExperienceCard/ExperienceCard';
+
+// Profile Menu
+export {ProfileMenu} from './ProfileMenu/ProfileMenu';

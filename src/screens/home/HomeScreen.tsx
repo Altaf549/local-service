@@ -12,8 +12,10 @@ import {
   BoxItem,
   CircleItem,
   HorizontalListSection,
+  ProfileMenu,
 } from '../../components/index';
 import { Spacer } from '../../components/Spacer/Spacer';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 
 import { BottomTabParamList, AppStackParamList, BRAHMAN, PUJA, PUJA_TYPE, SERVICE, SERVICE_CATEGORY, SERVICEMAN, SERVICE_CATEGORY_DETAILS, SERVICE_DETAILS, SERVICEMAN_DETAILS, PUJA_TYPE_DETAILS, PUJA_DETAILS, BRAHMAN_DETAILS } from '../../constant/Routes';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -32,6 +34,15 @@ const HomeScreen: React.FC = () => {
   const { banners, service_categories, services, servicemen, puja_types, pujas, brahmans, loading, error } =
     useAppSelector(state => state.home);
   const [refreshing, setRefreshing] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const handleProfilePress = () => {
+    setShowProfileMenu(true);
+  };
+
+  const handleProfileMenuClose = () => {
+    setShowProfileMenu(false);
+  };
 
   useEffect(() => {
     dispatch(fetchHomeData());
@@ -62,7 +73,17 @@ const HomeScreen: React.FC = () => {
           styles.container,
           { backgroundColor: theme.colors.background },
         ]}>
-        <Header title="Home" />
+        <Header 
+        title="Home" 
+        rightIcon={
+          <MaterialIcons 
+            name="account-circle" 
+            size={24} 
+            color={theme.colors.background} 
+          />
+        }
+        onRightIconPress={handleProfilePress}
+      />
         <SafeAreaView edges={[]} style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </SafeAreaView>
@@ -77,7 +98,17 @@ const HomeScreen: React.FC = () => {
         styles.container,
         { backgroundColor: theme.colors.background },
       ]}>
-      <Header title="Home" />
+      <Header 
+        title="Home" 
+        rightIcon={
+          <MaterialIcons 
+            name="account-circle" 
+            size={40} 
+            color={theme.colors.background} 
+          />
+        }
+        onRightIconPress={handleProfilePress}
+      />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -221,10 +252,13 @@ const HomeScreen: React.FC = () => {
           />
         )}
       </ScrollView>
+      <ProfileMenu 
+        visible={showProfileMenu} 
+        onClose={handleProfileMenuClose} 
+      />
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
