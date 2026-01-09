@@ -24,6 +24,33 @@ export interface Service {
   status?: string;
 }
 
+export interface ServiceCategory {
+  id: number;
+  category_name: string;
+}
+
+export interface ServiceWithServicemen {
+  id: number;
+  service_name: string;
+  category: ServiceCategory;
+  price: string;
+  description: string;
+  image: string;
+  status: string;
+  servicemen: ServicemanWithPrice[];
+}
+
+export interface ServicemanWithPrice {
+  id: number;
+  name: string;
+  phone: string;
+  experience: number;
+  profile_photo: string;
+  availability_status: string;
+  price: string;
+  custom_price: boolean;
+}
+
 export interface Serviceman {
   id: number;
   name: string;

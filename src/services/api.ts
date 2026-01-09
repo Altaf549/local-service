@@ -1,11 +1,12 @@
 import axios from '../network/axiosConfig';
 import {API_ENDPOINTS} from '../constant/ApiEndpoints';
-import {HomeData, HomeApiResponse, ServiceCategory, PujaType, Service, Puja, Serviceman, Brahman} from '../types/home';
+import {HomeData, HomeApiResponse, ServiceCategory, PujaType, Service, ServiceWithServicemen, Puja, Serviceman, Brahman} from '../types/home';
 
 export type {
   Banner,
   ServiceCategory,
   Service,
+  ServiceWithServicemen,
   Serviceman,
   PujaType,
   Puja,
@@ -57,6 +58,18 @@ export const getServices = async (): Promise<Service[]> => {
       return response.data.data;
     }
     throw new Error('Failed to fetch services');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getServiceDetails = async (id: number): Promise<ServiceWithServicemen> => {
+  try {
+    const response = await axios.get<{success: boolean; data: ServiceWithServicemen}>(`${API_ENDPOINTS.SERVICE_DETAILS}/${id}`);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch service details');
   } catch (error) {
     throw error;
   }

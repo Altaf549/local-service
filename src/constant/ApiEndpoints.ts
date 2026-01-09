@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
   SERVICE_CATEGORIES: '/service-categories',
   SERVICE_CATEGORY_DETAILS: '/service-categories',
   SERVICES: '/services',
+  SERVICE_DETAILS: '/services',
   PUJA_TYPES: '/puja-types',
   PUJA_TYPE_DETAILS: '/puja-types',
   PUJAS: '/pujas',

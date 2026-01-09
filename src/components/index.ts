@@ -63,4 +63,5 @@ export {CircleItem} from './Home/CircleItem';
 export type {CircleItemProps} from './Home/CircleItem';
 export {HorizontalListSection} from './Home/HorizontalListSection';
 export type {HorizontalListSectionProps} from './Home/HorizontalListSection';
-
+export {ProviderCard} from './ProviderCard/ProviderCard';
+export type {ProviderCardProps} from './ProviderCard/ProviderCard';

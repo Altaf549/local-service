@@ -9,6 +9,7 @@ import servicemanReducer from './slices/servicemanSlice';
 import brahmanReducer from './slices/brahmanSlice';
 import serviceCategoryDetailsReducer from './slices/serviceCategoryDetailsSlice';
 import pujaTypeDetailsReducer from './slices/pujaTypeDetailsSlice';
+import serviceDetailsReducer from './slices/serviceDetailsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     brahman: brahmanReducer,
     serviceCategoryDetails: serviceCategoryDetailsReducer,
     pujaTypeDetails: pujaTypeDetailsReducer,
+    serviceDetails: serviceDetailsReducer,
   },
 });
 
