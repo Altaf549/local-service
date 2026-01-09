@@ -7,18 +7,19 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  FlatList,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useDispatch, useSelector} from 'react-redux';
-import {useTheme} from '../../theme/ThemeContext';
-import {Header} from '../../components/Header/Header';
-import {Button} from '../../components/Button/Button';
-import {CustomImage} from '../../components/CustomImage/CustomImage';
-import {ProviderCard} from '../../components/ProviderCard/ProviderCard';
-import {RootState} from '../../redux/store';
-import {useRoute, useNavigation} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, BRAHMAN_DETAILS} from '../../constant/Routes';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { useTheme } from '../../theme/ThemeContext';
+import { Header } from '../../components/Header/Header';
+import { Button } from '../../components/Button/Button';
+import { CustomImage } from '../../components/CustomImage/CustomImage';
+import { ProviderCard } from '../../components/ProviderCard/ProviderCard';
+import { RootState } from '../../redux/store';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AppStackParamList, BRAHMAN_DETAILS } from '../../constant/Routes';
 import Console from '../../utils/Console';
 import {
   scale,
@@ -32,6 +33,7 @@ import {
   width,
 } from '../../utils/scaling';
 import { fetchPujaDetails } from '../../redux/slices/pujaDetailsSlice';
+import { Paragraph } from '../../components';
 
 type PujaDetailsNavigationProp = StackNavigationProp<AppStackParamList, 'PujaDetails'>;
 
@@ -41,17 +43,17 @@ interface RouteParams {
 
 const PujaDetailsScreen: React.FC = () => {
   Console.log('PujaDetailsScreen', 'rendering');
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const dispatch = useDispatch();
   const navigation = useNavigation<PujaDetailsNavigationProp>();
   const route = useRoute();
-  
+
   const routeParams = route.params as any;
   const pujaId = routeParams?.id;
-  
+
   Console.log('PujaDetailsScreen', 'pujaId extracted:', pujaId);
-  
-  const {pujaDetails, loading, error} = useSelector(
+
+  const { pujaDetails, loading, error } = useSelector(
     (state: RootState) => state.pujaDetails,
   );
 
@@ -78,13 +80,13 @@ const PujaDetailsScreen: React.FC = () => {
       }
 
       Console.log('Attempting to download file:', fileUrl);
-      
+
       // For PDF files, force open in external browser
       await Linking.openURL(fileUrl);
-      
+
     } catch (error) {
       Console.error('Download error:', error);
-      
+
       // If direct opening fails, try to open in browser
       try {
         await Linking.openURL(fileUrl);
@@ -117,7 +119,7 @@ const PujaDetailsScreen: React.FC = () => {
       onCall={handleCallPress}
       onDownload={handleDownloadPress}
       onPress={(id) => {
-        navigation.navigate(BRAHMAN_DETAILS, {id: id});
+        navigation.navigate(BRAHMAN_DETAILS, { id: id });
       }}
     />
   );
@@ -128,11 +130,11 @@ const PujaDetailsScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Puja Details" />
         <View style={styles.errorContainer}>
-          <Text style={{color: theme.colors.text}}>
+          <Text style={{ color: theme.colors.text }}>
             Puja ID is missing. Please go back and try again.
           </Text>
           <Button
@@ -151,11 +153,11 @@ const PujaDetailsScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Puja Details" />
         <View style={styles.loadingContainer}>
-          <Text style={{color: theme.colors.text}}>Loading...</Text>
+          <Text style={{ color: theme.colors.text }}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -167,11 +169,11 @@ const PujaDetailsScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Puja Details" />
         <View style={styles.errorContainer}>
-          <Text style={[styles.errorText, {color: theme.colors.error}]}>{error}</Text>
+          <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
         </View>
       </SafeAreaView>
     );
@@ -183,11 +185,11 @@ const PujaDetailsScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Puja Details" />
         <View style={styles.errorContainer}>
-          <Text style={{color: theme.colors.text}}>Puja not found</Text>
+          <Text style={{ color: theme.colors.text }}>Puja not found</Text>
         </View>
       </SafeAreaView>
     );
@@ -198,42 +200,41 @@ const PujaDetailsScreen: React.FC = () => {
       edges={['left', 'right']}
       style={[
         styles.container,
-        {backgroundColor: theme.colors.background},
+        { backgroundColor: theme.colors.background },
       ]}>
       <Header title={pujaDetails.puja_name} />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.mainContent, {backgroundColor: theme.colors.card}]}>
+        <View style={[styles.mainContent, { backgroundColor: theme.colors.card }]}>
           <CustomImage
-            source={{uri: pujaDetails.image}}
+            source={{ uri: pujaDetails.image }}
             style={styles.pujaImage}
           />
-          <View style={styles.pujaInfo}>
-            <View style={styles.actionButtons}>
-              {pujaDetails.material_file && (
-                <TouchableOpacity
-                  style={[styles.downloadButton, {backgroundColor: theme.colors.secondary}]}
-                  onPress={() => pujaDetails.material_file && handleDownloadPress(pujaDetails.material_file)}>
-                  <Text style={[styles.downloadButtonText, {color: theme.colors.background}]}>
-                    Download Materials
-                  </Text>
-                </TouchableOpacity>
-              )}
-              
-              <Button
-                title="Book Puja"
-                onPress={handleBookingPress}
-                style={styles.bookButton}
-              />
-            </View>
-          </View>
         </View>
-
+        <View style={styles.pujaInfo}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Description
+          </Text>
+          {pujaDetails.description ? (
+            <Paragraph>{pujaDetails.description}</Paragraph>
+          ) : (
+            <Text style={[styles.description, { color: theme.colors.text }]}>
+              No description available
+            </Text>
+          )}
+        </View>
         {pujaDetails.brahmans && pujaDetails.brahmans.length > 0 && (
           <View style={styles.brahmansSection}>
-            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               Available Brahmans
             </Text>
-            {pujaDetails.brahmans.map(brahman => renderBrahman(brahman))}
+            <FlatList
+              data={pujaDetails.brahmans}
+              renderItem={({ item }) => renderBrahman(item)}
+              keyExtractor={(item) => item.id.toString()}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContainer}
+              scrollEnabled={false}
+            />
           </View>
         )}
       </ScrollView>
@@ -271,11 +272,11 @@ const styles = StyleSheet.create({
   },
   pujaImage: {
     width: width,
+    height: verticalScale(200),
   },
   pujaInfo: {
     flex: 1,
     padding: moderateScale(16),
-    justifyContent: 'space-between',
   },
   pujaName: {
     fontSize: scaleFont(20),
@@ -326,6 +327,9 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(18),
     fontWeight: 'bold',
     marginBottom: verticalScale(16),
+  },
+  listContainer: {
+    paddingBottom: verticalScale(8),
   },
   goBackButton: {
     marginTop: verticalScale(20),

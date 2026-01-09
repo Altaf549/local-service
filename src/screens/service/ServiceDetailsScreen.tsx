@@ -7,20 +7,21 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  FlatList,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useDispatch, useSelector} from 'react-redux';
-import {useTheme} from '../../theme/ThemeContext';
-import {Header} from '../../components/Header/Header';
-import {Button} from '../../components/Button/Button';
-import {CustomImage} from '../../components/CustomImage/CustomImage';
-import {ProviderCard} from '../../components/ProviderCard/ProviderCard';
-import {fetchServiceDetails} from '../../redux/slices/serviceDetailsSlice';
-import {RootState} from '../../redux/store';
-import {ServiceWithServicemen} from '../../types/home';
-import {useRoute, useNavigation} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, SERVICEMAN_DETAILS} from '../../constant/Routes';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { useTheme } from '../../theme/ThemeContext';
+import { Header } from '../../components/Header/Header';
+import { Button } from '../../components/Button/Button';
+import { CustomImage } from '../../components/CustomImage/CustomImage';
+import { ProviderCard } from '../../components/ProviderCard/ProviderCard';
+import { fetchServiceDetails } from '../../redux/slices/serviceDetailsSlice';
+import { RootState } from '../../redux/store';
+import { ServiceWithServicemen } from '../../types/home';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AppStackParamList, SERVICEMAN_DETAILS } from '../../constant/Routes';
 import Console from '../../utils/Console';
 import {
   scale,
@@ -33,6 +34,7 @@ import {
   scaleWidth,
   width,
 } from '../../utils/scaling';
+import { Paragraph } from '../../components';
 
 type ServiceDetailsNavigationProp = StackNavigationProp<AppStackParamList, 'ServiceDetails'>;
 
@@ -42,19 +44,19 @@ interface RouteParams {
 
 const ServiceDetailsScreen: React.FC = () => {
   Console.log('ServiceDetailsScreen', 'rendering');
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const dispatch = useDispatch();
   const navigation = useNavigation<ServiceDetailsNavigationProp>();
   const route = useRoute();
-  
+
   // Add debugging and safe parameter access
   Console.log('ServiceDetailsScreen', 'route params:', route.params);
   const routeParams = route.params as any;
   const serviceId = routeParams?.id;
-  
+
   Console.log('ServiceDetailsScreen', 'serviceId extracted:', serviceId);
-  
-  const {serviceDetails, loading, error} = useSelector(
+
+  const { serviceDetails, loading, error } = useSelector(
     (state: RootState) => state.serviceDetails,
   );
 
@@ -86,23 +88,23 @@ const ServiceDetailsScreen: React.FC = () => {
   };
 
   const renderServiceman = (serviceman: any) => (
-  <ProviderCard
-    key={serviceman.id}
-    id={serviceman.id}
-    name={serviceman.name}
-    avatar={serviceman.profile_photo}
-    experience={serviceman.experience}
-    price={serviceman.price}
-    customPrice={serviceman.custom_price}
-    phone={serviceman.phone}
-    availabilityStatus={serviceman.availability_status}
-    type="serviceman"
-    onCall={handleCallPress}
-    onPress={(id) => {
-      navigation.navigate(SERVICEMAN_DETAILS, {id: id});
-    }}
-  />
-);
+    <ProviderCard
+      key={serviceman.id}
+      id={serviceman.id}
+      name={serviceman.name}
+      avatar={serviceman.profile_photo}
+      experience={serviceman.experience}
+      price={serviceman.price}
+      customPrice={serviceman.custom_price}
+      phone={serviceman.phone}
+      availabilityStatus={serviceman.availability_status}
+      type="serviceman"
+      onCall={handleCallPress}
+      onPress={(id) => {
+        navigation.navigate(SERVICEMAN_DETAILS, { id: id });
+      }}
+    />
+  );
 
   if (!serviceId) {
     return (
@@ -110,11 +112,11 @@ const ServiceDetailsScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Service Details" />
         <View style={styles.errorContainer}>
-          <Text style={{color: theme.colors.text}}>
+          <Text style={{ color: theme.colors.text }}>
             Service ID is missing. Please go back and try again.
           </Text>
           <Button
@@ -133,11 +135,11 @@ const ServiceDetailsScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Service Details" />
         <View style={styles.loadingContainer}>
-          <Text style={{color: theme.colors.text}}>Loading...</Text>
+          <Text style={{ color: theme.colors.text }}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -149,11 +151,11 @@ const ServiceDetailsScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Service Details" />
         <View style={styles.errorContainer}>
-          <Text style={[styles.errorText, {color: theme.colors.error}]}>{error}</Text>
+          <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
         </View>
       </SafeAreaView>
     );
@@ -165,11 +167,11 @@ const ServiceDetailsScreen: React.FC = () => {
         edges={['left', 'right']}
         style={[
           styles.container,
-          {backgroundColor: theme.colors.background},
+          { backgroundColor: theme.colors.background },
         ]}>
         <Header title="Service Details" />
         <View style={styles.errorContainer}>
-          <Text style={{color: theme.colors.text}}>Service not found</Text>
+          <Text style={{ color: theme.colors.text }}>Service not found</Text>
         </View>
       </SafeAreaView>
     );
@@ -180,24 +182,42 @@ const ServiceDetailsScreen: React.FC = () => {
       edges={['left', 'right']}
       style={[
         styles.container,
-        {backgroundColor: theme.colors.background},
+        { backgroundColor: theme.colors.background },
       ]}>
       <Header title={serviceDetails.service_name} />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.mainContent, {backgroundColor: theme.colors.card}]}>
+        <View style={[styles.mainContent, { backgroundColor: theme.colors.card }]}>
           <CustomImage
-            source={{uri: serviceDetails.image}}
+            source={{ uri: serviceDetails.image }}
             style={styles.serviceImage}
           />
-          
+        </View>
+        <View style={styles.serviceInfo}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Description
+          </Text>
+          {serviceDetails.description ? (
+            <Paragraph>{serviceDetails.description}</Paragraph>
+          ) : (
+            <Text style={[styles.description, { color: theme.colors.text }]}>
+              No description available
+            </Text>
+          )}
         </View>
 
         {serviceDetails.servicemen && serviceDetails.servicemen.length > 0 && (
           <View style={styles.servicemenSection}>
-            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               Available Servicemen
             </Text>
-            {serviceDetails.servicemen.map(serviceman => renderServiceman(serviceman))}
+            <FlatList
+              data={serviceDetails.servicemen}
+              renderItem={({ item }) => renderServiceman(item)}
+              keyExtractor={(item) => item.id.toString()}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContainer}
+              scrollEnabled={false}
+            />
           </View>
         )}
       </ScrollView>
@@ -228,7 +248,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   mainContent: {
-    flexDirection: 'row',
+    flex: 1,
     margin: moderateScale(16),
     borderRadius: moderateScale(12),
     overflow: 'hidden',
@@ -298,6 +318,9 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(18),
     fontWeight: 'bold',
     marginBottom: verticalScale(16),
+  },
+  listContainer: {
+    paddingBottom: verticalScale(8),
   },
   goBackButton: {
     marginTop: verticalScale(20),
