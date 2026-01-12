@@ -7,6 +7,8 @@ import ServicemanHomeScreen from '../screens/serviceman/ServicemanHomeScreen';
 import BrahmanScreen from '../screens/brahman/BrahmanScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import SettingsScreen from '../screens/settings/SettingsScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -18,6 +20,8 @@ export type AppStackParamList = {
   Login: undefined;
   Register: undefined;
   ServicemanHome: undefined;
+  Profile: undefined;
+  Settings: undefined;
   ServiceCategory: undefined;
   PujaType: undefined;
   ServiceCategoryDetails: { id: number };
@@ -62,6 +66,8 @@ export const PUJA_TYPE = 'PujaType';
 export const LOGIN = 'Login';
 export const REGISTER = 'Register';
 export const MAIN_TABS = 'MainTabs';
+export const PROFILE = 'Profile';
+export const SETTINGS = 'Settings';
 
 // User role constants
 export const USER_ROLES = {
