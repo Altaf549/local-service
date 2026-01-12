@@ -6,43 +6,55 @@ import {
   ScrollView,
   Alert,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import {useTheme} from '../../theme/ThemeContext';
-import {useAppDispatch} from '../../redux/hooks';
+import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {setUserData, setIsUser} from '../../redux/slices/userSlice';
+import {registerUser, clearRegisterSuccess} from '../../redux/slices/authSlice';
 import {TextInputWithLabel} from '../../components/TextInputWithLabel/TextInputWithLabel';
 import {PasswordInput} from '../../components/PasswordInput/PasswordInput';
 import {Dropdown, DropdownOption} from '../../components/Dropdown/Dropdown';
 import {Button} from '../../components/Button/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
+import {AppStackParamList, LOGIN, MAIN_TABS, SERVICEMAN_HOME, USER_ROLES} from '../../constant/Routes';
+
+type RegisterScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Register'>;
 
 const {width, height} = Dimensions.get('window');
 
-type UserRole = 'user' | 'brahman' | 'serviceman';
+type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
 
 const RegisterScreen: React.FC = () => {
   const {theme} = useTheme();
+  const navigation = useNavigation<RegisterScreenNavigationProp>();
   const dispatch = useAppDispatch();
+  const {loading, error, registerSuccess} = useAppSelector(state => state.auth);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [mobileNumberError, setMobileNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
   const userTypes: DropdownOption[] = [
-    {label: 'User', value: 'user'},
-    {label: 'Brahman', value: 'brahman'},
-    {label: 'Serviceman', value: 'serviceman'},
+    {label: 'User', value: USER_ROLES.USER},
+    {label: 'Brahman', value: USER_ROLES.BRAHMAN},
+    {label: 'Serviceman', value: USER_ROLES.SERVICEMAN},
   ];
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     // Reset errors
     setNameError('');
     setEmailError('');
+    setMobileNumberError('');
     setPasswordError('');
     setConfirmPasswordError('');
 
@@ -67,6 +79,14 @@ const RegisterScreen: React.FC = () => {
       hasError = true;
     }
 
+    if (!mobileNumber.trim()) {
+      setMobileNumberError('Please enter your mobile number');
+      hasError = true;
+    } else if (!/^\d{10}$/.test(mobileNumber)) {
+      setMobileNumberError('Please enter a valid 10-digit mobile number');
+      hasError = true;
+    }
+
     if (!password.trim()) {
       setPasswordError('Please enter your password');
       hasError = true;
@@ -87,21 +107,64 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    // Mock registration - in real app, this would make API calls
-    const mockUserData = {
-      id: 1,
-      name: name,
-      email: email,
-      mobile_number: '1234567890',
-      role: selectedRole,
-      status: 'active',
-      token: 'mock-token-' + Date.now(),
-    };
+    try {
+      const result = await dispatch(registerUser({
+        name: name.trim(),
+        email: email.trim(),
+        mobile_number: mobileNumber.trim(),
+        password,
+        role: selectedRole
+      })).unwrap();
 
-    dispatch(setUserData(mockUserData));
-    dispatch(setIsUser(true));
+      if ('needsActivation' in result) {
+        // For serviceman and brahman registration
+        Alert.alert(
+          'Registration Successful',
+          `${result.role === USER_ROLES.SERVICEMAN ? 'Serviceman' : 'Brahman'} account created successfully! Your account needs to be activated by admin before you can access all features.`,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Navigate to serviceman home screen
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: SERVICEMAN_HOME }],
+                });
+              }
+            }
+          ]
+        );
+      } else {
+        // For user registration - auto login
+        dispatch(setUserData(result));
+        dispatch(setIsUser(true));
 
-    Alert.alert('Success', `Registered as ${selectedRole} successfully!`);
+        Alert.alert('Success', `Registered and logged in as ${selectedRole} successfully!`);
+        
+        // Navigate based on user role
+        if (selectedRole === USER_ROLES.USER) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: MAIN_TABS }],
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      
+      // Handle validation errors
+      if (error.includes('name')) {
+        setNameError(error);
+      } else if (error.includes('email')) {
+        setEmailError(error);
+      } else if (error.includes('mobile')) {
+        setMobileNumberError(error);
+      } else if (error.includes('password')) {
+        setPasswordError(error);
+      } else {
+        Alert.alert('Error', error);
+      }
+    }
   };
 
   return (
@@ -143,6 +206,17 @@ const RegisterScreen: React.FC = () => {
           </View>
 
           <View style={styles.inputGroup}>
+            <TextInputWithLabel
+              label="Mobile Number"
+              value={mobileNumber}
+              onChangeText={setMobileNumber}
+              placeholder="Enter your 10-digit mobile number"
+              keyboardType="phone-pad"
+              error={mobileNumberError}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
             <PasswordInput
               label="Password"
               value={password}
@@ -175,20 +249,23 @@ const RegisterScreen: React.FC = () => {
 
         <View style={styles.buttonContainer}>
           <Button
-            title="Sign Up"
+            title={loading ? "Signing Up..." : "Sign Up"}
             onPress={handleRegister}
-            disabled={!selectedRole || !name || !email || !password || !confirmPassword}
+            disabled={!selectedRole || !name || !email || !mobileNumber || !password || !confirmPassword || loading}
             fullWidth={true}
             size="medium"
+            loading={loading}
           />
           
           <View style={styles.footer}>
             <Text style={[styles.footerText, {color: theme.colors.textSecondary}]}>
               Already have an account? 
             </Text>
-            <Text style={[styles.footerLink, {color: theme.colors.primary}]}>
-              Sign In
-            </Text>
+            <TouchableOpacity onPress={() => navigation.navigate(LOGIN)}>
+              <Text style={[styles.footerLink, {color: theme.colors.primary}]}>
+                Sign In
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

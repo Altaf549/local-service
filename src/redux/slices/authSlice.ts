@@ -1,9 +1,17 @@
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
-import {userLogin, servicemanLogin, brahmanLogin, logout} from '../../services/api';
+import {userLogin, servicemanLogin, brahmanLogin, logout, userRegister, servicemanRegister, brahmanRegister} from '../../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LoginCredentials {
   email: string;
+  password: string;
+  role: 'user' | 'serviceman' | 'brahman';
+}
+
+interface RegisterCredentials {
+  name: string;
+  email: string;
+  mobile_number: string;
   password: string;
   role: 'user' | 'serviceman' | 'brahman';
 }
@@ -40,16 +48,53 @@ interface LoginResponse {
   };
 }
 
+interface RegisterResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user?: {
+      id: number;
+      name: string;
+      email: string;
+      mobile_number: string;
+      role: string;
+      status: string;
+      created_at: string;
+    };
+    serviceman?: {
+      id: number;
+      name: string;
+      email: string;
+      mobile_number: string;
+      status: string;
+      availability_status: string;
+      created_at: string;
+    };
+    brahman?: {
+      id: number;
+      name: string;
+      email: string;
+      mobile_number: string;
+      status: string;
+      availability_status: string;
+      created_at: string;
+    };
+    token?: string;
+  };
+}
+
 interface AuthState {
   loading: boolean;
   error: string | null;
   loginSuccess: boolean;
+  registerSuccess: boolean;
 }
 
 const initialState: AuthState = {
   loading: false,
   error: null,
   loginSuccess: false,
+  registerSuccess: false,
 };
 
 // Async thunk for user login
@@ -153,6 +198,91 @@ export const logoutUser = createAsyncThunk(
   },
 );
 
+// Async thunk for user registration
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (credentials: RegisterCredentials, {rejectWithValue}) => {
+    try {
+      let response: RegisterResponse;
+      
+      switch (credentials.role) {
+        case 'user':
+          response = await userRegister(credentials.name, credentials.email, credentials.mobile_number, credentials.password);
+          break;
+        case 'serviceman':
+          response = await servicemanRegister(credentials.name, credentials.email, credentials.mobile_number, credentials.password);
+          break;
+        case 'brahman':
+          response = await brahmanRegister(credentials.name, credentials.email, credentials.mobile_number, credentials.password);
+          break;
+        default:
+          throw new Error('Invalid user role');
+      }
+
+      if (response.success) {
+        // For user registration, we might get a token and can log them in immediately
+        if (response.data.token && response.data.user) {
+          const userData = {
+            id: response.data.user.id,
+            name: response.data.user.name,
+            email: response.data.user.email,
+            mobile_number: response.data.user.mobile_number,
+            role: credentials.role,
+            status: response.data.user.status,
+            token: response.data.token,
+          };
+
+          // Store user data and token in AsyncStorage
+          await AsyncStorage.setItem('user_token', response.data.token);
+          await AsyncStorage.setItem('user_info', JSON.stringify(userData));
+
+          return userData;
+        } else {
+          // For serviceman and brahman, registration succeeds but they need admin activation
+          return {
+            message: response.message,
+            needsActivation: true,
+            role: credentials.role,
+          };
+        }
+      } else {
+        return rejectWithValue(response.message || 'Registration failed');
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      
+      if (error.response) {
+        const errorMessage = error.response.data?.message || 'Registration failed';
+        const errors = error.response.data?.errors;
+        
+        if (errors) {
+          // Handle validation errors
+          const validationErrors: string[] = [];
+          if (errors.name) {
+            validationErrors.push(errors.name[0]);
+          }
+          if (errors.email) {
+            validationErrors.push(errors.email[0]);
+          }
+          if (errors.mobile_number) {
+            validationErrors.push(errors.mobile_number[0]);
+          }
+          if (errors.password) {
+            validationErrors.push(errors.password[0]);
+          }
+          return rejectWithValue(validationErrors.join(' ') || errorMessage);
+        }
+        
+        return rejectWithValue(errorMessage);
+      } else if (error.request) {
+        return rejectWithValue('Network error. Please check your connection.');
+      } else {
+        return rejectWithValue('An unexpected error occurred.');
+      }
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -161,9 +291,13 @@ const authSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.loginSuccess = false;
+      state.registerSuccess = false;
     },
     clearLoginSuccess: state => {
       state.loginSuccess = false;
+    },
+    clearRegisterSuccess: state => {
+      state.registerSuccess = false;
     },
   },
   extraReducers: builder => {
@@ -183,6 +317,21 @@ const authSlice = createSlice({
         state.error = (action.payload as string) || 'Login failed';
         state.loginSuccess = false;
       })
+      .addCase(registerUser.pending, state => {
+        state.loading = true;
+        state.error = null;
+        state.registerSuccess = false;
+      })
+      .addCase(registerUser.fulfilled, state => {
+        state.loading = false;
+        state.error = null;
+        state.registerSuccess = true;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || 'Registration failed';
+        state.registerSuccess = false;
+      })
       .addCase(logoutUser.pending, state => {
         state.loading = true;
         state.error = null;
@@ -191,6 +340,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = null;
         state.loginSuccess = false;
+        state.registerSuccess = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false;
@@ -199,5 +349,5 @@ const authSlice = createSlice({
   },
 });
 
-export const {clearAuthState, clearLoginSuccess} = authSlice.actions;
+export const {clearAuthState, clearLoginSuccess, clearRegisterSuccess} = authSlice.actions;
 export default authSlice.reducer;

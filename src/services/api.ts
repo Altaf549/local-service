@@ -217,3 +217,46 @@ export const logout = async () => {
   }
 };
 
+// Registration API functions
+export const userRegister = async (name: string, email: string, mobile_number: string, password: string) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.USER_REGISTER, {
+      name,
+      email,
+      mobile_number,
+      password
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const servicemanRegister = async (name: string, email: string, mobile_number: string, password: string) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.SERVICEMAN_REGISTER, {
+      name,
+      email,
+      mobile_number,
+      password
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const brahmanRegister = async (name: string, email: string, mobile_number: string, password: string) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.BRAHMAN_REGISTER, {
+      name,
+      email,
+      mobile_number,
+      password
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+

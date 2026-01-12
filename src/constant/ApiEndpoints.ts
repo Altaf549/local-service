@@ -14,5 +14,8 @@ export const API_ENDPOINTS = {
   SERVICEMAN_LOGIN: '/serviceman/login',
   BRAHMAN_LOGIN: '/brahman/login',
   LOGOUT: '/logout',
+  USER_REGISTER: '/user/register',
+  SERVICEMAN_REGISTER: '/serviceman/register',
+  BRAHMAN_REGISTER: '/brahman/register',
 } as const;
 

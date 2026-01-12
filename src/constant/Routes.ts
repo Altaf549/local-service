@@ -61,6 +61,16 @@ export const SERVICE_CATEGORY = 'ServiceCategory';
 export const PUJA_TYPE = 'PujaType';
 export const LOGIN = 'Login';
 export const REGISTER = 'Register';
+export const MAIN_TABS = 'MainTabs';
+
+// User role constants
+export const USER_ROLES = {
+  USER: 'user',
+  SERVICEMAN: 'serviceman',
+  BRAHMAN: 'brahman',
+} as const;
+
+export type UserRole = keyof typeof USER_ROLES;
 
 // Detail screen routes
 export const SERVICE_CATEGORY_DETAILS = 'ServiceCategoryDetails';

@@ -30,10 +30,13 @@ const Stack = createStackNavigator();
 
 const AppStack = () => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+    <Stack.Navigator 
+      screenOptions={{headerShown: false}}
+      initialRouteName={LOGIN}
+    >
       <Stack.Screen name={LOGIN} component={LoginScreen} />
       <Stack.Screen name={REGISTER} component={RegisterScreen} />
+      <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
       <Stack.Screen name={SERVICEMAN_HOME} component={ServicemanHomeScreen} />
       <Stack.Screen name={SERVICE_CATEGORY} component={ServiceCategoryScreen} />
       <Stack.Screen name={PUJA_TYPE} component={PujaTypeScreen} />

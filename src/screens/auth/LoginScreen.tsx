@@ -19,13 +19,13 @@ import {Dropdown, DropdownOption} from '../../components/Dropdown/Dropdown';
 import {Button} from '../../components/Button/Button';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
-import {AppStackParamList, REGISTER, SERVICEMAN_HOME} from '../../constant/Routes';
+import {AppStackParamList, MAIN_TABS, REGISTER, SERVICEMAN_HOME, USER_ROLES} from '../../constant/Routes';
 
 type LoginScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Login'>;
 
 const {width, height} = Dimensions.get('window');
 
-type UserRole = 'user' | 'brahman' | 'serviceman';
+type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
 
 const LoginScreen: React.FC = () => {
   const {theme} = useTheme();
@@ -39,9 +39,9 @@ const LoginScreen: React.FC = () => {
   const [passwordError, setPasswordError] = useState('');
 
   const userTypes: DropdownOption[] = [
-    {label: 'User', value: 'user'},
-    {label: 'Brahman', value: 'brahman'},
-    {label: 'Serviceman', value: 'serviceman'},
+    {label: 'User', value: USER_ROLES.USER},
+    {label: 'Brahman', value: USER_ROLES.BRAHMAN},
+    {label: 'Serviceman', value: USER_ROLES.SERVICEMAN},
   ];
 
   const handleLogin = async () => {
@@ -91,12 +91,12 @@ const LoginScreen: React.FC = () => {
       Alert.alert('Success', `Logged in as ${selectedRole} successfully!`);
       
       // Navigate based on user role
-      if (selectedRole === 'user') {
+      if (selectedRole === USER_ROLES.USER) {
         navigation.reset({
           index: 0,
-          routes: [{ name: 'MainTabs' }],
+          routes: [{ name: MAIN_TABS }],
         });
-      } else if (selectedRole === 'serviceman' || selectedRole === 'brahman') {
+      } else if (selectedRole === USER_ROLES.SERVICEMAN || selectedRole === USER_ROLES.BRAHMAN) {
         navigation.reset({
           index: 0,
           routes: [{ name: SERVICEMAN_HOME }],
