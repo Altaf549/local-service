@@ -2,12 +2,13 @@ import React from 'react';
 import {StyleSheet, View, Text, TouchableOpacity, ScrollView} from 'react-native';
 import {useTheme} from '../../theme/ThemeContext';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import {useAppSelector} from '../../redux/hooks';
+import {useAppSelector, useAppDispatch} from '../../redux/hooks';
 import {RootState} from '../../redux/store';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList} from '../../constant/Routes';
-import {LOGIN} from '../../constant/Routes';
+import {AppStackParamList, LOGIN} from '../../constant/Routes';
+import {logoutUser} from '../../redux/slices/authSlice';
+import {clearUserData} from '../../redux/slices/userSlice';
 
 interface ProfileMenuProps {
   visible: boolean;
@@ -19,15 +20,17 @@ interface MenuItemProps {
   title: string;
   onPress: () => void;
   color?: string;
+  disabled?: boolean;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({icon, title, onPress, color}) => {
+const MenuItem: React.FC<MenuItemProps> = ({icon, title, onPress, color, disabled}) => {
   const {theme} = useTheme();
   
   return (
     <TouchableOpacity 
       style={styles.menuItem} 
       onPress={onPress}
+      disabled={disabled}
     >
       <MaterialIcons 
         name={icon} 
@@ -44,7 +47,9 @@ const MenuItem: React.FC<MenuItemProps> = ({icon, title, onPress, color}) => {
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
   const {theme} = useTheme();
   const {userData} = useAppSelector((state: RootState) => state.user);
+  const {loading} = useAppSelector((state: RootState) => state.auth);
   const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
+  const dispatch = useAppDispatch();
   
   const isLoggedIn = !!userData?.token;
 
@@ -69,9 +74,19 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
     navigation.navigate(LOGIN);
   };
 
-  const handleLogout = () => {
-    console.log('Logout pressed');
-    onClose();
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+      dispatch(clearUserData());
+      onClose();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'MainTabs' }],
+      });
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      // You could show an alert here if needed
+    }
   };
 
   if (!visible) {
@@ -118,9 +133,10 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
               />
               <MenuItem
                 icon="logout"
-                title="Logout"
+                title={loading ? "Logging out..." : "Logout"}
                 onPress={handleLogout}
                 color={theme.colors.error}
+                disabled={loading}
               />
             </>
           ) : (

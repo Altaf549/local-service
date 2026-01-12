@@ -8,6 +8,7 @@ interface UserData {
   token?: string;
   role?: string;
   status?: string;
+  availability_status?: string;
   [key: string]: any;
 }
 
@@ -35,9 +36,13 @@ const userSlice = createSlice({
       state.userData = null;
       state.isUser = false;
     },
+    logoutUser: state => {
+      state.userData = null;
+      state.isUser = false;
+    },
   },
 });
 
-export const {setUserData, setIsUser, clearUserData} = userSlice.actions;
+export const {setUserData, setIsUser, clearUserData, logoutUser} = userSlice.actions;
 export default userSlice.reducer;
 

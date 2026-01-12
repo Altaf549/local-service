@@ -10,5 +10,9 @@ export const API_ENDPOINTS = {
   PUJA_DETAILS: '/pujas',
   SERVICEMEN: '/servicemen',
   BRAHMANS: '/brahmans',
+  USER_LOGIN: '/user/login',
+  SERVICEMAN_LOGIN: '/serviceman/login',
+  BRAHMAN_LOGIN: '/brahman/login',
+  LOGOUT: '/logout',
 } as const;
 

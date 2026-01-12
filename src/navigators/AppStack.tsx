@@ -8,12 +8,14 @@ import PujaTypeDetailsScreen from '../screens/puja/PujaTypeDetailsScreen';
 import ServiceDetailsScreen from '../screens/service/ServiceDetailsScreen';
 import PujaDetailsScreen from '../screens/puja/PujaDetailsScreen';
 import ServicemanDetailsScreen from '../screens/serviceman/ServicemanDetailsScreen';
+import ServicemanHomeScreen from '../screens/serviceman/ServicemanHomeScreen';
 import BrahmanDetailsScreen from '../screens/brahman/BrahmanDetailsScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import { 
   LOGIN,
   REGISTER,
+  SERVICEMAN_HOME,
   PUJA_TYPE, 
   SERVICE_CATEGORY,
   SERVICE_CATEGORY_DETAILS,
@@ -32,6 +34,7 @@ const AppStack = () => {
       <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
       <Stack.Screen name={LOGIN} component={LoginScreen} />
       <Stack.Screen name={REGISTER} component={RegisterScreen} />
+      <Stack.Screen name={SERVICEMAN_HOME} component={ServicemanHomeScreen} />
       <Stack.Screen name={SERVICE_CATEGORY} component={ServiceCategoryScreen} />
       <Stack.Screen name={PUJA_TYPE} component={PujaTypeScreen} />
       <Stack.Screen name={SERVICE_CATEGORY_DETAILS} component={ServiceCategoryDetailsScreen} />

@@ -10,14 +10,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {useTheme} from '../../theme/ThemeContext';
-import {useAppDispatch} from '../../redux/hooks';
+import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {setUserData, setIsUser} from '../../redux/slices/userSlice';
+import {loginUser, clearLoginSuccess} from '../../redux/slices/authSlice';
 import {TextInputWithLabel} from '../../components/TextInputWithLabel/TextInputWithLabel';
 import {PasswordInput} from '../../components/PasswordInput/PasswordInput';
 import {Dropdown, DropdownOption} from '../../components/Dropdown/Dropdown';
 import {Button} from '../../components/Button/Button';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, REGISTER} from '../../constant/Routes';
+import {useNavigation} from '@react-navigation/native';
+import {AppStackParamList, REGISTER, SERVICEMAN_HOME} from '../../constant/Routes';
 
 type LoginScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Login'>;
 
@@ -25,13 +27,11 @@ const {width, height} = Dimensions.get('window');
 
 type UserRole = 'user' | 'brahman' | 'serviceman';
 
-interface LoginScreenProps {
-  navigation: LoginScreenNavigationProp;
-}
-
-const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
+const LoginScreen: React.FC = () => {
   const {theme} = useTheme();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
   const dispatch = useAppDispatch();
+  const {loading, error, loginSuccess} = useAppSelector(state => state.auth);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,7 +44,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     {label: 'Serviceman', value: 'serviceman'},
   ];
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Reset errors
     setEmailError('');
     setPasswordError('');
@@ -77,21 +77,43 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       return;
     }
 
-    // Mock login - in real app, this would make API calls
-    const mockUserData = {
-      id: 1,
-      name: `Test ${selectedRole}`,
-      email: email,
-      mobile_number: '1234567890',
-      role: selectedRole,
-      status: 'active',
-      token: 'mock-token-' + Date.now(),
-    };
+    try {
+      const result = await dispatch(loginUser({
+        email,
+        password,
+        role: selectedRole
+      })).unwrap();
 
-    dispatch(setUserData(mockUserData));
-    dispatch(setIsUser(true));
+      // Update user state in Redux
+      dispatch(setUserData(result));
+      dispatch(setIsUser(true));
 
-    Alert.alert('Success', `Logged in as ${selectedRole} successfully!`);
+      Alert.alert('Success', `Logged in as ${selectedRole} successfully!`);
+      
+      // Navigate based on user role
+      if (selectedRole === 'user') {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'MainTabs' }],
+        });
+      } else if (selectedRole === 'serviceman' || selectedRole === 'brahman') {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: SERVICEMAN_HOME }],
+        });
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      
+      // Handle validation errors
+      if (error.includes('email')) {
+        setEmailError(error);
+      } else if (error.includes('password')) {
+        setPasswordError(error);
+      } else {
+        Alert.alert('Error', error);
+      }
+    }
   };
 
   return (
@@ -145,11 +167,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
 
         <View style={styles.buttonContainer}>
           <Button
-            title="Sign In"
+            title={loading ? "Signing In..." : "Sign In"}
             onPress={handleLogin}
-            disabled={!selectedRole || !email || !password}
+            disabled={!selectedRole || !email || !password || loading}
             fullWidth={true}
             size="medium"
+            loading={loading}
           />
           
           <View style={styles.footer}>

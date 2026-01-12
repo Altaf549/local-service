@@ -171,3 +171,49 @@ export const getBrahmanDetails = async (id: number): Promise<any> => {
   }
 };
 
+// Login API functions
+export const userLogin = async (email: string, password: string) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.USER_LOGIN, {
+      email,
+      password
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const servicemanLogin = async (email: string, password: string) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.SERVICEMAN_LOGIN, {
+      email,
+      password
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const brahmanLogin = async (email: string, password: string) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.BRAHMAN_LOGIN, {
+      email,
+      password
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const logout = async () => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.LOGOUT);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
