@@ -6,7 +6,7 @@ import {useAppSelector, useAppDispatch} from '../../redux/hooks';
 import {RootState} from '../../redux/store';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, LOGIN} from '../../constant/Routes';
+import {AppStackParamList, LOGIN, MAIN_TABS} from '../../constant/Routes';
 import {logoutUser} from '../../redux/slices/authSlice';
 import {clearUserData} from '../../redux/slices/userSlice';
 
@@ -58,7 +58,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
     onClose();
   };
 
-  const handleOrders = () => {
+  const handleBooks = () => {
     console.log('Orders pressed');
     onClose();
   };
@@ -81,7 +81,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
       onClose();
       navigation.reset({
         index: 0,
-        routes: [{ name: 'MainTabs' }],
+        routes: [{ name: MAIN_TABS }],
       });
     } catch (error: any) {
       console.error('Logout error:', error);
@@ -123,8 +123,8 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
               />
               <MenuItem
                 icon="receipt-long"
-                title="My Orders"
-                onPress={handleOrders}
+                title="My Booking"
+                onPress={handleBooks}
               />
               <MenuItem
                 icon="settings"

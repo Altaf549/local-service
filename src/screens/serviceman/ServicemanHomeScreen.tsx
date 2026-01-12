@@ -1,15 +1,21 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../../components/Header/Header';
+import { ProfileMenu } from '../../components/ProfileMenu/ProfileMenu';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 
 const ServicemanHomeScreen: React.FC = () => {
   const { theme } = useTheme();
+  const [profileMenuVisible, setProfileMenuVisible] = useState(false);
 
   const handleProfilePress = () => {
-    // TODO: Implement profile menu
+    setProfileMenuVisible(true);
+  };
+
+  const handleProfileMenuClose = () => {
+    setProfileMenuVisible(false);
   };
 
   return (
@@ -38,6 +44,11 @@ const ServicemanHomeScreen: React.FC = () => {
           This screen is under construction
         </Text>
       </View>
+      
+      <ProfileMenu 
+        visible={profileMenuVisible}
+        onClose={handleProfileMenuClose}
+      />
     </SafeAreaView>
   );
 };

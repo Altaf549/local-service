@@ -172,19 +172,35 @@ export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await logout();
+      // Always clear local data first
+      await AsyncStorage.removeItem('user_token');
+      await AsyncStorage.removeItem('user_info');
       
-      if (response.success) {
-        // Clear AsyncStorage
-        await AsyncStorage.removeItem('user_token');
-        await AsyncStorage.removeItem('user_info');
+      // Try to call logout API, but don't fail if it doesn't work
+      try {
+        const response = await logout();
         
-        return response.message;
-      } else {
-        return rejectWithValue(response.message || 'Logout failed');
+        if (response.success) {
+          return response.message;
+        } else {
+          // API call failed but local data is cleared, return success anyway
+          return 'Logged out successfully';
+        }
+      } catch (apiError) {
+        console.warn('Logout API call failed, but local data cleared:', apiError);
+        // API call failed but local data is cleared, return success anyway
+        return 'Logged out successfully';
       }
     } catch (error: any) {
       console.error('Logout error:', error);
+      
+      // Even if there's an error, try to clear local data
+      try {
+        await AsyncStorage.removeItem('user_token');
+        await AsyncStorage.removeItem('user_info');
+      } catch (storageError) {
+        console.error('Failed to clear AsyncStorage:', storageError);
+      }
       
       if (error.response) {
         const errorMessage = error.response.data?.message || 'Logout failed';
