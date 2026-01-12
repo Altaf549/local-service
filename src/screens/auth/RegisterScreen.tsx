@@ -6,9 +6,7 @@ import {
   ScrollView,
   Alert,
   Dimensions,
-  TouchableOpacity,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import {useTheme} from '../../theme/ThemeContext';
 import {useAppDispatch} from '../../redux/hooks';
 import {setUserData, setIsUser} from '../../redux/slices/userSlice';
@@ -16,26 +14,21 @@ import {TextInputWithLabel} from '../../components/TextInputWithLabel/TextInputW
 import {PasswordInput} from '../../components/PasswordInput/PasswordInput';
 import {Dropdown, DropdownOption} from '../../components/Dropdown/Dropdown';
 import {Button} from '../../components/Button/Button';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, LOGIN} from '../../constant/Routes';
-
-type RegisterScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Register'>;
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const {width, height} = Dimensions.get('window');
 
 type UserRole = 'user' | 'brahman' | 'serviceman';
 
-interface RegisterScreenProps {
-  navigation: RegisterScreenNavigationProp;
-}
-
-const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
+const RegisterScreen: React.FC = () => {
   const {theme} = useTheme();
   const dispatch = useAppDispatch();
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
@@ -48,6 +41,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
 
   const handleRegister = () => {
     // Reset errors
+    setNameError('');
     setEmailError('');
     setPasswordError('');
     setConfirmPasswordError('');
@@ -58,6 +52,11 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
     if (!selectedRole) {
       Alert.alert('Error', 'Please select a user type');
       return;
+    }
+
+    if (!name.trim()) {
+      setNameError('Please enter your name');
+      hasError = true;
     }
 
     if (!email.trim()) {
@@ -91,7 +90,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
     // Mock registration - in real app, this would make API calls
     const mockUserData = {
       id: 1,
-      name: email.split('@')[0], // Use email prefix as name
+      name: name,
       email: email,
       mobile_number: '1234567890',
       role: selectedRole,
@@ -121,6 +120,16 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
         </View>
 
         <View style={styles.formContainer}>
+          <View style={styles.inputGroup}>
+            <TextInputWithLabel
+              label="Full Name"
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter your full name"
+              error={nameError}
+            />
+          </View>
+
           <View style={styles.inputGroup}>
             <TextInputWithLabel
               label="Email Address"
@@ -168,7 +177,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
           <Button
             title="Sign Up"
             onPress={handleRegister}
-            disabled={!selectedRole || !email || !password || !confirmPassword}
+            disabled={!selectedRole || !name || !email || !password || !confirmPassword}
             fullWidth={true}
             size="medium"
           />
@@ -177,11 +186,9 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
             <Text style={[styles.footerText, {color: theme.colors.textSecondary}]}>
               Already have an account? 
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate(LOGIN)}>
-              <Text style={[styles.footerLink, {color: theme.colors.primary}]}>
-                Sign In
-              </Text>
-            </TouchableOpacity>
+            <Text style={[styles.footerLink, {color: theme.colors.primary}]}>
+              Sign In
+            </Text>
           </View>
         </View>
       </ScrollView>
