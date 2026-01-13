@@ -172,9 +172,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       }
 
       await onSave(saveData);
-      onClose();
+      //onClose();
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to update profile');
+      // Don't call onClose() on error to keep modal open
     } finally {
       setLoading(false);
     }

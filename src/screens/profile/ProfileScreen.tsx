@@ -152,17 +152,29 @@ const ProfileScreen: React.FC = () => {
       }
       
       Alert.alert('Success', 'Profile updated successfully');
+      // Close modal only after successful save
+      console.log('Profile update success - closing modal. Current editModalVisible:', editModalVisible);
+      setEditModalVisible(false);
     } else {
       Alert.alert('Error', response.message || 'Failed to update profile');
+      // Keep modal open on error so user can retry
     }
   } catch (error: any) {
-    const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
-    Alert.alert('Error', errorMessage);
-    throw error;
-  }
+      console.log('Profile update error details:', {
+        error,
+        errorResponse: error.response,
+        errorMessage: error.response?.data?.message || error.message,
+        editModalVisibleBefore: editModalVisible
+      });
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
+      Alert.alert('Error', errorMessage);
+      // Don't throw error to prevent multiple alerts
+    }
 };
 
   const handleCloseModal = () => {
+    console.log('handleCloseModal called - current editModalVisible:', editModalVisible);
     setEditModalVisible(false);
   };
 
