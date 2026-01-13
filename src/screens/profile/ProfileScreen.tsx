@@ -20,67 +20,86 @@ const ProfileScreen: React.FC = () => {
   const { userData } = useAppSelector((state: RootState) => state.user);
   const dispatch = useAppDispatch();
   const [editModalVisible, setEditModalVisible] = React.useState(false);
+  const [editMode, setEditMode] = React.useState<'profile' | 'email' | 'phone' | 'password'>('profile');
 
   // Debug: Log userData to see what we're working with
   console.log('ProfileScreen userData:', userData);
 
   const handleEditProfile = () => {
+    setEditMode('profile');
     setEditModalVisible(true);
   };
 
-  const handleSaveProfile = async (name: string, profilePhoto: string | null, currentPassword: string, address?: string) => {
-    try {
-      const updateData: any = {
-        current_password: currentPassword,
-        name: name,
-      };
+  const handleEditEmail = () => {
+    setEditMode('email');
+    setEditModalVisible(true);
+  };
 
-      // Add address if provided
-      if (address && address.trim()) {
-        updateData.address = address.trim();
+  const handleEditPhone = () => {
+    setEditMode('phone');
+    setEditModalVisible(true);
+  };
+
+  const handleEditPassword = () => {
+    setEditMode('password');
+    setEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async (data: any) => {
+  try {
+    const updateData: any = {
+      current_password: data.currentPassword,
+    };
+
+    if (data.editMode === 'profile') {
+      updateData.name = data.name;
+      
+      if (data.address && data.address.trim()) {
+        updateData.address = data.address.trim();
       }
 
-      // Only add profile photo if it's different from current
       const currentPhoto = userData?.profile_photo_url || userData?.profile_photo;
-      if (profilePhoto && profilePhoto !== currentPhoto) {
-        // Convert URI to ImagePickerResult format
+      if (data.profilePhoto && data.profilePhoto !== currentPhoto) {
         updateData.profile_photo = {
-          uri: profilePhoto,
-          fileName: profilePhoto.split('/').pop() || 'profile_photo.jpg',
+          uri: data.profilePhoto,
+          fileName: data.profilePhoto.split('/').pop() || 'profile_photo.jpg',
           type: 'image/jpeg',
         };
       }
-
-      const response = await updateUserProfile(updateData);
-      
-      if (response.success) {
-        // Update Redux store with new user data
-        const updatedUserData = {
-          ...userData,
-          ...response.data,
-        };
-        
-        dispatch(setUserData(updatedUserData));
-        
-        // Update AsyncStorage with new user data
-        await AsyncStorage.setItem('user_info', JSON.stringify(updatedUserData));
-        
-        // If API returns a new token, update it
-        if (response.data.token) {
-          await AsyncStorage.setItem('user_token', response.data.token);
-          setAuthToken(response.data.token);
-        }
-        
-        Alert.alert('Success', 'Profile updated successfully');
-      } else {
-        Alert.alert('Error', response.message || 'Failed to update profile');
-      }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
-      Alert.alert('Error', errorMessage);
-      throw error; // Re-throw to let modal handle the loading state
+    } else if (data.editMode === 'email') {
+      updateData.email = data.email;
+    } else if (data.editMode === 'phone') {
+      updateData.mobile_number = data.phone;
+    } else if (data.editMode === 'password') {
+      updateData.new_password = data.newPassword;
     }
-  };
+
+    const response = await updateUserProfile(updateData);
+    
+    if (response.success) {
+      const updatedUserData = {
+        ...userData,
+        ...response.data,
+      };
+      
+      dispatch(setUserData(updatedUserData));
+      await AsyncStorage.setItem('user_info', JSON.stringify(updatedUserData));
+      
+      if (response.data.token) {
+        await AsyncStorage.setItem('user_token', response.data.token);
+        setAuthToken(response.data.token);
+      }
+      
+      Alert.alert('Success', 'Profile updated successfully');
+    } else {
+      Alert.alert('Error', response.message || 'Failed to update profile');
+    }
+  } catch (error: any) {
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
+    Alert.alert('Error', errorMessage);
+    throw error;
+  }
+};
 
   const handleCloseModal = () => {
     setEditModalVisible(false);
@@ -160,7 +179,7 @@ const ProfileScreen: React.FC = () => {
             </View>
             <TouchableOpacity 
               style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
-              onPress={handleEditProfile}
+              onPress={handleEditEmail}
             >
               <MaterialIcons 
                 name="edit" 
@@ -184,7 +203,7 @@ const ProfileScreen: React.FC = () => {
             </View>
             <TouchableOpacity 
               style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
-              onPress={handleEditProfile}
+              onPress={handleEditPhone}
             >
               <MaterialIcons 
                 name="edit" 
@@ -208,7 +227,7 @@ const ProfileScreen: React.FC = () => {
             </View>
             <TouchableOpacity 
               style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
-              onPress={handleEditProfile}
+              onPress={handleEditPassword}
             >
               <MaterialIcons 
                 name="edit" 
@@ -226,6 +245,9 @@ const ProfileScreen: React.FC = () => {
         currentName={userData?.name || ''}
         currentProfilePhoto={userData?.profile_photo_url || userData?.profile_photo || null}
         currentAddress={userData?.address || ''}
+        currentEmail={userData?.email || ''}
+        currentPhone={userData?.mobile_number || ''}
+        editMode={editMode}
         onSave={handleSaveProfile}
       />
     </SafeAreaView>

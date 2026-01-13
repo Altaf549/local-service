@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Alert, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../../components/Button/Button';
+import { PasswordInput } from '../../components/PasswordInput/PasswordInput';
+import { TextInputWithLabel } from '../../components/TextInputWithLabel/TextInputWithLabel';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 import { pickFromCamera, pickFromGallery } from '../../utils/imagePicker';
+import { useFormValidation, commonValidationRules } from '../../hooks/useFormValidation';
 
 interface EditProfileModalProps {
   visible: boolean;
@@ -14,7 +17,10 @@ interface EditProfileModalProps {
   currentName: string;
   currentProfilePhoto: string | null;
   currentAddress?: string;
-  onSave: (name: string, profilePhoto: string | null, currentPassword: string, address?: string) => void;
+  currentEmail?: string;
+  currentPhone?: string;
+  editMode: 'profile' | 'email' | 'phone' | 'password';
+  onSave: (data: any) => void;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({
@@ -23,14 +29,57 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   currentName,
   currentProfilePhoto,
   currentAddress,
+  currentEmail,
+  currentPhone,
+  editMode,
   onSave
 }) => {
   const { theme } = useTheme();
   const [name, setName] = useState(currentName);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(currentProfilePhoto);
   const [address, setAddress] = useState(currentAddress || '');
+  const [email, setEmail] = useState(currentEmail || '');
+  const [phone, setPhone] = useState(currentPhone || '');
   const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Get validation rules based on edit mode
+  const getValidationRules = () => {
+    const baseRules = {
+      currentPassword: commonValidationRules.currentPassword,
+    };
+
+    if (editMode === 'profile') {
+      return {
+        ...baseRules,
+        name: commonValidationRules.name,
+      };
+    } else if (editMode === 'email') {
+      return {
+        ...baseRules,
+        email: commonValidationRules.email,
+      };
+    } else if (editMode === 'phone') {
+      return {
+        ...baseRules,
+        phone: commonValidationRules.phone,
+      };
+    } else if (editMode === 'password') {
+      return {
+        ...baseRules,
+        newPassword: commonValidationRules.password,
+        confirmPassword: {
+          required: true,
+          custom: (value: string) => value === newPassword || 'Passwords do not match',
+        },
+      };
+    }
+    return baseRules;
+  };
+
+  const {errors, validateForm, setFieldError, clearErrors} = useFormValidation(getValidationRules());
 
   const handleChoosePhoto = async () => {
     try {
@@ -77,19 +126,52 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   };
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      Alert.alert('Error', 'Please enter your name');
-      return;
+    // Reset errors
+    clearErrors();
+
+    // Prepare form data based on edit mode
+    let formData: any = {
+      currentPassword,
+    };
+
+    if (editMode === 'profile') {
+      formData.name = name;
+    } else if (editMode === 'email') {
+      formData.email = email;
+    } else if (editMode === 'phone') {
+      formData.phone = phone;
+    } else if (editMode === 'password') {
+      formData.newPassword = newPassword;
+      formData.confirmPassword = confirmPassword;
     }
 
-    if (!currentPassword.trim()) {
-      Alert.alert('Error', 'Please enter your current password');
+    // Validate form
+    const isValid = validateForm(formData);
+
+    if (!isValid) {
       return;
     }
 
     setLoading(true);
     try {
-      await onSave(name.trim(), profilePhoto, currentPassword.trim(), address.trim());
+      const saveData: any = {
+        editMode,
+        currentPassword: currentPassword.trim(),
+      };
+
+      if (editMode === 'profile') {
+        saveData.name = name.trim();
+        saveData.address = address.trim();
+        saveData.profilePhoto = profilePhoto;
+      } else if (editMode === 'email') {
+        saveData.email = email.trim();
+      } else if (editMode === 'phone') {
+        saveData.phone = phone.trim();
+      } else if (editMode === 'password') {
+        saveData.newPassword = newPassword.trim();
+      }
+
+      await onSave(saveData);
       onClose();
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to update profile');
@@ -102,8 +184,25 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setName(currentName);
     setProfilePhoto(currentProfilePhoto);
     setAddress(currentAddress || '');
+    setEmail(currentEmail || '');
+    setPhone(currentPhone || '');
     setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
     onClose();
+  };
+
+  const getModalTitle = () => {
+    switch (editMode) {
+      case 'email':
+        return 'Edit Email';
+      case 'phone':
+        return 'Edit Phone';
+      case 'password':
+        return 'Change Password';
+      default:
+        return 'Edit Profile';
+    }
   };
 
   return (
@@ -123,84 +222,126 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
               <MaterialIcons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
-            <Text style={[styles.title, { color: theme.colors.text }]}>Edit Profile</Text>
+            <Text style={[styles.title, { color: theme.colors.text }]}>{getModalTitle()}</Text>
             <View style={styles.placeholder} />
           </View>
 
           <View style={styles.content}>
-            {/* Profile Photo Section */}
-            <View style={styles.photoSection}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Profile Photo</Text>
-              <View style={styles.photoContainer}>
-                {profilePhoto ? (
-                  <Image source={{ uri: profilePhoto }} style={styles.photo} />
-                ) : (
-                  <View style={[styles.photoPlaceholder, { backgroundColor: theme.colors.primary }]}>
-                    <MaterialIcons name="account-circle" size={60} color={theme.colors.background} />
-                  </View>
-                )}
-                <TouchableOpacity
-                  style={[styles.photoButton, { backgroundColor: theme.colors.primary }]}
-                  onPress={showPhotoOptions}
-                >
-                  <MaterialIcons name="camera-alt" size={20} color={theme.colors.background} />
-                  <Text style={[styles.photoButtonText, { color: theme.colors.background }]}>
-                    Change Photo
-                  </Text>
-                </TouchableOpacity>
+            {/* Profile Photo Section - Only for profile edit mode */}
+            {editMode === 'profile' && (
+              <View style={styles.photoSection}>
+                <Text style={[styles.photoSectionTitle, { color: theme.colors.text }]}>Profile Photo</Text>
+                <View style={styles.photoContainer}>
+                  {profilePhoto ? (
+                    <Image source={{ uri: profilePhoto }} style={styles.photo} />
+                  ) : (
+                    <View style={[styles.photoPlaceholder, { backgroundColor: theme.colors.primary }]}>
+                      <MaterialIcons name="account-circle" size={60} color={theme.colors.background} />
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    style={[styles.photoButton, { backgroundColor: theme.colors.primary }]}
+                    onPress={showPhotoOptions}
+                  >
+                    <MaterialIcons name="camera-alt" size={20} color={theme.colors.background} />
+                    <Text style={[styles.photoButtonText, { color: theme.colors.background }]}>
+                      Change Photo
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            )}
 
-            {/* Name Section */}
-            <View style={styles.nameSection}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Name</Text>
-              <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
-                <MaterialIcons name="person" size={20} color={theme.colors.textSecondary} />
-                <TextInput
-                  style={[styles.nameText, { color: theme.colors.text }]}
+            {/* Name Section - Only for profile edit mode */}
+            {editMode === 'profile' && (
+              <View style={styles.nameSection}>
+                <TextInputWithLabel
+                  label="Name"
                   value={name}
                   onChangeText={setName}
                   placeholder="Enter your name"
-                  placeholderTextColor={theme.colors.textSecondary}
-                  multiline={false}
-                  maxLength={50}
+                  error={errors.name}
                 />
               </View>
-            </View>
+            )}
 
-            {/* Current Password Section */}
-            <View style={styles.nameSection}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Current Password</Text>
-              <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
-                <MaterialIcons name="lock" size={20} color={theme.colors.textSecondary} />
-                <TextInput
-                  style={[styles.nameText, { color: theme.colors.text }]}
-                  value={currentPassword}
-                  onChangeText={setCurrentPassword}
-                  placeholder="Enter your current password"
-                  placeholderTextColor={theme.colors.textSecondary}
-                  secureTextEntry={true}
-                  multiline={false}
+            {/* Email Section - Only for email edit mode */}
+            {editMode === 'email' && (
+              <View style={styles.nameSection}>
+                <TextInputWithLabel
+                  label="Email Address"
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  error={errors.email}
                 />
               </View>
-            </View>
+            )}
 
-            {/* Address Section */}
-            <View style={styles.nameSection}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Address</Text>
-              <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
-                <MaterialIcons name="location-on" size={20} color={theme.colors.textSecondary} />
-                <TextInput
-                  style={[styles.nameText, { color: theme.colors.text }]}
+            {/* Phone Section - Only for phone edit mode */}
+            {editMode === 'phone' && (
+              <View style={styles.nameSection}>
+                <TextInputWithLabel
+                  label="Phone Number"
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="Enter your phone number"
+                  keyboardType="phone-pad"
+                  error={errors.phone}
+                />
+              </View>
+            )}
+
+            {/* New Password Section - Only for password edit mode */}
+            {editMode === 'password' && (
+              <>
+                <View style={styles.nameSection}>
+                  <PasswordInput
+                    label="New Password"
+                    value={newPassword}
+                    onChangeText={setNewPassword}
+                    placeholder="Enter your new password"
+                    error={errors.newPassword}
+                  />
+                </View>
+
+                <View style={styles.nameSection}>
+                  <PasswordInput
+                    label="Confirm New Password"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    placeholder="Confirm your new password"
+                    error={errors.confirmPassword}
+                  />
+                </View>
+              </>
+            )}
+
+            {/* Address Section - Only for profile edit mode */}
+            {editMode === 'profile' && (
+              <View style={styles.nameSection}>
+                <TextInputWithLabel
+                  label="Address"
                   value={address}
                   onChangeText={setAddress}
                   placeholder="Enter your address"
-                  placeholderTextColor={theme.colors.textSecondary}
                   multiline={true}
                   numberOfLines={3}
-                  textAlignVertical="top"
                 />
               </View>
+            )}
+
+            {/* Current Password Section - Always shown */}
+            <View style={styles.nameSection}>
+              <PasswordInput
+                label="Current Password"
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                placeholder="Enter your current password"
+                error={errors.currentPassword}
+              />
             </View>
           </View>
 
@@ -246,14 +387,13 @@ const styles = StyleSheet.create({
     width: moderateScale(40),
   },
   content: {
-    flex: 1,
     padding: moderateScale(20),
   },
   photoSection: {
     alignItems: 'center',
     marginBottom: moderateVerticalScale(30),
   },
-  sectionTitle: {
+  photoSectionTitle: {
     fontSize: moderateScale(16),
     fontWeight: '600',
     marginBottom: moderateVerticalScale(15),
@@ -289,18 +429,6 @@ const styles = StyleSheet.create({
   },
   nameSection: {
     marginBottom: moderateVerticalScale(20),
-  },
-  nameInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: moderateScale(15),
-    paddingVertical: moderateVerticalScale(12),
-    borderRadius: moderateScale(8),
-  },
-  nameText: {
-    fontSize: moderateScale(16),
-    marginLeft: moderateScale(10),
-    flex: 1,
   },
   footer: {
     paddingHorizontal: moderateScale(20),

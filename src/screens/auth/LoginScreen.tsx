@@ -20,6 +20,7 @@ import {Button} from '../../components/Button/Button';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
 import {AppStackParamList, MAIN_TABS, REGISTER, SERVICEMAN_HOME, USER_ROLES} from '../../constant/Routes';
+import {useFormValidation, commonValidationRules} from '../../hooks/useFormValidation';
 
 type LoginScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Login'>;
 
@@ -35,8 +36,13 @@ const LoginScreen: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+
+  const validationRules = {
+    email: commonValidationRules.email,
+    password: commonValidationRules.basicPassword,
+  };
+
+  const {errors, validateForm, setFieldError, clearErrors} = useFormValidation(validationRules);
 
   const userTypes: DropdownOption[] = [
     {label: 'User', value: USER_ROLES.USER},
@@ -46,34 +52,19 @@ const LoginScreen: React.FC = () => {
 
   const handleLogin = async () => {
     // Reset errors
-    setEmailError('');
-    setPasswordError('');
+    clearErrors();
 
-    // Validation
-    let hasError = false;
-
+    // Validate user role selection
     if (!selectedRole) {
       Alert.alert('Error', 'Please select a user type');
       return;
     }
 
-    if (!email.trim()) {
-      setEmailError('Please enter your email');
-      hasError = true;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError('Please enter a valid email');
-      hasError = true;
-    }
+    // Validate form
+    const formData = { email, password };
+    const isValid = validateForm(formData);
 
-    if (!password.trim()) {
-      setPasswordError('Please enter your password');
-      hasError = true;
-    } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      hasError = true;
-    }
-
-    if (hasError) {
+    if (!isValid) {
       return;
     }
 
@@ -107,9 +98,9 @@ const LoginScreen: React.FC = () => {
       
       // Handle validation errors
       if (error.includes('email')) {
-        setEmailError(error);
+        setFieldError('email', error);
       } else if (error.includes('password')) {
-        setPasswordError(error);
+        setFieldError('password', error);
       } else {
         Alert.alert('Error', error);
       }
@@ -140,7 +131,7 @@ const LoginScreen: React.FC = () => {
               placeholder="Enter your email"
               keyboardType="email-address"
               autoCapitalize="none"
-              error={emailError}
+              error={errors.email}
             />
           </View>
 
@@ -150,7 +141,7 @@ const LoginScreen: React.FC = () => {
               value={password}
               onChangeText={setPassword}
               placeholder="Enter your password"
-              error={passwordError}
+              error={errors.password}
             />
           </View>
 

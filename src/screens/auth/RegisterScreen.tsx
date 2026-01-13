@@ -20,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
 import {AppStackParamList, LOGIN, MAIN_TABS, SERVICEMAN_HOME, USER_ROLES} from '../../constant/Routes';
+import {useFormValidation, commonValidationRules} from '../../hooks/useFormValidation';
 
 type RegisterScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Register'>;
 
@@ -38,11 +39,19 @@ const RegisterScreen: React.FC = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [mobileNumberError, setMobileNumberError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+  const validationRules = {
+    name: commonValidationRules.name,
+    email: commonValidationRules.email,
+    mobileNumber: commonValidationRules.phone,
+    password: commonValidationRules.password,
+    confirmPassword: {
+      required: true,
+      custom: (value: string) => value === password || 'Passwords do not match',
+    },
+  };
+
+  const {errors, validateForm, setFieldError, clearErrors} = useFormValidation(validationRules);
 
   const userTypes: DropdownOption[] = [
     {label: 'User', value: USER_ROLES.USER},
@@ -52,58 +61,19 @@ const RegisterScreen: React.FC = () => {
 
   const handleRegister = async () => {
     // Reset errors
-    setNameError('');
-    setEmailError('');
-    setMobileNumberError('');
-    setPasswordError('');
-    setConfirmPasswordError('');
+    clearErrors();
 
-    // Validation
-    let hasError = false;
-
+    // Validate user role selection
     if (!selectedRole) {
       Alert.alert('Error', 'Please select a user type');
       return;
     }
 
-    if (!name.trim()) {
-      setNameError('Please enter your name');
-      hasError = true;
-    }
+    // Validate form
+    const formData = { name, email, mobileNumber, password, confirmPassword };
+    const isValid = validateForm(formData);
 
-    if (!email.trim()) {
-      setEmailError('Please enter your email');
-      hasError = true;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError('Please enter a valid email');
-      hasError = true;
-    }
-
-    if (!mobileNumber.trim()) {
-      setMobileNumberError('Please enter your mobile number');
-      hasError = true;
-    } else if (!/^\d{10}$/.test(mobileNumber)) {
-      setMobileNumberError('Please enter a valid 10-digit mobile number');
-      hasError = true;
-    }
-
-    if (!password.trim()) {
-      setPasswordError('Please enter your password');
-      hasError = true;
-    } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      hasError = true;
-    }
-
-    if (!confirmPassword.trim()) {
-      setConfirmPasswordError('Please confirm your password');
-      hasError = true;
-    } else if (password !== confirmPassword) {
-      setConfirmPasswordError('Passwords do not match');
-      hasError = true;
-    }
-
-    if (hasError) {
+    if (!isValid) {
       return;
     }
 
@@ -154,13 +124,13 @@ const RegisterScreen: React.FC = () => {
       
       // Handle validation errors
       if (error.includes('name')) {
-        setNameError(error);
+        setFieldError('name', error);
       } else if (error.includes('email')) {
-        setEmailError(error);
+        setFieldError('email', error);
       } else if (error.includes('mobile')) {
-        setMobileNumberError(error);
+        setFieldError('mobileNumber', error);
       } else if (error.includes('password')) {
-        setPasswordError(error);
+        setFieldError('password', error);
       } else {
         Alert.alert('Error', error);
       }
@@ -189,7 +159,7 @@ const RegisterScreen: React.FC = () => {
               value={name}
               onChangeText={setName}
               placeholder="Enter your full name"
-              error={nameError}
+              error={errors.name}
             />
           </View>
 
@@ -201,7 +171,7 @@ const RegisterScreen: React.FC = () => {
               placeholder="Enter your email"
               keyboardType="email-address"
               autoCapitalize="none"
-              error={emailError}
+              error={errors.email}
             />
           </View>
 
@@ -210,9 +180,9 @@ const RegisterScreen: React.FC = () => {
               label="Mobile Number"
               value={mobileNumber}
               onChangeText={setMobileNumber}
-              placeholder="Enter your 10-digit mobile number"
+              placeholder="Enter your mobile number"
               keyboardType="phone-pad"
-              error={mobileNumberError}
+              error={errors.mobileNumber}
             />
           </View>
 
@@ -221,8 +191,8 @@ const RegisterScreen: React.FC = () => {
               label="Password"
               value={password}
               onChangeText={setPassword}
-              placeholder="Enter your password"
-              error={passwordError}
+              placeholder="Create a password"
+              error={errors.password}
             />
           </View>
 
@@ -232,7 +202,7 @@ const RegisterScreen: React.FC = () => {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Confirm your password"
-              error={confirmPasswordError}
+              error={errors.confirmPassword}
             />
           </View>
 
