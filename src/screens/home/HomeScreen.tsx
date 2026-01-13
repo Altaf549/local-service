@@ -21,6 +21,7 @@ import { BottomTabParamList, AppStackParamList, BRAHMAN, PUJA, PUJA_TYPE, SERVIC
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchHomeData } from '../../redux/slices/homeSlice';
 import { moderateVerticalScale, moderateScale } from '../../utils/scaling';
+import { CustomImage } from '../../components/CustomImage/CustomImage';
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabParamList, 'Home'>,
@@ -33,6 +34,7 @@ const HomeScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const { banners, service_categories, services, servicemen, puja_types, pujas, brahmans, loading, error } =
     useAppSelector(state => state.home);
+  const { userData } = useAppSelector(state => state.user);
   const [refreshing, setRefreshing] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -42,6 +44,28 @@ const HomeScreen: React.FC = () => {
 
   const handleProfileMenuClose = () => {
     setShowProfileMenu(false);
+  };
+
+  const renderProfileImage = () => {
+    if (userData?.profile_photo_url || userData?.profile_photo) {
+      return (
+        <CustomImage
+          source={{ uri: userData.profile_photo_url || userData.profile_photo }}
+          style={{
+            width: moderateScale(40),
+            height: moderateScale(40),
+            borderRadius: moderateScale(20),
+          }}
+        />
+      );
+    }
+    return (
+      <MaterialIcons
+        name="account-circle"
+        size={40}
+        color={theme.colors.background}
+      />
+    );
   };
 
   useEffect(() => {
@@ -73,17 +97,11 @@ const HomeScreen: React.FC = () => {
           styles.container,
           { backgroundColor: theme.colors.background },
         ]}>
-        <Header 
-        title="Home" 
-        rightIcon={
-          <MaterialIcons 
-            name="account-circle" 
-            size={24} 
-            color={theme.colors.background} 
-          />
-        }
-        onRightIconPress={handleProfilePress}
-      />
+        <Header
+          title="Home"
+          rightIcon={renderProfileImage()}
+          onRightIconPress={handleProfilePress}
+        />
         <SafeAreaView edges={[]} style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </SafeAreaView>
@@ -98,15 +116,9 @@ const HomeScreen: React.FC = () => {
         styles.container,
         { backgroundColor: theme.colors.background },
       ]}>
-      <Header 
-        title="Home" 
-        rightIcon={
-          <MaterialIcons 
-            name="account-circle" 
-            size={40} 
-            color={theme.colors.background} 
-          />
-        }
+      <Header
+        title="Home"
+        rightIcon={renderProfileImage()}
         onRightIconPress={handleProfilePress}
       />
       <ScrollView
@@ -252,9 +264,9 @@ const HomeScreen: React.FC = () => {
           />
         )}
       </ScrollView>
-      <ProfileMenu 
-        visible={showProfileMenu} 
-        onClose={handleProfileMenuClose} 
+      <ProfileMenu
+        visible={showProfileMenu}
+        onClose={handleProfileMenuClose}
       />
     </SafeAreaView>
   );

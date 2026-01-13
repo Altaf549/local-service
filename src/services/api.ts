@@ -1,6 +1,7 @@
 import axios from '../network/axiosConfig';
 import {API_ENDPOINTS} from '../constant/ApiEndpoints';
 import {HomeData, HomeApiResponse, ServiceCategory, PujaType, Service, ServiceWithServicemen, Puja, Serviceman, Brahman} from '../types/home';
+import {ImagePickerResult} from '../utils/imagePicker';
 
 export type {
   Banner,
@@ -254,6 +255,48 @@ export const brahmanRegister = async (name: string, email: string, mobile_number
       mobile_number,
       password
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// User Profile Update API function
+export const updateUserProfile = async (profileData: {
+  current_password: string;
+  name?: string;
+  email?: string;
+  mobile_number?: string;
+  address?: string;
+  new_password?: string;
+  profile_photo?: ImagePickerResult;
+}) => {
+  try {
+    const formData = new FormData();
+    
+    // Add required field
+    formData.append('current_password', profileData.current_password);
+    
+    // Add optional fields only if they exist
+    if (profileData.name) formData.append('name', profileData.name);
+    if (profileData.email) formData.append('email', profileData.email);
+    if (profileData.mobile_number) formData.append('mobile_number', profileData.mobile_number);
+    if (profileData.address) formData.append('address', profileData.address);
+    if (profileData.new_password) formData.append('new_password', profileData.new_password);
+    if (profileData.profile_photo) {
+      formData.append('profile_photo', {
+        uri: profileData.profile_photo.uri,
+        type: profileData.profile_photo.type || 'image/jpeg',
+        name: profileData.profile_photo.fileName || 'profile_photo.jpg',
+      } as any);
+    }
+    
+    const response = await axios.post(API_ENDPOINTS.USER_PROFILE_UPDATE, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
     return response.data;
   } catch (error) {
     throw error;

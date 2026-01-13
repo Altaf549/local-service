@@ -34,6 +34,30 @@ export const BASE_URL = MAIN_URL + DEV_URL;
 
 axios.defaults.baseURL = BASE_URL;
 axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
+
+// Function to set authorization header
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    Console.log('Authorization header set:', `Bearer ${token.substring(0, 10)}...`);
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+    Console.log('Authorization header removed');
+  }
+};
+
+// Function to initialize auth token from storage
+export const initializeAuthToken = async () => {
+  try {
+    const token = await AsyncStorage.getItem('user_token');
+    if (token) {
+      setAuthToken(token);
+      Console.log('Auth token initialized from storage');
+    }
+  } catch (error) {
+    Console.log('Error initializing auth token:', error);
+  }
+};
 axios.interceptors.request.use(
     request => {
         Console.log(`\x1b[${LogColors.blue}m%s\x1b[0m`, 'Starting Request -- ');
@@ -92,10 +116,10 @@ const resetAppData = async () => {
     const { dispatch } = store;
     
     // Remove authorization header
-    delete axios.defaults.headers.common['Authorization'];
+    setAuthToken(null);
     
     // Clear AsyncStorage
-    await AsyncStorage.removeItem('urser_token');
+    await AsyncStorage.removeItem('user_token');
     await AsyncStorage.removeItem('user_info');
     Console.log('resetAppData called');
     dispatch(clearUserData());

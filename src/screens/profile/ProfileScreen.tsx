@@ -1,24 +1,89 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../../components/Header/Header';
 import { Button } from '../../components/Button/Button';
+import EditProfileModal from '../../components/EditProfileModal/EditProfileModal';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { useAppSelector } from '../../redux/hooks';
+import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
+import { updateUserProfile } from '../../services/api';
+import { setUserData } from '../../redux/slices/userSlice';
+import { setAuthToken } from '../../network/axiosConfig';
+import { CustomImage } from '../../components/CustomImage/CustomImage';
 
 const ProfileScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userData } = useAppSelector((state: RootState) => state.user);
+  const dispatch = useAppDispatch();
+  const [editModalVisible, setEditModalVisible] = React.useState(false);
+
+  // Debug: Log userData to see what we're working with
+  console.log('ProfileScreen userData:', userData);
 
   const handleEditProfile = () => {
-    // TODO: Implement edit profile functionality
+    setEditModalVisible(true);
   };
 
-  const handleBack = () => {
-    // TODO: Navigate back to previous screen
+  const handleSaveProfile = async (name: string, profilePhoto: string | null, currentPassword: string, address?: string) => {
+    try {
+      const updateData: any = {
+        current_password: currentPassword,
+        name: name,
+      };
+
+      // Add address if provided
+      if (address && address.trim()) {
+        updateData.address = address.trim();
+      }
+
+      // Only add profile photo if it's different from current
+      const currentPhoto = userData?.profile_photo_url || userData?.profile_photo;
+      if (profilePhoto && profilePhoto !== currentPhoto) {
+        // Convert URI to ImagePickerResult format
+        updateData.profile_photo = {
+          uri: profilePhoto,
+          fileName: profilePhoto.split('/').pop() || 'profile_photo.jpg',
+          type: 'image/jpeg',
+        };
+      }
+
+      const response = await updateUserProfile(updateData);
+      
+      if (response.success) {
+        // Update Redux store with new user data
+        const updatedUserData = {
+          ...userData,
+          ...response.data,
+        };
+        
+        dispatch(setUserData(updatedUserData));
+        
+        // Update AsyncStorage with new user data
+        await AsyncStorage.setItem('user_info', JSON.stringify(updatedUserData));
+        
+        // If API returns a new token, update it
+        if (response.data.token) {
+          await AsyncStorage.setItem('user_token', response.data.token);
+          setAuthToken(response.data.token);
+        }
+        
+        Alert.alert('Success', 'Profile updated successfully');
+      } else {
+        Alert.alert('Error', response.message || 'Failed to update profile');
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
+      Alert.alert('Error', errorMessage);
+      throw error; // Re-throw to let modal handle the loading state
+    }
+  };
+
+  const handleCloseModal = () => {
+    setEditModalVisible(false);
   };
 
   if (!userData) {
@@ -45,9 +110,9 @@ const ProfileScreen: React.FC = () => {
         {/* Profile Header with Image and Name */}
         <View style={styles.profileHeader}>
           <View style={styles.imageContainer}>
-            {userData?.profile_photo ? (
-              <Image
-                source={{ uri: userData.profile_photo }}
+            {userData?.profile_photo_url || userData?.profile_photo ? (
+              <CustomImage
+                source={{ uri: userData.profile_photo_url || userData.profile_photo }}
                 style={styles.profileImage}
               />
             ) : (
@@ -75,6 +140,11 @@ const ProfileScreen: React.FC = () => {
           <Text style={[styles.profileName, { color: theme.colors.text }]}>
             {userData?.name || 'N/A'}
           </Text>
+          {userData?.address && (
+            <Text style={[styles.addressText, { color: theme.colors.textSecondary }]}>
+              {userData.address}
+            </Text>
+          )}
         </View>
 
         {/* Email Card */}
@@ -149,6 +219,15 @@ const ProfileScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
+      
+      <EditProfileModal
+        visible={editModalVisible}
+        onClose={handleCloseModal}
+        currentName={userData?.name || ''}
+        currentProfilePhoto={userData?.profile_photo_url || userData?.profile_photo || null}
+        currentAddress={userData?.address || ''}
+        onSave={handleSaveProfile}
+      />
     </SafeAreaView>
   );
 };
@@ -208,6 +287,11 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(24),
     fontWeight: 'bold',
     marginTop: moderateVerticalScale(10),
+  },
+  addressText: {
+    fontSize: moderateScale(16),
+    marginTop: moderateVerticalScale(5),
+    textAlign: 'center',
   },
   infoCard: {
     borderRadius: moderateScale(12),

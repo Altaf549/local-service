@@ -6,6 +6,7 @@ import RNBootSplash from 'react-native-bootsplash';
 import FlashMessage from 'react-native-flash-message';
 import {AppDispatch, RootState} from '../redux/store';
 import {setUserData, setIsUser} from '../redux/slices/userSlice';
+import {initializeAuthToken} from '../network/axiosConfig';
 import {MAIN_TABS, RootStackParamList, SERVICEMAN_HOME, USER_ROLES} from '../constant/Routes';
 import AppStack from './AppStack';
 import {StackActions} from '@react-navigation/native';
@@ -24,6 +25,9 @@ const RootNavigator = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
+        // Initialize auth token from storage
+        await initializeAuthToken();
+
         // Check for stored token and user data
         const token = await AsyncStorage.getItem('user_token');
         const userInfo = await AsyncStorage.getItem('user_info');

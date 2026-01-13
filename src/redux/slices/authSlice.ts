@@ -1,6 +1,7 @@
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import {userLogin, servicemanLogin, brahmanLogin, logout, userRegister, servicemanRegister, brahmanRegister} from '../../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setAuthToken } from '../../network/axiosConfig';
 
 interface LoginCredentials {
   email: string;
@@ -27,6 +28,9 @@ interface LoginResponse {
       mobile_number: string;
       role: string;
       status: string;
+      address?: string;
+      profile_photo?: string;
+      profile_photo_url?: string;
     };
     serviceman?: {
       id: number;
@@ -35,6 +39,9 @@ interface LoginResponse {
       mobile_number: string;
       status: string;
       availability_status: string;
+      address?: string;
+      profile_photo?: string;
+      profile_photo_url?: string;
     };
     brahman?: {
       id: number;
@@ -43,6 +50,9 @@ interface LoginResponse {
       mobile_number: string;
       status: string;
       availability_status: string;
+      address?: string;
+      profile_photo?: string;
+      profile_photo_url?: string;
     };
     token: string;
   };
@@ -59,6 +69,7 @@ interface RegisterResponse {
       mobile_number: string;
       role: string;
       status: string;
+      address?: string;
       created_at: string;
     };
     serviceman?: {
@@ -68,6 +79,7 @@ interface RegisterResponse {
       mobile_number: string;
       status: string;
       availability_status: string;
+      address?: string;
       created_at: string;
     };
     brahman?: {
@@ -77,6 +89,7 @@ interface RegisterResponse {
       mobile_number: string;
       status: string;
       availability_status: string;
+      address?: string;
       created_at: string;
     };
     token?: string;
@@ -124,6 +137,9 @@ export const loginUser = createAsyncThunk(
           name: response.data.user?.name || response.data.serviceman?.name || response.data.brahman?.name || '',
           email: response.data.user?.email || response.data.serviceman?.email || response.data.brahman?.email || '',
           mobile_number: response.data.user?.mobile_number || response.data.serviceman?.mobile_number || response.data.brahman?.mobile_number || '',
+          profile_photo: response.data.user?.profile_photo || response.data.serviceman?.profile_photo || response.data.brahman?.profile_photo,
+          profile_photo_url: response.data.user?.profile_photo_url || response.data.serviceman?.profile_photo_url || response.data.brahman?.profile_photo_url,
+          address: response.data.user?.address || response.data.serviceman?.address || response.data.brahman?.address,
           role: credentials.role,
           status: response.data.user?.status || response.data.serviceman?.status || response.data.brahman?.status,
           availability_status: response.data.serviceman?.availability_status || response.data.brahman?.availability_status,
@@ -133,6 +149,9 @@ export const loginUser = createAsyncThunk(
         // Store user data and token in AsyncStorage
         await AsyncStorage.setItem('user_token', response.data.token);
         await AsyncStorage.setItem('user_info', JSON.stringify(userData));
+
+        // Set authorization header for axios
+        setAuthToken(response.data.token);
 
         return userData;
       } else {
@@ -243,6 +262,7 @@ export const registerUser = createAsyncThunk(
             name: response.data.user.name,
             email: response.data.user.email,
             mobile_number: response.data.user.mobile_number,
+            address: response.data.user.address,
             role: credentials.role,
             status: response.data.user.status,
             token: response.data.token,
@@ -251,6 +271,9 @@ export const registerUser = createAsyncThunk(
           // Store user data and token in AsyncStorage
           await AsyncStorage.setItem('user_token', response.data.token);
           await AsyncStorage.setItem('user_info', JSON.stringify(userData));
+
+          // Set authorization header for axios
+          setAuthToken(response.data.token);
 
           return userData;
         } else {

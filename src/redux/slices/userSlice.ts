@@ -5,6 +5,9 @@ interface UserData {
   name: string;
   email: string;
   mobile_number: string;
+  profile_photo?: string;
+  profile_photo_url?: string;
+  address?: string;
   token?: string;
   role?: string;
   status?: string;
