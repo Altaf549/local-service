@@ -21,7 +21,7 @@ import { RootState } from '../../redux/store';
 import { ServiceWithServicemen } from '../../types/home';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList, SERVICEMAN_DETAILS } from '../../constant/Routes';
+import { AppStackParamList, SERVICEMAN_DETAILS, LOGIN } from '../../constant/Routes';
 import Console from '../../utils/Console';
 import {
   scale,
@@ -59,6 +59,9 @@ const ServiceDetailsScreen: React.FC = () => {
   const { serviceDetails, loading, error } = useSelector(
     (state: RootState) => state.serviceDetails,
   );
+  const { userData, isUser } = useSelector(
+    (state: RootState) => state.user,
+  );
 
   useEffect(() => {
     Console.log('ServiceDetailsScreen', 'useEffect called, serviceId:', serviceId);
@@ -71,18 +74,87 @@ const ServiceDetailsScreen: React.FC = () => {
   }, [dispatch, serviceId]);
 
   const handleCallPress = (phoneNumber: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to make a call. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'ServiceDetails',
+                serviceId: serviceId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Linking.openURL(`tel:${phoneNumber}`).catch(() => {
       Alert.alert('Error', 'Unable to make a call');
     });
   };
 
   const handleDownloadPress = (fileUrl: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to download files. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'ServiceDetails',
+                serviceId: serviceId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Linking.openURL(fileUrl).catch(() => {
       Alert.alert('Error', 'Unable to open file');
     });
   };
 
   const handleBookingPress = () => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to make a booking. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'ServiceDetails',
+                serviceId: serviceId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     // Navigate to booking screen or handle booking logic
     Alert.alert('Booking', 'Booking functionality will be implemented');
   };
@@ -100,6 +172,7 @@ const ServiceDetailsScreen: React.FC = () => {
       availabilityStatus={serviceman.availability_status}
       type="serviceman"
       onCall={handleCallPress}
+      onBook={handleBookingPress}
       onPress={(id) => {
         navigation.navigate(SERVICEMAN_DETAILS, { id: id });
       }}

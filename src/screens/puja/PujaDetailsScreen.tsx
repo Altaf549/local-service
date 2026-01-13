@@ -19,7 +19,7 @@ import { ProviderCard } from '../../components/ProviderCard/ProviderCard';
 import { RootState } from '../../redux/store';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList, BRAHMAN_DETAILS } from '../../constant/Routes';
+import { AppStackParamList, BRAHMAN_DETAILS, LOGIN } from '../../constant/Routes';
 import Console from '../../utils/Console';
 import {
   scale,
@@ -56,6 +56,9 @@ const PujaDetailsScreen: React.FC = () => {
   const { pujaDetails, loading, error } = useSelector(
     (state: RootState) => state.pujaDetails,
   );
+  const { userData, isUser } = useSelector(
+    (state: RootState) => state.user,
+  );
 
   useEffect(() => {
     Console.log('PujaDetailsScreen', 'useEffect called, pujaId:', pujaId);
@@ -66,12 +69,58 @@ const PujaDetailsScreen: React.FC = () => {
   }, [dispatch, pujaId]);
 
   const handleCallPress = (phoneNumber: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to make a call. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'PujaDetails',
+                pujaId: pujaId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Linking.openURL(`tel:${phoneNumber}`).catch(() => {
       Alert.alert('Error', 'Unable to make a call');
     });
   };
 
   const handleDownloadPress = async (fileUrl: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to download files. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'PujaDetails',
+                pujaId: pujaId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     try {
       // Check if URL is valid
       if (!fileUrl) {
@@ -98,6 +147,29 @@ const PujaDetailsScreen: React.FC = () => {
   };
 
   const handleBookingPress = () => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to make a booking. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'PujaDetails',
+                pujaId: pujaId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Alert.alert('Booking', 'Booking functionality will be implemented');
   };
 
@@ -118,6 +190,7 @@ const PujaDetailsScreen: React.FC = () => {
       type="brahman"
       onCall={handleCallPress}
       onDownload={handleDownloadPress}
+      onBook={handleBookingPress}
       onPress={(id) => {
         navigation.navigate(BRAHMAN_DETAILS, { id: id });
       }}

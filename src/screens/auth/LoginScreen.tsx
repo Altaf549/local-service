@@ -18,8 +18,8 @@ import {PasswordInput} from '../../components/PasswordInput/PasswordInput';
 import {Dropdown, DropdownOption} from '../../components/Dropdown/Dropdown';
 import {Button} from '../../components/Button/Button';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {useNavigation} from '@react-navigation/native';
-import {AppStackParamList, MAIN_TABS, REGISTER, SERVICEMAN_HOME, USER_ROLES} from '../../constant/Routes';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {AppStackParamList, MAIN_TABS, REGISTER, SERVICEMAN_HOME, USER_ROLES, PUJA_DETAILS, SERVICE_DETAILS} from '../../constant/Routes';
 import {useFormValidation, commonValidationRules} from '../../hooks/useFormValidation';
 
 type LoginScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Login'>;
@@ -31,11 +31,18 @@ type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
 const LoginScreen: React.FC = () => {
   const {theme} = useTheme();
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const route = useRoute();
   const dispatch = useAppDispatch();
   const {loading, error, loginSuccess} = useAppSelector(state => state.auth);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Extract route parameters for return navigation
+  const routeParams = route.params as any;
+  const returnTo = routeParams?.returnTo;
+  const pujaId = routeParams?.pujaId;
+  const serviceId = routeParams?.serviceId;
 
   const validationRules = {
     email: commonValidationRules.email,
@@ -81,17 +88,43 @@ const LoginScreen: React.FC = () => {
 
       Alert.alert('Success', `Logged in as ${selectedRole} successfully!`);
       
-      // Navigate based on user role
-      if (selectedRole === USER_ROLES.USER) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: MAIN_TABS }],
-        });
-      } else if (selectedRole === USER_ROLES.SERVICEMAN || selectedRole === USER_ROLES.BRAHMAN) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: SERVICEMAN_HOME }],
-        });
+      // Handle return navigation if coming from another screen
+      if (returnTo && selectedRole === USER_ROLES.USER) {
+        if (returnTo === 'PujaDetails' && pujaId) {
+          navigation.reset({
+            index: 0,
+            routes: [
+              { name: MAIN_TABS },
+              { name: PUJA_DETAILS, params: { id: pujaId } }
+            ],
+          });
+        } else if (returnTo === 'ServiceDetails' && serviceId) {
+          navigation.reset({
+            index: 0,
+            routes: [
+              { name: MAIN_TABS },
+              { name: SERVICE_DETAILS, params: { id: serviceId } }
+            ],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: MAIN_TABS }],
+          });
+        }
+      } else {
+        // Navigate based on user role (default behavior)
+        if (selectedRole === USER_ROLES.USER) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: MAIN_TABS }],
+          });
+        } else if (selectedRole === USER_ROLES.SERVICEMAN || selectedRole === USER_ROLES.BRAHMAN) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: SERVICEMAN_HOME }],
+          });
+        }
       }
     } catch (error: any) {
       console.error('Login error:', error);
