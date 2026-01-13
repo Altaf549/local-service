@@ -37,7 +37,7 @@ const AppStack = () => {
   return (
     <Stack.Navigator 
       screenOptions={{headerShown: false}}
-      initialRouteName={LOGIN}
+      initialRouteName={MAIN_TABS}
     >
       <Stack.Screen name={LOGIN} component={LoginScreen} />
       <Stack.Screen name={REGISTER} component={RegisterScreen} />
