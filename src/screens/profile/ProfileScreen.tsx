@@ -10,15 +10,20 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
-import { updateUserProfile } from '../../services/api';
+import { updateUserProfile, deleteAccount } from '../../services/api';
 import { setUserData } from '../../redux/slices/userSlice';
+import { setIsUser } from '../../redux/slices/userSlice';
 import { setAuthToken } from '../../network/axiosConfig';
 import { CustomImage } from '../../components/CustomImage/CustomImage';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AppStackParamList, MAIN_TABS } from '../../constant/Routes';
 
 const ProfileScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userData } = useAppSelector((state: RootState) => state.user);
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
   const [editModalVisible, setEditModalVisible] = React.useState(false);
   const [editMode, setEditMode] = React.useState<'profile' | 'email' | 'phone' | 'password'>('profile');
 
@@ -43,6 +48,62 @@ const ProfileScreen: React.FC = () => {
   const handleEditPassword = () => {
     setEditMode('password');
     setEditModalVisible(true);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: confirmDeleteAccount,
+        },
+      ]
+    );
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      const response = await deleteAccount();
+      
+      if (response.success) {
+        // Clear all stored data
+        await AsyncStorage.multiRemove(['user_info', 'user_token']);
+        
+        // Clear Redux state
+        dispatch(setUserData(null as any));
+        dispatch(setIsUser(false));
+        setAuthToken(null);
+        
+        Alert.alert(
+          'Account Deleted',
+          'Your account has been successfully deleted.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Navigate to home screen
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: MAIN_TABS }],
+                });
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Error', response.message || 'Failed to delete account');
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete account';
+      Alert.alert('Error', errorMessage);
+    }
   };
 
   const handleSaveProfile = async (data: any) => {
@@ -231,6 +292,30 @@ const ProfileScreen: React.FC = () => {
             >
               <MaterialIcons 
                 name="edit" 
+                size={moderateScale(16)} 
+                color={theme.colors.background} 
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Delete Account Card */}
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.error, borderWidth: 1 }]}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoContent}>
+              <Text style={[styles.infoLabel, { color: theme.colors.error }]}>
+                Delete Account
+              </Text>
+              <Text style={[styles.infoValue, { color: theme.colors.textSecondary }]}>
+                Permanently delete your account and all data
+              </Text>
+            </View>
+            <TouchableOpacity 
+              style={[styles.editButtonSmall, { backgroundColor: theme.colors.error }]}
+              onPress={handleDeleteAccount}
+            >
+              <MaterialIcons 
+                name="delete" 
                 size={moderateScale(16)} 
                 color={theme.colors.background} 
               />

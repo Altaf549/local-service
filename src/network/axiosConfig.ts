@@ -93,17 +93,17 @@ axios.interceptors.response.use(
     },
     // uncomment and createAsyncThunk error not caught
     error => {
-        Console.log('errorData2', error.response.status)
+        Console.log('errorData2', error.response?.status)
         if (error) {
              Console.log(`\x1b[${31}m%s\x1b[0m`, 'response error', error);
             Console.log(
                 `\x1b[${91}m%s\x1b[0m`,
                 'error msg : ',
                 JSON.stringify(
-                    error.response.data.message || error.response.data.error,
+                    error.response?.data?.message || error.response?.data?.error || error.message,
                 ),
             );
-            if (error.response.status == 401 && error.response.data.type == undefined) {
+            if (error.response?.status == 401 && error.response?.data?.type == undefined) {
                 Console.log('errorData4', error)
                 resetAppData();
             }

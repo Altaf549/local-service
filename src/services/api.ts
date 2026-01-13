@@ -303,3 +303,13 @@ export const updateUserProfile = async (profileData: {
   }
 };
 
+// Delete Account API function
+export const deleteAccount = async () => {
+  try {
+    const response = await axios.delete(API_ENDPOINTS.DELETE_ACCOUNT);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+

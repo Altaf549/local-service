@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   SERVICEMAN_REGISTER: '/serviceman/register',
   BRAHMAN_REGISTER: '/brahman/register',
   USER_PROFILE_UPDATE: '/user/profile/update',
+  DELETE_ACCOUNT: '/user/delete-account',
   TERMS_AND_CONDITIONS: '/terms-and-conditions',
   PRIVACY_POLICY: '/privacy-policy',
   ABOUT_US: '/about-us',
