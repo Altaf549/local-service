@@ -32,7 +32,7 @@ function App() {
           }}
         />
         <SafeAreaView
-          edges={['left', 'right', 'bottom']}
+          edges={['left', 'right']}
           style={{flex: 1, backgroundColor: theme.colors.whiteBackground}}>
           <RootNavigator />
         </SafeAreaView>
