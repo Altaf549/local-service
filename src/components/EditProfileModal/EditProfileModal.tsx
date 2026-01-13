@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Alert, ActivityIndicator, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, Alert, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
@@ -113,99 +113,107 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       presentationStyle="pageSheet"
     >
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <MaterialIcons name="close" size={24} color={theme.colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.title, { color: theme.colors.text }]}>Edit Profile</Text>
-          <View style={styles.placeholder} />
-        </View>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidingView}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.header}>
+            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+              <MaterialIcons name="close" size={24} color={theme.colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.title, { color: theme.colors.text }]}>Edit Profile</Text>
+            <View style={styles.placeholder} />
+          </View>
 
-        <View style={styles.content}>
-          {/* Profile Photo Section */}
-          <View style={styles.photoSection}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Profile Photo</Text>
-            <View style={styles.photoContainer}>
-              {profilePhoto ? (
-                <Image source={{ uri: profilePhoto }} style={styles.photo} />
-              ) : (
-                <View style={[styles.photoPlaceholder, { backgroundColor: theme.colors.primary }]}>
-                  <MaterialIcons name="account-circle" size={60} color={theme.colors.background} />
-                </View>
-              )}
-              <TouchableOpacity
-                style={[styles.photoButton, { backgroundColor: theme.colors.primary }]}
-                onPress={showPhotoOptions}
-              >
-                <MaterialIcons name="camera-alt" size={20} color={theme.colors.background} />
-                <Text style={[styles.photoButtonText, { color: theme.colors.background }]}>
-                  Change Photo
-                </Text>
-              </TouchableOpacity>
+          <View style={styles.content}>
+            {/* Profile Photo Section */}
+            <View style={styles.photoSection}>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Profile Photo</Text>
+              <View style={styles.photoContainer}>
+                {profilePhoto ? (
+                  <Image source={{ uri: profilePhoto }} style={styles.photo} />
+                ) : (
+                  <View style={[styles.photoPlaceholder, { backgroundColor: theme.colors.primary }]}>
+                    <MaterialIcons name="account-circle" size={60} color={theme.colors.background} />
+                  </View>
+                )}
+                <TouchableOpacity
+                  style={[styles.photoButton, { backgroundColor: theme.colors.primary }]}
+                  onPress={showPhotoOptions}
+                >
+                  <MaterialIcons name="camera-alt" size={20} color={theme.colors.background} />
+                  <Text style={[styles.photoButtonText, { color: theme.colors.background }]}>
+                    Change Photo
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Name Section */}
+            <View style={styles.nameSection}>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Name</Text>
+              <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
+                <MaterialIcons name="person" size={20} color={theme.colors.textSecondary} />
+                <TextInput
+                  style={[styles.nameText, { color: theme.colors.text }]}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Enter your name"
+                  placeholderTextColor={theme.colors.textSecondary}
+                  multiline={false}
+                  maxLength={50}
+                />
+              </View>
+            </View>
+
+            {/* Current Password Section */}
+            <View style={styles.nameSection}>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Current Password</Text>
+              <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
+                <MaterialIcons name="lock" size={20} color={theme.colors.textSecondary} />
+                <TextInput
+                  style={[styles.nameText, { color: theme.colors.text }]}
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  placeholder="Enter your current password"
+                  placeholderTextColor={theme.colors.textSecondary}
+                  secureTextEntry={true}
+                  multiline={false}
+                />
+              </View>
+            </View>
+
+            {/* Address Section */}
+            <View style={styles.nameSection}>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Address</Text>
+              <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
+                <MaterialIcons name="location-on" size={20} color={theme.colors.textSecondary} />
+                <TextInput
+                  style={[styles.nameText, { color: theme.colors.text }]}
+                  value={address}
+                  onChangeText={setAddress}
+                  placeholder="Enter your address"
+                  placeholderTextColor={theme.colors.textSecondary}
+                  multiline={true}
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              </View>
             </View>
           </View>
 
-          {/* Name Section */}
-          <View style={styles.nameSection}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Name</Text>
-            <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
-              <MaterialIcons name="person" size={20} color={theme.colors.textSecondary} />
-              <TextInput
-                style={[styles.nameText, { color: theme.colors.text }]}
-                value={name}
-                onChangeText={setName}
-                placeholder="Enter your name"
-                placeholderTextColor={theme.colors.textSecondary}
-                multiline={false}
-                maxLength={50}
-              />
-            </View>
+          <View style={styles.footer}>
+            <Button
+              title={loading ? "Saving..." : "Save Changes"}
+              onPress={handleSave}
+              disabled={loading}
+              fullWidth={true}
+            />
           </View>
-
-          {/* Current Password Section */}
-          <View style={styles.nameSection}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Current Password</Text>
-            <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
-              <MaterialIcons name="lock" size={20} color={theme.colors.textSecondary} />
-              <TextInput
-                style={[styles.nameText, { color: theme.colors.text }]}
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-                placeholder="Enter your current password"
-                placeholderTextColor={theme.colors.textSecondary}
-                secureTextEntry={true}
-                multiline={false}
-              />
-            </View>
-          </View>
-
-          {/* Address Section */}
-          <View style={styles.nameSection}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Address</Text>
-            <View style={[styles.nameInput, { backgroundColor: theme.colors.card }]}>
-              <MaterialIcons name="location-on" size={20} color={theme.colors.textSecondary} />
-              <TextInput
-                style={[styles.nameText, { color: theme.colors.text }]}
-                value={address}
-                onChangeText={setAddress}
-                placeholder="Enter your address"
-                placeholderTextColor={theme.colors.textSecondary}
-                multiline={true}
-                numberOfLines={3}
-                textAlignVertical="top"
-              />
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.footer}>
-          <Button
-            title={loading ? "Saving..." : "Save Changes"}
-            onPress={handleSave}
-            disabled={loading}
-            fullWidth={true}
-          />
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </Modal>
   );
@@ -213,6 +221,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  keyboardAvoidingView: {
     flex: 1,
   },
   header: {
