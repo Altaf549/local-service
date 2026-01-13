@@ -5,20 +5,22 @@ import { useTheme, ThemeMode } from '../../theme/ThemeContext';
 import { Header } from '../../components/Header/Header';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
+import { BASE_URL, MAIN_URL } from '../../network/axiosConfig';
+import { API_ENDPOINTS } from '../../constant/ApiEndpoints';
 
 const SettingsScreen: React.FC = () => {
   const { theme, themeMode, setThemeMode, isDark } = useTheme();
   
   const handlePrivacyPolicy = () => {
-    Linking.openURL('https://example.com/privacy-policy');
+    Linking.openURL(MAIN_URL + API_ENDPOINTS.PRIVACY_POLICY);
   };
 
   const handleTermsConditions = () => {
-    Linking.openURL('https://example.com/terms-conditions');
+    Linking.openURL(MAIN_URL + API_ENDPOINTS.TERMS_AND_CONDITIONS);
   };
 
   const handleAboutUs = () => {
-    Linking.openURL('https://example.com/about-us');
+    Linking.openURL(MAIN_URL + API_ENDPOINTS.ABOUT_US);
   };
 
   const handleThemeToggle = () => {

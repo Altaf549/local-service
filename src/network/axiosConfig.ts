@@ -23,14 +23,14 @@ const LogColors: any = {
     cyanBright: 96,
     whiteBright: 97,
 };
-
-export const DEV_URL = 'http://192.168.1.36:8000/api';
+export const MAIN_URL = 'http://192.168.1.36:8000'
+export const DEV_URL = '/api';
 // export const PRODUCTION_URL = '';
 
 
 
 // @info chnage to prod url before release
-export const BASE_URL = DEV_URL;
+export const BASE_URL = MAIN_URL + DEV_URL;
 
 axios.defaults.baseURL = BASE_URL;
 axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';

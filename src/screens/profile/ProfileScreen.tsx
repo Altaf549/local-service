@@ -61,7 +61,7 @@ const ProfileScreen: React.FC = () => {
             )}
             <View style={styles.editImageOverlay}>
               <TouchableOpacity 
-                style={[styles.editImageButton, { backgroundColor: theme.colors.background }]}
+                style={[styles.editImageButton, { backgroundColor: theme.colors.surface }]}
                 onPress={handleEditProfile}
               >
                 <MaterialIcons 
