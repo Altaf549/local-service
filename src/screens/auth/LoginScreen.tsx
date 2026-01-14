@@ -78,11 +78,14 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
+      console.log('LoginScreen - Attempting login with role:', selectedRole);
       const result = await dispatch(loginUser({
         email,
         password,
         role: selectedRole
       })).unwrap();
+
+      console.log('LoginScreen - Login successful, result:', result);
 
       // Update user state in Redux
       dispatch(setUserData(result));
@@ -132,12 +135,15 @@ const LoginScreen: React.FC = () => {
         }
       } else {
         // Navigate based on user role (default behavior)
+        console.log('LoginScreen - Navigating based on role:', selectedRole);
         if (selectedRole === USER_ROLES.USER) {
+          console.log('LoginScreen - Navigating to MAIN_TABS');
           navigation.reset({
             index: 0,
             routes: [{ name: MAIN_TABS }],
           });
         } else if (selectedRole === USER_ROLES.SERVICEMAN || selectedRole === USER_ROLES.BRAHMAN) {
+          console.log('LoginScreen - Navigating to SERVICEMAN_HOME');
           navigation.reset({
             index: 0,
             routes: [{ name: SERVICEMAN_HOME }],

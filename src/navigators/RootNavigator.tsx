@@ -34,18 +34,28 @@ const RootNavigator = () => {
 
         if (token && userInfo) {
           const parsedUserData = JSON.parse(userInfo);
+          console.log('RootNavigator - User data loaded:', parsedUserData);
+          console.log('RootNavigator - User role:', parsedUserData.role);
           dispatch(setUserData(parsedUserData));
           dispatch(setIsUser(true));
 
           // Navigate based on user role after a short delay to ensure navigation is ready
           setTimeout(() => {
+            console.log('RootNavigator - Checking role for navigation:', parsedUserData.role);
             if (parsedUserData.role === USER_ROLES.USER) {
+              console.log('RootNavigator - Navigating to MAIN_TABS');
               navigationRef.current?.dispatch(
                 StackActions.replace(MAIN_TABS)
               );
             } else if (parsedUserData.role === USER_ROLES.SERVICEMAN || parsedUserData.role === USER_ROLES.BRAHMAN) {
+              console.log('RootNavigator - Navigating to SERVICEMAN_HOME');
               navigationRef.current?.dispatch(
                 StackActions.replace(SERVICEMAN_HOME)
+              );
+            } else {
+              console.log('RootNavigator - Unknown role, defaulting to MAIN_TABS');
+              navigationRef.current?.dispatch(
+                StackActions.replace(MAIN_TABS)
               );
             }
           }, 100);

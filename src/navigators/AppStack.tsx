@@ -13,14 +13,18 @@ import BrahmanDetailsScreen from '../screens/brahman/BrahmanDetailsScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import ServicemanProfileScreen from '../screens/profile/ServicemanProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import BookingScreen from '../screens/booking/BookingScreen';
+import BookingServicemanScreen from '../screens/booking/BookingServicemanScreen';
 import BookingDetailsScreen from '../screens/booking/BookingDetailsScreen';
+import BookingDetailsServicemanScreen from '../screens/booking/BookingDetailsServicemanScreen';
 import { 
   LOGIN,
   REGISTER,
   SERVICEMAN_HOME,
   PROFILE,
+  SERVICEMAN_PROFILE,
   SETTINGS,
   MAIN_TABS,
   PUJA_TYPE, 
@@ -32,7 +36,9 @@ import {
   SERVICEMAN_DETAILS,
   BRAHMAN_DETAILS,
   BOOKING,
-  BOOKING_DETAILS
+  BOOKING_SERVICEMAN,
+  BOOKING_DETAILS,
+  BOOKING_DETAILS_SERVICEMAN
 } from '../constant/Routes';
 
 const Stack = createStackNavigator();
@@ -46,6 +52,7 @@ const AppStack = () => {
       <Stack.Screen name={LOGIN} component={LoginScreen} />
       <Stack.Screen name={REGISTER} component={RegisterScreen} />
       <Stack.Screen name={PROFILE} component={ProfileScreen} />
+      <Stack.Screen name={SERVICEMAN_PROFILE} component={ServicemanProfileScreen} />
       <Stack.Screen name={SETTINGS} component={SettingsScreen} />
       <Stack.Screen name={MAIN_TABS} component={BottomTabNavigator} />
       <Stack.Screen name={SERVICEMAN_HOME} component={ServicemanHomeScreen} />
@@ -58,7 +65,9 @@ const AppStack = () => {
       <Stack.Screen name={SERVICEMAN_DETAILS} component={ServicemanDetailsScreen} />
       <Stack.Screen name={BRAHMAN_DETAILS} component={BrahmanDetailsScreen} />
       <Stack.Screen name={BOOKING} component={BookingScreen} />
+      <Stack.Screen name={BOOKING_SERVICEMAN} component={BookingServicemanScreen} />
       <Stack.Screen name={BOOKING_DETAILS} component={BookingDetailsScreen} />
+      <Stack.Screen name={BOOKING_DETAILS_SERVICEMAN} component={BookingDetailsServicemanScreen} />
     </Stack.Navigator>
   );
 };

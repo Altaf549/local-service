@@ -8,9 +8,12 @@ import BrahmanScreen from '../screens/brahman/BrahmanScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import ServicemanProfileScreen from '../screens/profile/ServicemanProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import BookingScreen from '../screens/booking/BookingScreen';
+import BookingServicemanScreen from '../screens/booking/BookingServicemanScreen';
 import BookingDetailsScreen from '../screens/booking/BookingDetailsScreen';
+import BookingDetailsServicemanScreen from '../screens/booking/BookingDetailsServicemanScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -23,6 +26,7 @@ export type AppStackParamList = {
   Register: undefined;
   ServicemanHome: undefined;
   Profile: undefined;
+  ServicemanProfile: undefined;
   Settings: undefined;
   ServiceCategory: undefined;
   PujaType: undefined;
@@ -33,7 +37,9 @@ export type AppStackParamList = {
   ServicemanDetails: { id: number };
   BrahmanDetails: { id: number };
   Booking: undefined;
+  BookingServiceman: undefined;
   BookingDetails: { bookingId: number };
+  BookingDetailsServiceman: { bookingId: number };
 };
 
 export type AuthStackParamList = {
@@ -71,9 +77,12 @@ export const LOGIN = 'Login';
 export const REGISTER = 'Register';
 export const MAIN_TABS = 'MainTabs';
 export const PROFILE = 'Profile';
+export const SERVICEMAN_PROFILE = 'ServicemanProfile';
 export const SETTINGS = 'Settings';
 export const BOOKING = 'Booking';
+export const BOOKING_SERVICEMAN = 'BookingServiceman';
 export const BOOKING_DETAILS = 'BookingDetails';
+export const BOOKING_DETAILS_SERVICEMAN = 'BookingDetailsServiceman';
 
 // User role constants
 export const USER_ROLES = {

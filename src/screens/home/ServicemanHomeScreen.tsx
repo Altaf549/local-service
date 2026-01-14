@@ -44,8 +44,7 @@ const ServicemanHomeScreen: React.FC = () => {
           This screen is under construction
         </Text>
       </View>
-      
-      <ProfileMenu 
+      <ProfileMenu
         visible={profileMenuVisible}
         onClose={handleProfileMenuClose}
       />

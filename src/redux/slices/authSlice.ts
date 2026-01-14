@@ -146,6 +146,9 @@ export const loginUser = createAsyncThunk(
           token: response.data.token,
         };
 
+        console.log('AuthSlice - Login successful with role:', credentials.role);
+        console.log('AuthSlice - User data being stored:', userData);
+
         // Store user data and token in AsyncStorage
         await AsyncStorage.setItem('user_token', response.data.token);
         await AsyncStorage.setItem('user_info', JSON.stringify(userData));

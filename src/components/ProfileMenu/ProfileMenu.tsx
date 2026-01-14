@@ -6,7 +6,7 @@ import {useAppSelector, useAppDispatch} from '../../redux/hooks';
 import {RootState} from '../../redux/store';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, LOGIN, MAIN_TABS, PROFILE, SETTINGS, BOOKING} from '../../constant/Routes';
+import {AppStackParamList, LOGIN, MAIN_TABS, PROFILE, SETTINGS, BOOKING, SERVICEMAN_PROFILE, BOOKING_SERVICEMAN, USER_ROLES} from '../../constant/Routes';
 import {logoutUser} from '../../redux/slices/authSlice';
 import {clearUserData} from '../../redux/slices/userSlice';
 
@@ -56,13 +56,25 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
   const handleProfile = () => {
     console.log('Profile pressed');
     onClose();
-    navigation.navigate(PROFILE);
+    
+    // Navigate to different profile screens based on user role
+    if (userData?.role === USER_ROLES.SERVICEMAN || userData?.role === USER_ROLES.BRAHMAN) {
+      navigation.navigate(SERVICEMAN_PROFILE);
+    } else {
+      navigation.navigate(PROFILE);
+    }
   };
 
   const handleBooks = () => {
     console.log('Booking pressed');
     onClose();
-    navigation.navigate(BOOKING);
+    
+    // Navigate to different booking screens based on user role
+    if (userData?.role === USER_ROLES.SERVICEMAN || userData?.role === USER_ROLES.BRAHMAN) {
+      navigation.navigate(BOOKING_SERVICEMAN);
+    } else {
+      navigation.navigate(BOOKING);
+    }
   };
 
   const handleSettings = () => {
