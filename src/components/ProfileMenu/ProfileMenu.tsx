@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, ScrollView} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert} from 'react-native';
 import {useTheme} from '../../theme/ThemeContext';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import {useAppSelector, useAppDispatch} from '../../redux/hooks';
@@ -57,9 +57,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
     console.log('Profile pressed');
     onClose();
     
-    // Navigate to different profile screens based on user role
+    // Check account status for serviceman and brahman
     if (userData?.role === USER_ROLES.SERVICEMAN || userData?.role === USER_ROLES.BRAHMAN) {
-      navigation.navigate(SERVICEMAN_PROFILE);
+      if (userData?.status === 'active') {
+        navigation.navigate(SERVICEMAN_PROFILE);
+      } else {
+        Alert.alert('Account Not Active', 'Your account is not active. Please contact support to activate your account.');
+      }
     } else {
       navigation.navigate(PROFILE);
     }
@@ -69,9 +73,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
     console.log('Booking pressed');
     onClose();
     
-    // Navigate to different booking screens based on user role
+    // Check account status for serviceman and brahman
     if (userData?.role === USER_ROLES.SERVICEMAN || userData?.role === USER_ROLES.BRAHMAN) {
-      navigation.navigate(BOOKING_SERVICEMAN);
+      if (userData?.status === 'active') {
+        navigation.navigate(BOOKING_SERVICEMAN);
+      } else {
+        Alert.alert('Account Not Active', 'Your account is not active. Please contact support to activate your account.');
+      }
     } else {
       navigation.navigate(BOOKING);
     }

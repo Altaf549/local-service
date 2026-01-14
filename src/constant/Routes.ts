@@ -14,6 +14,9 @@ import BookingScreen from '../screens/booking/BookingScreen';
 import BookingServicemanScreen from '../screens/booking/BookingServicemanScreen';
 import BookingDetailsScreen from '../screens/booking/BookingDetailsScreen';
 import BookingDetailsServicemanScreen from '../screens/booking/BookingDetailsServicemanScreen';
+import ServicemanServicesScreen from '../screens/services/ServicemanServicesScreen';
+import ServicemanExperienceScreen from '../screens/experience/ServicemanExperienceScreen';
+import ServicemanAchievementScreen from '../screens/achievement/ServicemanAchievementScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -38,6 +41,9 @@ export type AppStackParamList = {
   BrahmanDetails: { id: number };
   Booking: undefined;
   BookingServiceman: undefined;
+  ServicemanServices: undefined;
+  ServicemanExperience: undefined;
+  ServicemanAchievement: undefined;
   BookingDetails: { bookingId: number };
   BookingDetailsServiceman: { bookingId: number };
 };
@@ -81,6 +87,9 @@ export const SERVICEMAN_PROFILE = 'ServicemanProfile';
 export const SETTINGS = 'Settings';
 export const BOOKING = 'Booking';
 export const BOOKING_SERVICEMAN = 'BookingServiceman';
+export const SERVICEMAN_SERVICES = 'ServicemanServices';
+export const SERVICEMAN_EXPERIENCE = 'ServicemanExperience';
+export const SERVICEMAN_ACHIEVEMENT = 'ServicemanAchievement';
 export const BOOKING_DETAILS = 'BookingDetails';
 export const BOOKING_DETAILS_SERVICEMAN = 'BookingDetailsServiceman';
 

@@ -19,6 +19,9 @@ import BookingScreen from '../screens/booking/BookingScreen';
 import BookingServicemanScreen from '../screens/booking/BookingServicemanScreen';
 import BookingDetailsScreen from '../screens/booking/BookingDetailsScreen';
 import BookingDetailsServicemanScreen from '../screens/booking/BookingDetailsServicemanScreen';
+import ServicemanServicesScreen from '../screens/services/ServicemanServicesScreen';
+import ServicemanExperienceScreen from '../screens/experience/ServicemanExperienceScreen';
+import ServicemanAchievementScreen from '../screens/achievement/ServicemanAchievementScreen';
 import { 
   LOGIN,
   REGISTER,
@@ -37,6 +40,9 @@ import {
   BRAHMAN_DETAILS,
   BOOKING,
   BOOKING_SERVICEMAN,
+  SERVICEMAN_SERVICES,
+  SERVICEMAN_EXPERIENCE,
+  SERVICEMAN_ACHIEVEMENT,
   BOOKING_DETAILS,
   BOOKING_DETAILS_SERVICEMAN
 } from '../constant/Routes';
@@ -66,6 +72,9 @@ const AppStack = () => {
       <Stack.Screen name={BRAHMAN_DETAILS} component={BrahmanDetailsScreen} />
       <Stack.Screen name={BOOKING} component={BookingScreen} />
       <Stack.Screen name={BOOKING_SERVICEMAN} component={BookingServicemanScreen} />
+      <Stack.Screen name={SERVICEMAN_SERVICES} component={ServicemanServicesScreen} />
+      <Stack.Screen name={SERVICEMAN_EXPERIENCE} component={ServicemanExperienceScreen} />
+      <Stack.Screen name={SERVICEMAN_ACHIEVEMENT} component={ServicemanAchievementScreen} />
       <Stack.Screen name={BOOKING_DETAILS} component={BookingDetailsScreen} />
       <Stack.Screen name={BOOKING_DETAILS_SERVICEMAN} component={BookingDetailsServicemanScreen} />
     </Stack.Navigator>

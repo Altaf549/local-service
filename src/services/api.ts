@@ -387,6 +387,92 @@ export const updateBooking = async (id: number, bookingData: {
   }
 };
 
+// Serviceman Profile Update API function
+export const updateServicemanProfile = async (profileData: {
+  government_id: string;
+  id_proof_image?: ImagePickerResult;
+  address: string;
+  profile_photo?: ImagePickerResult;
+}) => {
+  try {
+    const formData = new FormData();
+    
+    // Add required fields
+    formData.append('government_id', profileData.government_id);
+    formData.append('address', profileData.address);
+    
+    // Add optional files
+    if (profileData.id_proof_image) {
+      formData.append('id_proof_image', {
+        uri: profileData.id_proof_image.uri,
+        type: profileData.id_proof_image.type || 'image/jpeg',
+        name: profileData.id_proof_image.fileName || 'id_proof_image.jpg',
+      } as any);
+    }
+    
+    if (profileData.profile_photo) {
+      formData.append('profile_photo', {
+        uri: profileData.profile_photo.uri,
+        type: profileData.profile_photo.type || 'image/jpeg',
+        name: profileData.profile_photo.fileName || 'profile_photo.jpg',
+      } as any);
+    }
+    
+    const response = await axios.post(API_ENDPOINTS.SERVICEMAN_PROFILE_UPDATE, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Brahman Profile Update API function
+export const updateBrahmanProfile = async (profileData: {
+  government_id: string;
+  id_proof_image?: ImagePickerResult;
+  address: string;
+  profile_photo?: ImagePickerResult;
+}) => {
+  try {
+    const formData = new FormData();
+    
+    // Add required fields
+    formData.append('government_id', profileData.government_id);
+    formData.append('address', profileData.address);
+    
+    // Add optional files
+    if (profileData.id_proof_image) {
+      formData.append('id_proof_image', {
+        uri: profileData.id_proof_image.uri,
+        type: profileData.id_proof_image.type || 'image/jpeg',
+        name: profileData.id_proof_image.fileName || 'id_proof_image.jpg',
+      } as any);
+    }
+    
+    if (profileData.profile_photo) {
+      formData.append('profile_photo', {
+        uri: profileData.profile_photo.uri,
+        type: profileData.profile_photo.type || 'image/jpeg',
+        name: profileData.profile_photo.fileName || 'profile_photo.jpg',
+      } as any);
+    }
+    
+    const response = await axios.post(API_ENDPOINTS.BRAHMAN_PROFILE_UPDATE, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const cancelBooking = async (id: number, cancellationReason?: string) => {
   try {
     const response = await axios.put(`${API_ENDPOINTS.BOOKINGS}/cancel/${id}`, {
