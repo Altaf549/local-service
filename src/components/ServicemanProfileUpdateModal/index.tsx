@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +20,7 @@ interface ServicemanProfileUpdateModalProps {
   currentProfilePhoto?: string | null;
   currentIdProofImage?: string | null;
   userType: 'serviceman' | 'brahman';
+  existingData?: any;
 }
 
 const ServicemanProfileUpdateModal: React.FC<ServicemanProfileUpdateModalProps> = ({
@@ -30,14 +31,30 @@ const ServicemanProfileUpdateModal: React.FC<ServicemanProfileUpdateModalProps> 
   currentAddress = '',
   currentProfilePhoto = null,
   currentIdProofImage = null,
-  userType
+  userType,
+  existingData
 }) => {
   const { theme } = useTheme();
-  const [governmentId, setGovernmentId] = useState(currentGovernmentId);
-  const [address, setAddress] = useState(currentAddress);
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(currentProfilePhoto);
-  const [idProofImage, setIdProofImage] = useState<string | null>(currentIdProofImage);
+  const [governmentId, setGovernmentId] = useState(existingData?.government_id || currentGovernmentId);
+  const [address, setAddress] = useState(existingData?.address || currentAddress);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(existingData?.profile_photo || currentProfilePhoto);
+  const [idProofImage, setIdProofImage] = useState<string | null>(existingData?.id_proof_image || currentIdProofImage);
   const [loading, setLoading] = useState(false);
+
+  // Update form fields when existingData changes
+  useEffect(() => {
+    if (existingData) {
+      setGovernmentId(existingData.government_id || '');
+      setAddress(existingData.address || '');
+      setProfilePhoto(existingData.profile_photo || null);
+      setIdProofImage(existingData.id_proof_image || null);
+    } else {
+      setGovernmentId(currentGovernmentId);
+      setAddress(currentAddress);
+      setProfilePhoto(currentProfilePhoto);
+      setIdProofImage(currentIdProofImage);
+    }
+  }, [existingData, currentGovernmentId, currentAddress, currentProfilePhoto, currentIdProofImage]);
 
   const validationRules = {
     governmentId: {

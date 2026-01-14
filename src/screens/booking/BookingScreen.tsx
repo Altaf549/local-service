@@ -4,54 +4,39 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { Header, BookingCard } from '../../components';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { useAppSelector } from '../../redux/hooks';
+import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
-import { getUserBookings } from '../../services/api';
+import { fetchUserBookings } from '../../redux/slices/bookingSlice';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../constant/Routes';
-
-interface Booking {
-  id: number;
-  booking_type: 'service' | 'puja';
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  booking_date: string;
-  booking_time: string;
-  total_amount: string;
-  user: any;
-  service?: any;
-  puja?: any;
-  serviceman?: any;
-  brahman?: any;
-}
+import { Booking } from '../../redux/slices/bookingSlice';
 
 type BookingScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Booking'>;
 
 const BookingScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userData } = useAppSelector((state: RootState) => state.user);
+  const { bookings, loading, error } = useAppSelector((state: RootState) => state.bookings);
+  const dispatch = useAppDispatch();
   const navigation = useNavigation<BookingScreenNavigationProp>();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchBookings = async () => {
     try {
-      const response = await getUserBookings();
-      setBookings(response.bookings || []);
+      await dispatch(fetchUserBookings()).unwrap();
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch bookings';
+      const errorMessage = error || 'Failed to fetch bookings';
       Alert.alert('Error', errorMessage);
     } finally {
-      setLoading(false);
       setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    dispatch(fetchUserBookings());
+  }, [dispatch]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -67,6 +52,8 @@ const BookingScreen: React.FC = () => {
       case 'completed':
         return theme.colors.info || '#2196F3';
       case 'cancelled':
+        return theme.colors.error || '#F44336';
+      case 'rejected':
         return theme.colors.error || '#F44336';
       default:
         return theme.colors.textSecondary;

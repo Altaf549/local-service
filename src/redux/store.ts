@@ -15,6 +15,9 @@ import pujaDetailsReducer from './slices/pujaDetailsSlice';
 import servicemanDetailsReducer from './slices/servicemanDetailsSlice';
 import brahmanDetailsReducer from './slices/brahmanDetailsSlice';
 import bookingReducer from './slices/bookingSlice';
+import servicemanProfileReducer from './slices/servicemanProfileSlice';
+import brahmanProfileReducer from './slices/brahmanProfileSlice';
+import deleteAccountReducer from './slices/deleteAccountSlice';
 
 export const store = configureStore({
   reducer: {
@@ -34,6 +37,9 @@ export const store = configureStore({
     servicemanDetails: servicemanDetailsReducer,
     brahmanDetails: brahmanDetailsReducer,
     bookings: bookingReducer,
+    servicemanProfile: servicemanProfileReducer,
+    brahmanProfile: brahmanProfileReducer,
+    deleteAccount: deleteAccountReducer,
   },
 });
 

@@ -7,11 +7,11 @@ import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 interface Booking {
   id: number;
   booking_type: 'service' | 'puja';
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'rejected';
   booking_date: string;
   booking_time: string;
   total_amount: string;
-  user: any;
+  user?: any;
   service?: any;
   puja?: any;
   serviceman?: any;

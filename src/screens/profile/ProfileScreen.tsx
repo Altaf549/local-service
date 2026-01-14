@@ -10,9 +10,10 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
-import { updateUserProfile, deleteAccount } from '../../services/api';
-import { setUserData } from '../../redux/slices/userSlice';
+import { deleteUserAccount } from '../../redux/slices/deleteAccountSlice';
+import { setUserData, updateUserProfileThunk, clearUpdateProfileError } from '../../redux/slices/userSlice';
 import { setIsUser } from '../../redux/slices/userSlice';
+import { logoutUser } from '../../redux/slices/authSlice';
 import { setAuthToken } from '../../network/axiosConfig';
 import { CustomImage } from '../../components/CustomImage/CustomImage';
 import { useNavigation } from '@react-navigation/native';
@@ -21,7 +22,8 @@ import { AppStackParamList, MAIN_TABS } from '../../constant/Routes';
 
 const ProfileScreen: React.FC = () => {
   const { theme } = useTheme();
-  const { userData } = useAppSelector((state: RootState) => state.user);
+  const { userData, updateProfileLoading, updateProfileError } = useAppSelector((state: RootState) => state.user);
+  const deleteAccountState = useAppSelector((state: RootState) => state.deleteAccount);
   const dispatch = useAppDispatch();
   const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
   const [editModalVisible, setEditModalVisible] = React.useState(false);
@@ -70,108 +72,94 @@ const ProfileScreen: React.FC = () => {
 
   const confirmDeleteAccount = async () => {
     try {
-      const response = await deleteAccount();
+      await dispatch(deleteUserAccount()).unwrap();
       
-      if (response.success) {
-        // Clear all stored data
-        await AsyncStorage.multiRemove(['user_info', 'user_token']);
-        
-        // Clear Redux state
-        dispatch(setUserData(null as any));
-        dispatch(setIsUser(false));
-        setAuthToken(null);
-        
-        Alert.alert(
-          'Account Deleted',
-          'Your account has been successfully deleted.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Navigate to home screen
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: MAIN_TABS }],
-                });
-              },
+      // Clear all stored data
+      await AsyncStorage.multiRemove(['user_info', 'user_token']);
+      
+      // Clear Redux state
+      dispatch(setUserData(null as any));
+      dispatch(setIsUser(false));
+      dispatch(logoutUser());
+      setAuthToken(null);
+      
+      Alert.alert(
+        'Account Deleted',
+        'Your account has been successfully deleted.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: MAIN_TABS }],
+              });
             },
-          ]
-        );
-      } else {
-        Alert.alert('Error', response.message || 'Failed to delete account');
-      }
+          },
+        ]
+      );
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete account';
-      Alert.alert('Error', errorMessage);
+      console.error('Delete account error:', error);
+      Alert.alert(
+        'Error',
+        error || 'Failed to delete account. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
   const handleSaveProfile = async (data: any) => {
-  try {
-    const updateData: any = {
-      current_password: data.currentPassword,
-    };
+    try {
+      const updateData: any = {
+        current_password: data.currentPassword,
+      };
 
-    if (data.editMode === 'profile') {
-      updateData.name = data.name;
+      if (data.editMode === 'profile') {
+        updateData.name = data.name;
+        
+        if (data.address && data.address.trim()) {
+          updateData.address = data.address.trim();
+        }
+
+        const currentPhoto = userData?.profile_photo_url || userData?.profile_photo;
+        if (data.profilePhoto && data.profilePhoto !== currentPhoto) {
+          updateData.profile_photo = {
+            uri: data.profilePhoto,
+            fileName: data.profilePhoto.split('/').pop() || 'profile_photo.jpg',
+            type: 'image/jpeg',
+          };
+        }
+      } else if (data.editMode === 'email') {
+        updateData.email = data.email;
+      } else if (data.editMode === 'phone') {
+        updateData.mobile_number = data.phone;
+      } else if (data.editMode === 'password') {
+        updateData.new_password = data.newPassword;
+      }
+
+      await dispatch(updateUserProfileThunk(updateData)).unwrap();
       
-      if (data.address && data.address.trim()) {
-        updateData.address = data.address.trim();
-      }
-
-      const currentPhoto = userData?.profile_photo_url || userData?.profile_photo;
-      if (data.profilePhoto && data.profilePhoto !== currentPhoto) {
-        updateData.profile_photo = {
-          uri: data.profilePhoto,
-          fileName: data.profilePhoto.split('/').pop() || 'profile_photo.jpg',
-          type: 'image/jpeg',
-        };
-      }
-    } else if (data.editMode === 'email') {
-      updateData.email = data.email;
-    } else if (data.editMode === 'phone') {
-      updateData.mobile_number = data.phone;
-    } else if (data.editMode === 'password') {
-      updateData.new_password = data.newPassword;
-    }
-
-    const response = await updateUserProfile(updateData);
-    
-    if (response.success) {
+      // Update AsyncStorage with the new user data
       const updatedUserData = {
         ...userData,
-        ...response.data,
+        ...updateData,
       };
-      
-      dispatch(setUserData(updatedUserData));
       await AsyncStorage.setItem('user_info', JSON.stringify(updatedUserData));
-      
-      if (response.data.token) {
-        await AsyncStorage.setItem('user_token', response.data.token);
-        setAuthToken(response.data.token);
-      }
       
       Alert.alert('Success', 'Profile updated successfully');
       // Close modal only after successful save
       console.log('Profile update success - closing modal. Current editModalVisible:', editModalVisible);
       setEditModalVisible(false);
-    } else {
-      Alert.alert('Error', response.message || 'Failed to update profile');
-      // Keep modal open on error so user can retry
-    }
-  } catch (error: any) {
+    } catch (error: any) {
       console.log('Profile update error details:', {
         error,
-        errorResponse: error.response,
-        errorMessage: error.response?.data?.message || error.message,
         editModalVisibleBefore: editModalVisible
       });
       
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
-      Alert.alert('Error', errorMessage);
+      Alert.alert('Error', error || 'Failed to update profile');
       // Don't throw error to prevent multiple alerts
     }
-};
+  };
 
   const handleCloseModal = () => {
     console.log('handleCloseModal called - current editModalVisible:', editModalVisible);
@@ -370,6 +358,7 @@ const ProfileScreen: React.FC = () => {
         currentPhone={userData?.mobile_number || ''}
         editMode={editMode}
         onSave={handleSaveProfile}
+        loading={updateProfileLoading}
       />
     </SafeAreaView>
   );

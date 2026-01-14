@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { createServiceBooking, createPujaBooking, getUserBookings, getBookingDetails } from '../../services/api';
+import { createServiceBooking, createPujaBooking, getUserBookings, getBookingDetails, updateBooking, cancelBooking } from '../../services/api';
 
 interface Booking {
   id: number;
@@ -34,6 +34,10 @@ interface BookingState {
   error: string | null;
   createBookingLoading: boolean;
   createBookingSuccess: boolean;
+  updateLoading: boolean;
+  updateError: string | null;
+  cancelLoading: boolean;
+  cancelError: string | null;
 }
 
 const initialState: BookingState = {
@@ -43,6 +47,10 @@ const initialState: BookingState = {
   error: null,
   createBookingLoading: false,
   createBookingSuccess: false,
+  updateLoading: false,
+  updateError: null,
+  cancelLoading: false,
+  cancelError: null,
 };
 
 // Async thunk for creating service booking
@@ -175,6 +183,46 @@ export const fetchBookingDetails = createAsyncThunk(
   }
 );
 
+// Async thunk for updating booking
+export const updateBookingThunk = createAsyncThunk(
+  'bookings/updateBooking',
+  async ({ id, bookingData }: { id: number; bookingData: {
+    booking_date?: string;
+    booking_time?: string;
+    address?: string;
+    mobile_number?: string;
+    notes?: string;
+  }}, { rejectWithValue }) => {
+    try {
+      const response = await updateBooking(id, bookingData);
+      if (response.success) {
+        return response.data.booking;
+      } else {
+        return rejectWithValue(response.message || 'Failed to update booking');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to update booking');
+    }
+  }
+);
+
+// Async thunk for cancelling booking
+export const cancelBookingThunk = createAsyncThunk(
+  'bookings/cancelBooking',
+  async ({ id, cancellationReason }: { id: number; cancellationReason?: string }, { rejectWithValue }) => {
+    try {
+      const response = await cancelBooking(id, cancellationReason);
+      if (response.success) {
+        return response.data.booking;
+      } else {
+        return rejectWithValue(response.message || 'Failed to cancel booking');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to cancel booking');
+    }
+  }
+);
+
 const bookingSlice = createSlice({
   name: 'bookings',
   initialState,
@@ -183,6 +231,8 @@ const bookingSlice = createSlice({
       state.createBookingLoading = false;
       state.createBookingSuccess = false;
       state.error = null;
+      state.updateError = null;
+      state.cancelError = null;
     },
     clearCreateBookingSuccess: (state) => {
       state.createBookingSuccess = false;
@@ -255,6 +305,52 @@ const bookingSlice = createSlice({
       .addCase(fetchBookingDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      
+      // Update booking
+      .addCase(updateBookingThunk.pending, (state) => {
+        state.updateLoading = true;
+        state.updateError = null;
+      })
+      .addCase(updateBookingThunk.fulfilled, (state, action) => {
+        state.updateLoading = false;
+        state.updateError = null;
+        // Update booking in the list
+        const index = state.bookings.findIndex(booking => booking.id === action.payload.id);
+        if (index !== -1) {
+          state.bookings[index] = action.payload;
+        }
+        // Update current booking if it's the same
+        if (state.currentBooking?.id === action.payload.id) {
+          state.currentBooking = action.payload;
+        }
+      })
+      .addCase(updateBookingThunk.rejected, (state, action) => {
+        state.updateLoading = false;
+        state.updateError = action.payload as string;
+      })
+      
+      // Cancel booking
+      .addCase(cancelBookingThunk.pending, (state) => {
+        state.cancelLoading = true;
+        state.cancelError = null;
+      })
+      .addCase(cancelBookingThunk.fulfilled, (state, action) => {
+        state.cancelLoading = false;
+        state.cancelError = null;
+        // Update booking in the list
+        const index = state.bookings.findIndex(booking => booking.id === action.payload.id);
+        if (index !== -1) {
+          state.bookings[index] = action.payload;
+        }
+        // Update current booking if it's the same
+        if (state.currentBooking?.id === action.payload.id) {
+          state.currentBooking = action.payload;
+        }
+      })
+      .addCase(cancelBookingThunk.rejected, (state, action) => {
+        state.cancelLoading = false;
+        state.cancelError = action.payload as string;
       });
   },
 });

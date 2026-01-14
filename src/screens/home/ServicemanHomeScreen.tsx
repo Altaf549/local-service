@@ -7,17 +7,22 @@ import { ProfileMenu } from '../../components/ProfileMenu/ProfileMenu';
 import ProfileUpdateCard from '../../components/ProfileUpdateCard/ProfileUpdateCard';
 import ServicemanProfileUpdateModal from '../../components/ServicemanProfileUpdateModal';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { updateServicemanProfile, updateBrahmanProfile } from '../../services/api';
-import { useAppSelector } from '../../redux/hooks';
+import { updateServicemanProfile, updateBrahmanProfile, getServicemanProfileData, getBrahmanProfileData } from '../../services/api';
+import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
 import { USER_ROLES, SERVICEMAN_SERVICES, SERVICEMAN_EXPERIENCE, SERVICEMAN_ACHIEVEMENT } from '../../constant/Routes';
 import { useNavigation } from '@react-navigation/native';
+import { fetchServicemanProfileData } from '../../redux/slices/servicemanProfileSlice';
+import { fetchBrahmanProfileData } from '../../redux/slices/brahmanProfileSlice';
 
 const ServicemanHomeScreen: React.FC = () => {
   const { theme } = useTheme();
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
   const [profileUpdateModalVisible, setProfileUpdateModalVisible] = useState(false);
   const { userData } = useAppSelector((state: RootState) => state.user);
+  const servicemanProfile = useAppSelector((state: RootState) => state.servicemanProfile);
+  const brahmanProfile = useAppSelector((state: RootState) => state.brahmanProfile);
+  const dispatch = useAppDispatch();
   const navigation = useNavigation();
 
   const handleProfilePress = () => {
@@ -28,8 +33,21 @@ const ServicemanHomeScreen: React.FC = () => {
     setProfileMenuVisible(false);
   };
 
-  const handleProfileUpdatePress = () => {
-    setProfileUpdateModalVisible(true);
+  const handleProfileUpdatePress = async () => {
+    try {
+      // Fetch existing profile data based on user role
+      if (userData?.role === USER_ROLES.SERVICEMAN) {
+        await dispatch(fetchServicemanProfileData()).unwrap();
+      } else if (userData?.role === USER_ROLES.BRAHMAN) {
+        await dispatch(fetchBrahmanProfileData()).unwrap();
+      }
+      
+      setProfileUpdateModalVisible(true);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+      // If there's an error fetching data, still open the modal with empty state
+      setProfileUpdateModalVisible(true);
+    }
   };
 
   const handleProfileUpdateModalClose = () => {
@@ -143,6 +161,7 @@ const ServicemanHomeScreen: React.FC = () => {
         onClose={handleProfileUpdateModalClose}
         onSave={handleProfileUpdate}
         userType={userData?.role === USER_ROLES.SERVICEMAN ? 'serviceman' : 'brahman'}
+        existingData={userData?.role === USER_ROLES.SERVICEMAN ? servicemanProfile.profileData : brahmanProfile.profileData}
       />
       <ProfileMenu
         visible={profileMenuVisible}

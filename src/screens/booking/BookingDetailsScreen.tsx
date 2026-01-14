@@ -5,10 +5,10 @@ import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../../components/Header/Header';
 import { Button } from '../../components/Button/Button';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { useAppSelector } from '../../redux/hooks';
+import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
+import { fetchBookingDetails, updateBookingThunk, cancelBookingThunk } from '../../redux/slices/bookingSlice';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
-import { getBookingDetails, updateBooking, cancelBooking } from '../../services/api';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../constant/Routes';
@@ -26,7 +26,7 @@ interface BookingDetails {
   address: string;
   mobile_number: string;
   notes?: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'rejected';
   payment_status: 'pending' | 'paid' | 'refunded';
   payment_method: 'cod' | 'online';
   total_amount: string;
@@ -49,9 +49,8 @@ const BookingDetailsScreen: React.FC = () => {
   const route = useRoute<BookingDetailsRouteProp>();
   const { bookingId } = route.params;
 
-  const [booking, setBooking] = useState<BookingDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
+  const dispatch = useAppDispatch();
+  const { currentBooking, loading, updateLoading, cancelLoading } = useAppSelector((state: RootState) => state.bookings);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     booking_date: '',
@@ -60,32 +59,25 @@ const BookingDetailsScreen: React.FC = () => {
     mobile_number: '',
     notes: '',
   });
+  useEffect(() => {
+    if (currentBooking) {
+      setEditForm({
+        booking_date: currentBooking.booking_date.split('T')[0],
+        booking_time: currentBooking.booking_time,
+        address: currentBooking.address,
+        mobile_number: currentBooking.mobile_number,
+        notes: currentBooking.notes || '',
+      });
+    }
+  }, [currentBooking]);
   const [cancellationReason, setCancellationReason] = useState('');
   const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const fetchBookingDetails = async () => {
-    try {
-      const response = await getBookingDetails(bookingId);
-      setBooking(response.booking);
-      setEditForm({
-        booking_date: response.booking.booking_date.split('T')[0],
-        booking_time: response.booking.booking_time,
-        address: response.booking.address,
-        mobile_number: response.booking.mobile_number,
-        notes: response.booking.notes || '',
-      });
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch booking details';
-      Alert.alert('Error', errorMessage);
-      navigation.goBack();
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchBookingDetails();
-  }, [bookingId]);
+    if (bookingId) {
+      dispatch(fetchBookingDetails(bookingId));
+    }
+  }, [bookingId, dispatch]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -127,53 +119,35 @@ const BookingDetailsScreen: React.FC = () => {
   };
 
   const handleUpdateBooking = async () => {
-    if (!booking) return;
+    if (!currentBooking) return;
 
-    setUpdating(true);
     try {
-      const response = await updateBooking(booking.id, editForm);
-      if (response.success) {
-        Alert.alert('Success', 'Booking updated successfully');
-        setIsEditing(false);
-        fetchBookingDetails();
-      } else {
-        Alert.alert('Error', response.message || 'Failed to update booking');
-      }
+      await dispatch(updateBookingThunk({ id: currentBooking.id, bookingData: editForm })).unwrap();
+      Alert.alert('Success', 'Booking updated successfully');
+      setIsEditing(false);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update booking';
-      Alert.alert('Error', errorMessage);
-    } finally {
-      setUpdating(false);
+      Alert.alert('Error', error || 'Failed to update booking');
     }
   };
 
   const handleCancelBooking = async () => {
-    if (!booking) return;
+    if (!currentBooking) return;
 
-    setUpdating(true);
     try {
-      const response = await cancelBooking(booking.id, cancellationReason);
-      if (response.success) {
-        Alert.alert('Success', 'Booking cancelled successfully');
-        setShowCancelModal(false);
-        setCancellationReason('');
-        fetchBookingDetails();
-      } else {
-        Alert.alert('Error', response.message || 'Failed to cancel booking');
-      }
+      await dispatch(cancelBookingThunk({ id: currentBooking.id, cancellationReason })).unwrap();
+      Alert.alert('Success', 'Booking cancelled successfully');
+      setShowCancelModal(false);
+      setCancellationReason('');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to cancel booking';
-      Alert.alert('Error', errorMessage);
-    } finally {
-      setUpdating(false);
+      Alert.alert('Error', error || 'Failed to cancel booking');
     }
   };
 
   const handleContactProvider = () => {
-    if (!booking) return;
+    if (!currentBooking) return;
 
-    const phoneNumber = booking.serviceman?.mobile_number || booking.brahman?.mobile_number;
-    const providerName = booking.serviceman?.name || booking.brahman?.name || 'Provider';
+    const phoneNumber = currentBooking.serviceman?.mobile_number || currentBooking.brahman?.mobile_number;
+    const providerName = currentBooking.serviceman?.name || currentBooking.brahman?.name || 'Provider';
 
     if (phoneNumber) {
       Alert.alert(
@@ -199,9 +173,9 @@ const BookingDetailsScreen: React.FC = () => {
     }
   };
 
-  const canEdit = booking?.status === 'pending';
-  const canCancel = booking?.status === 'pending' || booking?.status === 'confirmed';
-  const canContact = booking?.status === 'confirmed' || booking?.status === 'completed';
+  const canEdit = currentBooking?.status === 'pending';
+  const canCancel = currentBooking?.status === 'pending' || currentBooking?.status === 'confirmed';
+  const canContact = currentBooking?.status === 'confirmed' || currentBooking?.status === 'completed';
 
   if (loading) {
     return (
@@ -216,7 +190,7 @@ const BookingDetailsScreen: React.FC = () => {
     );
   }
 
-  if (!booking) {
+  if (!currentBooking) {
     return (
       <SafeAreaView edges={['left', 'right']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <Header title="Booking Details" />
@@ -229,8 +203,8 @@ const BookingDetailsScreen: React.FC = () => {
     );
   }
 
-  const serviceName = booking.service?.service_name || booking.puja?.puja_name || 'Unknown Service';
-  const providerName = booking.serviceman?.name || booking.brahman?.name || 'Unknown Provider';
+  const serviceName = currentBooking.service?.service_name || currentBooking.puja?.puja_name || 'Unknown Service';
+  const providerName = currentBooking.serviceman?.name || currentBooking.brahman?.name || 'Unknown Provider';
 
   return (
     <SafeAreaView edges={['left', 'right']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -243,9 +217,9 @@ const BookingDetailsScreen: React.FC = () => {
             <Text style={[styles.serviceName, { color: theme.colors.text }]}>
               {serviceName}
             </Text>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) }]}>
+            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(currentBooking.status) }]}>
               <Text style={[styles.statusText, { color: theme.colors.background }]}>
-                {getStatusText(booking.status)}
+                {getStatusText(currentBooking.status)}
               </Text>
             </View>
           </View>
@@ -253,7 +227,7 @@ const BookingDetailsScreen: React.FC = () => {
             {providerName}
           </Text>
           <Text style={[styles.bookingType, { color: theme.colors.textSecondary }]}>
-            {booking.booking_type === 'service' ? 'Service Booking' : 'Puja Booking'}
+            {currentBooking.booking_type === 'service' ? 'Service Booking' : 'Puja Booking'}
           </Text>
         </View>
 
@@ -274,7 +248,7 @@ const BookingDetailsScreen: React.FC = () => {
               />
             ) : (
               <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-                {formatDate(booking.booking_date)}
+                {formatDate(currentBooking.booking_date)}
               </Text>
             )}
           </View>
@@ -290,7 +264,7 @@ const BookingDetailsScreen: React.FC = () => {
               />
             ) : (
               <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-                {booking.booking_time}
+                {currentBooking.booking_time}
               </Text>
             )}
           </View>
@@ -307,7 +281,7 @@ const BookingDetailsScreen: React.FC = () => {
               />
             ) : (
               <Text style={[styles.infoValue, { color: theme.colors.text, flex: 1 }]}>
-                {booking.address}
+                {currentBooking.address}
               </Text>
             )}
           </View>
@@ -324,12 +298,12 @@ const BookingDetailsScreen: React.FC = () => {
               />
             ) : (
               <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-                {booking.mobile_number}
+                {currentBooking.mobile_number}
               </Text>
             )}
           </View>
 
-          {booking.notes && (
+          {currentBooking.notes && (
             <View style={styles.infoRow}>
               <MaterialIcons name="notes" size={moderateScale(20)} color={theme.colors.textSecondary} />
               <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Notes:</Text>
@@ -342,7 +316,7 @@ const BookingDetailsScreen: React.FC = () => {
                 />
               ) : (
                 <Text style={[styles.infoValue, { color: theme.colors.text, flex: 1 }]}>
-                  {booking.notes}
+                  {currentBooking.notes}
                 </Text>
               )}
             </View>
@@ -359,7 +333,7 @@ const BookingDetailsScreen: React.FC = () => {
             <MaterialIcons name="payments" size={moderateScale(20)} color={theme.colors.textSecondary} />
             <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Amount:</Text>
             <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-              ₹{booking.total_amount}
+              ₹{currentBooking.total_amount}
             </Text>
           </View>
 
@@ -367,7 +341,7 @@ const BookingDetailsScreen: React.FC = () => {
             <MaterialIcons name="account-balance-wallet" size={moderateScale(20)} color={theme.colors.textSecondary} />
             <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Method:</Text>
             <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-              {booking.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
+              {currentBooking.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
             </Text>
           </View>
 
@@ -375,7 +349,7 @@ const BookingDetailsScreen: React.FC = () => {
             <MaterialIcons name="credit-card" size={moderateScale(20)} color={theme.colors.textSecondary} />
             <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Status:</Text>
             <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-              {getStatusText(booking.payment_status)}
+              {getStatusText(currentBooking.payment_status)}
             </Text>
           </View>
         </View>
@@ -395,7 +369,7 @@ const BookingDetailsScreen: React.FC = () => {
               <Button
                 title="Save Changes"
                 onPress={handleUpdateBooking}
-                loading={updating}
+                loading={updateLoading}
                 style={styles.actionButton}
               />
               <Button
@@ -403,11 +377,11 @@ const BookingDetailsScreen: React.FC = () => {
                 onPress={() => {
                   setIsEditing(false);
                   setEditForm({
-                    booking_date: booking.booking_date.split('T')[0],
-                    booking_time: booking.booking_time,
-                    address: booking.address,
-                    mobile_number: booking.mobile_number,
-                    notes: booking.notes || '',
+                    booking_date: currentBooking.booking_date.split('T')[0],
+                    booking_time: currentBooking.booking_time,
+                    address: currentBooking.address,
+                    mobile_number: currentBooking.mobile_number,
+                    notes: currentBooking.notes || '',
                   });
                 }}
                 style={{ ...styles.actionButton, backgroundColor: theme.colors.surface }}
@@ -432,7 +406,7 @@ const BookingDetailsScreen: React.FC = () => {
             />
           )}
 
-          {booking.status === 'cancelled' && !isEditing && (
+          {currentBooking.status === 'cancelled' && !isEditing && (
             <View style={[styles.infoMessage, { backgroundColor: theme.colors.surface }]}>
               <Text style={[styles.infoMessageText, { color: theme.colors.textSecondary }]}>
                 This booking has been cancelled. Please make a new booking if needed.

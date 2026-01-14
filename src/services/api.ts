@@ -430,6 +430,16 @@ export const updateServicemanProfile = async (profileData: {
   }
 };
 
+// Get Serviceman Profile Data API function
+export const getServicemanProfileData = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.SERVICEMAN_PROFILE_DATA);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Brahman Profile Update API function
 export const updateBrahmanProfile = async (profileData: {
   government_id: string;
@@ -467,6 +477,16 @@ export const updateBrahmanProfile = async (profileData: {
       },
     });
     
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get Brahman Profile Data API function
+export const getBrahmanProfileData = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.BRAHMAN_PROFILE_DATA);
     return response.data;
   } catch (error) {
     throw error;

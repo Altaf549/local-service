@@ -21,6 +21,7 @@ interface EditProfileModalProps {
   currentPhone?: string;
   editMode: 'profile' | 'email' | 'phone' | 'password';
   onSave: (data: any) => void;
+  loading?: boolean;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({
@@ -32,7 +33,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   currentEmail,
   currentPhone,
   editMode,
-  onSave
+  onSave,
+  loading = false
 }) => {
   const { theme } = useTheme();
   const [name, setName] = useState(currentName);
@@ -43,7 +45,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
 
   // Get validation rules based on edit mode
   const getValidationRules = () => {
@@ -152,7 +153,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       return;
     }
 
-    setLoading(true);
     try {
       const saveData: any = {
         editMode,
@@ -176,8 +176,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to update profile');
       // Don't call onClose() on error to keep modal open
-    } finally {
-      setLoading(false);
     }
   };
 
