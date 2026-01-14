@@ -23,7 +23,7 @@ import {fetchServicemanDetails} from '../../redux/slices/servicemanDetailsSlice'
 import {RootState} from '../../redux/store';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, SERVICE_DETAILS} from '../../constant/Routes';
+import {AppStackParamList, SERVICE_DETAILS, LOGIN} from '../../constant/Routes';
 import Console from '../../utils/Console';
 import {
   scale,
@@ -44,6 +44,7 @@ interface RouteParams {
 }
 
 const ServicemanDetailsScreen: React.FC = () => {
+  
   Console.log('ServicemanDetailsScreen', 'rendering');
   const {theme} = useTheme();
   const dispatch = useDispatch();
@@ -58,6 +59,9 @@ const ServicemanDetailsScreen: React.FC = () => {
   const {servicemanDetails, loading, error} = useSelector(
     (state: RootState) => state.servicemanDetails,
   );
+  const { userData, isUser } = useSelector(
+    (state: RootState) => state.user,
+  );
 
   useEffect(() => {
     Console.log('ServicemanDetailsScreen', 'useEffect called, servicemanId:', servicemanId);
@@ -68,18 +72,87 @@ const ServicemanDetailsScreen: React.FC = () => {
   }, [dispatch, servicemanId]);
 
   const handleCallPress = (phoneNumber: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to make a call. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'ServicemanDetails',
+                servicemanId: servicemanId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Linking.openURL(`tel:${phoneNumber}`).catch(() => {
       Alert.alert('Error', 'Unable to make a call');
     });
   };
 
   const handleEmailPress = (email: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to send an email. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'ServicemanDetails',
+                servicemanId: servicemanId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Linking.openURL(`mailto:${email}`).catch(() => {
       Alert.alert('Error', 'Unable to open email');
     });
   };
 
   const handleBookingPress = () => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to make a booking. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'ServicemanDetails',
+                servicemanId: servicemanId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Alert.alert('Booking', 'Booking functionality will be implemented');
   };
 

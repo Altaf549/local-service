@@ -23,7 +23,7 @@ import {fetchBrahmanDetails} from '../../redux/slices/brahmanDetailsSlice';
 import {RootState} from '../../redux/store';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, PUJA_DETAILS} from '../../constant/Routes';
+import {AppStackParamList, PUJA_DETAILS, LOGIN} from '../../constant/Routes';
 import Console from '../../utils/Console';
 import {
   scale,
@@ -58,6 +58,9 @@ const BrahmanDetailsScreen: React.FC = () => {
   const {brahmanDetails, loading, error} = useSelector(
     (state: RootState) => state.brahmanDetails,
   );
+  const { userData, isUser } = useSelector(
+    (state: RootState) => state.user,
+  );
 
   useEffect(() => {
     Console.log('BrahmanDetailsScreen', 'useEffect called, brahmanId:', brahmanId);
@@ -68,22 +71,114 @@ const BrahmanDetailsScreen: React.FC = () => {
   }, [dispatch, brahmanId]);
 
   const handleCallPress = (phoneNumber: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to make a call. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'BrahmanDetails',
+                brahmanId: brahmanId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Linking.openURL(`tel:${phoneNumber}`).catch(() => {
       Alert.alert('Error', 'Unable to make a call');
     });
   };
 
   const handleEmailPress = (email: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to send an email. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'BrahmanDetails',
+                brahmanId: brahmanId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Linking.openURL(`mailto:${email}`).catch(() => {
       Alert.alert('Error', 'Unable to open email');
     });
   };
 
   const handleBookingPress = () => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to make a booking. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'BrahmanDetails',
+                brahmanId: brahmanId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Alert.alert('Booking', 'Booking functionality will be implemented');
   };
 
   const handleDownloadPress = (materialFile: string) => {
+    if (!isUser || !userData) {
+      Alert.alert(
+        'Login Required',
+        'You need to login to download files. Would you like to login now?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(LOGIN, { 
+                returnTo: 'BrahmanDetails',
+                brahmanId: brahmanId 
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     Linking.openURL(materialFile).catch(() => {
       // Fallback to Google Docs viewer
       const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(materialFile)}`;

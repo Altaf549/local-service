@@ -17,7 +17,7 @@ export type RootStackParamList = {
 
 export type AppStackParamList = {
   MainTabs: undefined;
-  Login: { returnTo?: string; pujaId?: number; serviceId?: number };
+  Login: { returnTo?: string; pujaId?: number; serviceId?: number; servicemanId?: number; brahmanId?: number };
   Register: undefined;
   ServicemanHome: undefined;
   Profile: undefined;

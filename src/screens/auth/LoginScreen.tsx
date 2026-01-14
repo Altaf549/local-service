@@ -19,7 +19,7 @@ import {Dropdown, DropdownOption} from '../../components/Dropdown/Dropdown';
 import {Button} from '../../components/Button/Button';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {AppStackParamList, MAIN_TABS, REGISTER, SERVICEMAN_HOME, USER_ROLES, PUJA_DETAILS, SERVICE_DETAILS} from '../../constant/Routes';
+import {AppStackParamList, MAIN_TABS, REGISTER, SERVICEMAN_HOME, USER_ROLES, PUJA_DETAILS, SERVICE_DETAILS, SERVICEMAN_DETAILS, BRAHMAN_DETAILS} from '../../constant/Routes';
 import {useFormValidation, commonValidationRules} from '../../hooks/useFormValidation';
 
 type LoginScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Login'>;
@@ -43,6 +43,8 @@ const LoginScreen: React.FC = () => {
   const returnTo = routeParams?.returnTo;
   const pujaId = routeParams?.pujaId;
   const serviceId = routeParams?.serviceId;
+  const servicemanId = routeParams?.servicemanId;
+  const brahmanId = routeParams?.brahmanId;
 
   const validationRules = {
     email: commonValidationRules.email,
@@ -104,6 +106,22 @@ const LoginScreen: React.FC = () => {
             routes: [
               { name: MAIN_TABS },
               { name: SERVICE_DETAILS, params: { id: serviceId } }
+            ],
+          });
+        } else if (returnTo === 'ServicemanDetails' && servicemanId) {
+          navigation.reset({
+            index: 0,
+            routes: [
+              { name: MAIN_TABS },
+              { name: SERVICEMAN_DETAILS, params: { id: servicemanId } }
+            ],
+          });
+        } else if (returnTo === 'BrahmanDetails' && brahmanId) {
+          navigation.reset({
+            index: 0,
+            routes: [
+              { name: MAIN_TABS },
+              { name: BRAHMAN_DETAILS, params: { id: brahmanId } }
             ],
           });
         } else {
