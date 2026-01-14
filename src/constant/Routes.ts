@@ -3,7 +3,7 @@ import HomeScreen from '../screens/home/HomeScreen';
 import ServiceScreen from '../screens/service/ServiceScreen';
 import PujaScreen from '../screens/puja/PujaScreen';
 import ServicemanScreen from '../screens/serviceman/ServicemanScreen';
-import ServicemanHomeScreen from '../screens/serviceman/ServicemanHomeScreen';
+import ServicemanHomeScreen from '../screens/home/ServicemanHomeScreen';
 import BrahmanScreen from '../screens/brahman/BrahmanScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';

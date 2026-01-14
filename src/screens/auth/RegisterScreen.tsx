@@ -231,7 +231,7 @@ const RegisterScreen: React.FC = () => {
             <Text style={[styles.footerText, {color: theme.colors.textSecondary}]}>
               Already have an account? 
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate(LOGIN)}>
+            <TouchableOpacity onPress={() => navigation.navigate(LOGIN,{})}>
               <Text style={[styles.footerLink, {color: theme.colors.primary}]}>
                 Sign In
               </Text>

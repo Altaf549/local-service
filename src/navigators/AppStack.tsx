@@ -8,7 +8,7 @@ import PujaTypeDetailsScreen from '../screens/puja/PujaTypeDetailsScreen';
 import ServiceDetailsScreen from '../screens/service/ServiceDetailsScreen';
 import PujaDetailsScreen from '../screens/puja/PujaDetailsScreen';
 import ServicemanDetailsScreen from '../screens/serviceman/ServicemanDetailsScreen';
-import ServicemanHomeScreen from '../screens/serviceman/ServicemanHomeScreen';
+import ServicemanHomeScreen from '../screens/home/ServicemanHomeScreen';
 import BrahmanDetailsScreen from '../screens/brahman/BrahmanDetailsScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
