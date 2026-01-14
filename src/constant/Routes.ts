@@ -9,6 +9,8 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
+import BookingScreen from '../screens/booking/BookingScreen';
+import BookingDetailsScreen from '../screens/booking/BookingDetailsScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -30,6 +32,8 @@ export type AppStackParamList = {
   PujaDetails: { id: number };
   ServicemanDetails: { id: number };
   BrahmanDetails: { id: number };
+  Booking: undefined;
+  BookingDetails: { bookingId: number };
 };
 
 export type AuthStackParamList = {
@@ -68,6 +72,8 @@ export const REGISTER = 'Register';
 export const MAIN_TABS = 'MainTabs';
 export const PROFILE = 'Profile';
 export const SETTINGS = 'Settings';
+export const BOOKING = 'Booking';
+export const BOOKING_DETAILS = 'BookingDetails';
 
 // User role constants
 export const USER_ROLES = {

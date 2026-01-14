@@ -76,3 +76,7 @@ export type {ExperienceCardProps} from './ExperienceCard/ExperienceCard';
 
 // Profile Menu
 export {ProfileMenu} from './ProfileMenu/ProfileMenu';
+
+// Booking Card
+export {default as BookingCard} from './BookingCard/BookingCard';
+export type {BookingCardProps} from './BookingCard/BookingCard';

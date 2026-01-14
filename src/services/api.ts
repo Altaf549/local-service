@@ -372,3 +372,29 @@ export const getBookingDetails = async (id: number) => {
   }
 };
 
+export const updateBooking = async (id: number, bookingData: {
+  booking_date?: string;
+  booking_time?: string;
+  address?: string;
+  mobile_number?: string;
+  notes?: string;
+}) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.BOOKINGS}/${id}`, bookingData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const cancelBooking = async (id: number, cancellationReason?: string) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.BOOKINGS}/cancel/${id}`, {
+      cancellation_reason: cancellationReason
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+

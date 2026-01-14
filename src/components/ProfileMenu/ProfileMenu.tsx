@@ -6,7 +6,7 @@ import {useAppSelector, useAppDispatch} from '../../redux/hooks';
 import {RootState} from '../../redux/store';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {AppStackParamList, LOGIN, MAIN_TABS, PROFILE, SETTINGS} from '../../constant/Routes';
+import {AppStackParamList, LOGIN, MAIN_TABS, PROFILE, SETTINGS, BOOKING} from '../../constant/Routes';
 import {logoutUser} from '../../redux/slices/authSlice';
 import {clearUserData} from '../../redux/slices/userSlice';
 
@@ -60,8 +60,9 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
   };
 
   const handleBooks = () => {
-    console.log('Orders pressed');
+    console.log('Booking pressed');
     onClose();
+    navigation.navigate(BOOKING);
   };
 
   const handleSettings = () => {
@@ -73,7 +74,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({visible, onClose}) => {
   const handleLogin = () => {
     console.log('Login pressed');
     onClose();
-    navigation.navigate(LOGIN);
+    navigation.navigate(LOGIN, {});
   };
 
   const handleLogout = async () => {

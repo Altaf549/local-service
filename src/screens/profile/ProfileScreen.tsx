@@ -334,6 +334,30 @@ const ProfileScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* My Bookings Card */}
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.card }]}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoContent}>
+              <Text style={[styles.infoLabel, { color: theme.colors.text }]}>
+                My Bookings
+              </Text>
+              <Text style={[styles.infoValue, { color: theme.colors.textSecondary }]}>
+                View and manage your bookings
+              </Text>
+            </View>
+            <TouchableOpacity 
+              style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
+              onPress={() => navigation.navigate('Booking')}
+            >
+              <MaterialIcons 
+                name="event" 
+                size={moderateScale(16)} 
+                color={theme.colors.background} 
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
       
       <EditProfileModal

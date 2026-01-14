@@ -14,6 +14,8 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
+import BookingScreen from '../screens/booking/BookingScreen';
+import BookingDetailsScreen from '../screens/booking/BookingDetailsScreen';
 import { 
   LOGIN,
   REGISTER,
@@ -28,7 +30,9 @@ import {
   SERVICE_DETAILS,
   PUJA_DETAILS,
   SERVICEMAN_DETAILS,
-  BRAHMAN_DETAILS
+  BRAHMAN_DETAILS,
+  BOOKING,
+  BOOKING_DETAILS
 } from '../constant/Routes';
 
 const Stack = createStackNavigator();
@@ -53,6 +57,8 @@ const AppStack = () => {
       <Stack.Screen name={PUJA_DETAILS} component={PujaDetailsScreen} />
       <Stack.Screen name={SERVICEMAN_DETAILS} component={ServicemanDetailsScreen} />
       <Stack.Screen name={BRAHMAN_DETAILS} component={BrahmanDetailsScreen} />
+      <Stack.Screen name={BOOKING} component={BookingScreen} />
+      <Stack.Screen name={BOOKING_DETAILS} component={BookingDetailsScreen} />
     </Stack.Navigator>
   );
 };
