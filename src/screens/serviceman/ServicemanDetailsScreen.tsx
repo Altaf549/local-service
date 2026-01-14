@@ -10,7 +10,8 @@ import {
   FlatList,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { store } from '../../redux/store';
 import {useTheme} from '../../theme/ThemeContext';
 import {Header} from '../../components/Header/Header';
 import {Button} from '../../components/Button/Button';
@@ -58,11 +59,14 @@ const ServicemanDetailsScreen: React.FC = () => {
   
   Console.log('ServicemanDetailsScreen', 'servicemanId extracted:', servicemanId);
   
-  const {servicemanDetails, loading, error} = useSelector(
+  const {servicemanDetails, loading, error: servicemanError} = useSelector(
     (state: RootState) => state.servicemanDetails,
   );
   const { userData, isUser } = useSelector(
     (state: RootState) => state.user,
+  );
+  const { createBookingLoading, error: bookingError } = useSelector(
+    (state: RootState) => state.bookings,
   );
 
   // Booking state
@@ -128,11 +132,43 @@ const ServicemanDetailsScreen: React.FC = () => {
           ]
         );
       } else {
-        Alert.alert('Booking Failed', result.error?.message || 'Failed to create booking');
+        // Get current error from Redux state to avoid closure issues
+        const currentState = store.getState();
+        const currentBookingError = currentState.bookings.error;
+        
+        console.log('Current booking error from store:', currentBookingError);
+        console.log('Current booking error type:', typeof currentBookingError);
+        console.log('Current booking error is null:', currentBookingError === null);
+        console.log('Current booking error is undefined:', currentBookingError === undefined);
+        
+        const errorMessage = currentBookingError || 'Failed to create booking';
+        let alertTitle = 'Booking Failed';
+        
+        // Customize alert title based on error message
+        if (errorMessage.toLowerCase().includes('already book')) {
+          alertTitle = 'Booking Exists';
+        } else if (errorMessage.toLowerCase().includes('unavailable')) {
+          alertTitle = 'Service Unavailable';
+        } else if (errorMessage.toLowerCase().includes('validation')) {
+          alertTitle = 'Validation Error';
+        }
+        
+        Alert.alert(alertTitle, errorMessage);
       }
     } catch (error: any) {
       Console.error('Booking error:', error);
-      Alert.alert('Booking Failed', error.message || 'An error occurred while creating booking');
+      const errorMessage = error.message || bookingError || 'An error occurred while creating booking';
+      let alertTitle = 'Booking Failed';
+      
+      if (errorMessage.toLowerCase().includes('already book')) {
+        alertTitle = 'Booking Exists';
+      } else if (errorMessage.toLowerCase().includes('unavailable')) {
+        alertTitle = 'Service Unavailable';
+      } else if (errorMessage.toLowerCase().includes('validation')) {
+        alertTitle = 'Validation Error';
+      }
+      
+      Alert.alert(alertTitle, errorMessage);
     }
   };
 
@@ -282,7 +318,7 @@ if (!servicemanId) {
     );
   }
 
-  if (error) {
+  if (servicemanError) {
     return (
       <SafeAreaView
         edges={['left', 'right']}
@@ -292,7 +328,7 @@ if (!servicemanId) {
         ]}>
         <Header title="Serviceman Details" />
         <View style={styles.errorContainer}>
-          <Text style={[styles.errorText, {color: theme.colors.error}]}>{error}</Text>
+          <Text style={[styles.errorText, {color: theme.colors.error}]}>{servicemanError}</Text>
         </View>
       </SafeAreaView>
     );

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
+import { store } from '../../redux/store';
 import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../../components/Header/Header';
 import { Button } from '../../components/Button/Button';
@@ -44,7 +45,6 @@ interface RouteParams {
 }
 
 const PujaDetailsScreen: React.FC = () => {
-  Console.log('PujaDetailsScreen', 'rendering');
   const { theme } = useTheme();
   const dispatch = useDispatch();
   const navigation = useNavigation<PujaDetailsNavigationProp>();
@@ -53,13 +53,15 @@ const PujaDetailsScreen: React.FC = () => {
   const routeParams = route.params as any;
   const pujaId = routeParams?.id;
 
-  Console.log('PujaDetailsScreen', 'pujaId extracted:', pujaId);
 
   const { pujaDetails, loading, error } = useSelector(
     (state: RootState) => state.pujaDetails,
   );
   const { userData, isUser } = useSelector(
     (state: RootState) => state.user,
+  );
+  const { createBookingLoading, error: bookingError } = useSelector(
+    (state: RootState) => state.bookings,
   );
 
   // Booking state
@@ -68,11 +70,7 @@ const PujaDetailsScreen: React.FC = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
-    Console.log('PujaDetailsScreen', 'useEffect called, pujaId:', pujaId);
-    if (pujaId) {
-      Console.log('PujaDetailsScreen', 'dispatching fetchPujaDetails with id:', pujaId);
-      dispatch(fetchPujaDetails(pujaId) as any);
-    }
+    dispatch(fetchPujaDetails(pujaId) as any);
   }, [dispatch, pujaId]);
 
   const handleCallPress = (phoneNumber: string) => {
@@ -135,19 +133,16 @@ const PujaDetailsScreen: React.FC = () => {
         return;
       }
 
-      Console.log('Attempting to download file:', fileUrl);
 
       // For PDF files, force open in external browser
       await Linking.openURL(fileUrl);
 
     } catch (error) {
-      Console.error('Download error:', error);
 
       // If direct opening fails, try to open in browser
       try {
         await Linking.openURL(fileUrl);
       } catch (browserError) {
-        Console.error('Browser error:', browserError);
         Alert.alert('Error', 'Unable to open file. Please try again.');
       }
     }
@@ -205,11 +200,35 @@ const PujaDetailsScreen: React.FC = () => {
           ]
         );
       } else {
-        Alert.alert('Booking Failed', result.error?.message || 'Failed to create booking');
+        const errorMessage = result.error?.message || 'Failed to create booking';
+        let alertTitle = 'Booking Failed';
+        
+        // Customize alert title based on error message
+        if (errorMessage.toLowerCase().includes('already book')) {
+          alertTitle = 'Booking Exists';
+        } else if (errorMessage.toLowerCase().includes('unavailable')) {
+          alertTitle = 'Service Unavailable';
+        } else if (errorMessage.toLowerCase().includes('validation')) {
+          alertTitle = 'Validation Error';
+        }
+        
+        Alert.alert(alertTitle, errorMessage);
       }
     } catch (error: any) {
-      Console.error('Booking error:', error);
-      Alert.alert('Booking Failed', error.message || 'An error occurred while creating booking');
+      const currentState = store.getState();
+      const currentBookingError = currentState.bookings.error;
+      const errorMessage = currentBookingError || 'An error occurred while creating booking';
+      let alertTitle = 'Booking Failed';
+      
+      if (errorMessage.toLowerCase().includes('already book')) {
+        alertTitle = 'Booking Exists';
+      } else if (errorMessage.toLowerCase().includes('unavailable')) {
+        alertTitle = 'Service Unavailable';
+      } else if (errorMessage.toLowerCase().includes('validation')) {
+        alertTitle = 'Validation Error';
+      }
+      
+      Alert.alert(alertTitle, errorMessage);
     }
   };
 

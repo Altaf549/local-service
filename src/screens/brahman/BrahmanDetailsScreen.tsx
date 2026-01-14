@@ -10,7 +10,8 @@ import {
   FlatList,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { store } from '../../redux/store';
 import {useTheme} from '../../theme/ThemeContext';
 import {Header} from '../../components/Header/Header';
 import {Button} from '../../components/Button/Button';
@@ -46,7 +47,6 @@ interface RouteParams {
 }
 
 const BrahmanDetailsScreen: React.FC = () => {
-  Console.log('BrahmanDetailsScreen', 'rendering');
   const {theme} = useTheme();
   const dispatch = useDispatch();
   const navigation = useNavigation<BrahmanDetailsNavigationProp>();
@@ -55,7 +55,6 @@ const BrahmanDetailsScreen: React.FC = () => {
   const routeParams = route.params as any;
   const brahmanId = routeParams?.id;
   
-  Console.log('BrahmanDetailsScreen', 'brahmanId extracted:', brahmanId);
   
   const {brahmanDetails, loading, error} = useSelector(
     (state: RootState) => state.brahmanDetails,
@@ -63,17 +62,16 @@ const BrahmanDetailsScreen: React.FC = () => {
   const { userData, isUser } = useSelector(
     (state: RootState) => state.user,
   );
+  const { createBookingLoading, error: bookingError } = useSelector(
+    (state: RootState) => state.bookings,
+  );
 
   // Booking state
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
-    Console.log('BrahmanDetailsScreen', 'useEffect called, brahmanId:', brahmanId);
-    if (brahmanId) {
-      Console.log('BrahmanDetailsScreen', 'dispatching fetchBrahmanDetails with id:', brahmanId);
-      dispatch(fetchBrahmanDetails(brahmanId) as any);
-    }
+    dispatch(fetchBrahmanDetails(brahmanId) as any);
   }, [dispatch, brahmanId]);
 
   const handleCallPress = (phoneNumber: string) => {
@@ -184,11 +182,35 @@ const BrahmanDetailsScreen: React.FC = () => {
           ]
         );
       } else {
-        Alert.alert('Booking Failed', result.error?.message || 'Failed to create booking');
+        const errorMessage = result.error?.message || 'Failed to create booking';
+        let alertTitle = 'Booking Failed';
+        
+        // Customize alert title based on error message
+        if (errorMessage.toLowerCase().includes('already book')) {
+          alertTitle = 'Booking Exists';
+        } else if (errorMessage.toLowerCase().includes('unavailable')) {
+          alertTitle = 'Service Unavailable';
+        } else if (errorMessage.toLowerCase().includes('validation')) {
+          alertTitle = 'Validation Error';
+        }
+        
+        Alert.alert(alertTitle, errorMessage);
       }
     } catch (error: any) {
-      Console.error('Booking error:', error);
-      Alert.alert('Booking Failed', error.message || 'An error occurred while creating booking');
+      const currentState = store.getState();
+      const currentBookingError = currentState.bookings.error;
+      const errorMessage = currentBookingError || 'An error occurred while creating booking';
+      let alertTitle = 'Booking Failed';
+      
+      if (errorMessage.toLowerCase().includes('already book')) {
+        alertTitle = 'Booking Exists';
+      } else if (errorMessage.toLowerCase().includes('unavailable')) {
+        alertTitle = 'Service Unavailable';
+      } else if (errorMessage.toLowerCase().includes('validation')) {
+        alertTitle = 'Validation Error';
+      }
+      
+      Alert.alert(alertTitle, errorMessage);
     }
   };
 
@@ -237,7 +259,7 @@ const renderExperience = (experience: any) => (
       description={experience.description}
       compact={true}
       onPress={(id) => {
-        Console.log('Experience pressed:', id);
+        // Handle experience press
       }}
     />
   );
@@ -251,7 +273,7 @@ const renderExperience = (experience: any) => (
       achieved_date={achievement.achieved_date}
       compact={true}
       onPress={(id) => {
-        Console.log('Achievement pressed:', id);
+        // Handle achievement press
       }}
     />
   );

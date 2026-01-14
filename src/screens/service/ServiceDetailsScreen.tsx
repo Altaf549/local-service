@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
+import { store } from '../../redux/store';
 import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../../components/Header/Header';
 import { Button } from '../../components/Button/Button';
@@ -62,6 +63,9 @@ const ServiceDetailsScreen: React.FC = () => {
   );
   const { userData, isUser } = useSelector(
     (state: RootState) => state.user,
+  );
+  const { createBookingLoading, error: bookingError } = useSelector(
+    (state: RootState) => state.bookings,
   );
 
   // Booking state
@@ -189,11 +193,37 @@ const ServiceDetailsScreen: React.FC = () => {
           ]
         );
       } else {
-        Alert.alert('Booking Failed', result.error?.message || 'Failed to create booking');
+        // Get current error from Redux state to avoid closure issues
+        const currentState = store.getState();
+        const currentBookingError = currentState.bookings.error;
+        
+        const errorMessage = currentBookingError || 'Failed to create booking';
+        let alertTitle = 'Booking Failed';
+        
+        // Customize alert title based on error message
+        if (errorMessage.toLowerCase().includes('already book')) {
+          alertTitle = 'Booking Exists';
+        } else if (errorMessage.toLowerCase().includes('unavailable')) {
+          alertTitle = 'Service Unavailable';
+        } else if (errorMessage.toLowerCase().includes('validation')) {
+          alertTitle = 'Validation Error';
+        }
+        
+        Alert.alert(alertTitle, errorMessage);
       }
     } catch (error: any) {
-      Console.error('Booking error:', error);
-      Alert.alert('Booking Failed', error.message || 'An error occurred while creating booking');
+      const errorMessage = error.message || 'An error occurred while creating booking';
+      let alertTitle = 'Booking Failed';
+      
+      if (errorMessage.toLowerCase().includes('already book')) {
+        alertTitle = 'Booking Exists';
+      } else if (errorMessage.toLowerCase().includes('unavailable')) {
+        alertTitle = 'Service Unavailable';
+      } else if (errorMessage.toLowerCase().includes('validation')) {
+        alertTitle = 'Validation Error';
+      }
+      
+      Alert.alert(alertTitle, errorMessage);
     }
   };
 

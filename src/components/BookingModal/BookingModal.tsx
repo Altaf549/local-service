@@ -12,6 +12,7 @@ import {
     ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../Button/Button';
 import { TextInputWithLabel } from '../TextInputWithLabel/TextInputWithLabel';
@@ -41,6 +42,8 @@ const BookingModal: React.FC<BookingModalProps> = ({
     const { theme } = useTheme();
     const [bookingDate, setBookingDate] = useState('');
     const [bookingTime, setBookingTime] = useState('');
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
     const [address, setAddress] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [notes, setNotes] = useState('');
@@ -141,6 +144,35 @@ const BookingModal: React.FC<BookingModalProps> = ({
         return bookingType === 'service' ? 'Service Provider' : 'Brahman';
     };
 
+    const handleDateChange = (event: any, selectedDate?: Date) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            const formattedDate = selectedDate.toISOString().split('T')[0];
+            setBookingDate(formattedDate);
+        }
+    };
+
+    const handleTimeChange = (event: any, selectedTime?: Date) => {
+        setShowTimePicker(false);
+        if (selectedTime) {
+            const hours = selectedTime.getHours();
+            const minutes = selectedTime.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12;
+            const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+            const formattedTime = `${formattedHours}:${formattedMinutes} ${ampm}`;
+            setBookingTime(formattedTime);
+        }
+    };
+
+    const showDatePickerModal = () => {
+        setShowDatePicker(true);
+    };
+
+    const showTimePickerModal = () => {
+        setShowTimePicker(true);
+    };
+
     return (
         <Modal
             visible={visible}
@@ -174,24 +206,31 @@ const BookingModal: React.FC<BookingModalProps> = ({
 
                             <View style={styles.formSection}>
                                 <View style={styles.inputSpacing}>
-
-                                    <TextInputWithLabel
-                                        label="Booking Date"
-                                        value={bookingDate}
-                                        onChangeText={setBookingDate}
-                                        placeholder="Select booking date (YYYY-MM-DD)"
-                                        error={errors.bookingDate}
-                                    />
+                                    <Text style={[styles.label, { color: theme.colors.text }]}>Booking Date</Text>
+                                    <TouchableOpacity
+                                        style={[styles.datePickerButton, { borderColor: errors.bookingDate ? '#ff4444' : theme.colors.border }]}
+                                        onPress={showDatePickerModal}
+                                    >
+                                        <Text style={[styles.datePickerText, { color: bookingDate ? theme.colors.text : theme.colors.textSecondary }]}>
+                                            {bookingDate || 'Select booking date'}
+                                        </Text>
+                                        <MaterialIcons name="calendar-today" size={20} color={theme.colors.textSecondary} />
+                                    </TouchableOpacity>
+                                    {errors.bookingDate && <Text style={styles.errorText}>{errors.bookingDate}</Text>}
                                 </View>
 
                                 <View style={styles.inputSpacing}>
-                                    <TextInputWithLabel
-                                        label="Booking Time"
-                                        value={bookingTime}
-                                        onChangeText={setBookingTime}
-                                        placeholder="Enter booking time (e.g., 10:00 AM)"
-                                        error={errors.bookingTime}
-                                    />
+                                    <Text style={[styles.label, { color: theme.colors.text }]}>Booking Time</Text>
+                                    <TouchableOpacity
+                                        style={[styles.datePickerButton, { borderColor: errors.bookingTime ? '#ff4444' : theme.colors.border }]}
+                                        onPress={showTimePickerModal}
+                                    >
+                                        <Text style={[styles.datePickerText, { color: bookingTime ? theme.colors.text : theme.colors.textSecondary }]}>
+                                            {bookingTime || 'Select booking time'}
+                                        </Text>
+                                        <MaterialIcons name="schedule" size={20} color={theme.colors.textSecondary} />
+                                    </TouchableOpacity>
+                                    {errors.bookingTime && <Text style={styles.errorText}>{errors.bookingTime}</Text>}
                                 </View>
 
                                 <View style={styles.inputSpacing}>
@@ -238,6 +277,25 @@ const BookingModal: React.FC<BookingModalProps> = ({
                                 fullWidth={true}
                             />
                         </View>
+                        
+                        {showDatePicker && (
+                            <DateTimePicker
+                                value={bookingDate ? new Date(bookingDate) : new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={handleDateChange}
+                                minimumDate={new Date()}
+                            />
+                        )}
+                        
+                        {showTimePicker && (
+                            <DateTimePicker
+                                value={new Date()}
+                                mode="time"
+                                display="default"
+                                onChange={handleTimeChange}
+                            />
+                        )}
                     </ScrollView>
                 </KeyboardAvoidingView>
             </SafeAreaView>
@@ -297,6 +355,29 @@ const styles = StyleSheet.create({
     footer: {
         paddingHorizontal: moderateScale(20),
         paddingBottom: moderateVerticalScale(20),
+    },
+    label: {
+        fontSize: moderateScale(14),
+        marginBottom: moderateVerticalScale(8),
+        fontWeight: '500',
+    },
+    datePickerButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderRadius: moderateScale(8),
+        paddingHorizontal: moderateScale(15),
+        paddingVertical: moderateVerticalScale(12),
+        backgroundColor: '#ffffff',
+    },
+    datePickerText: {
+        fontSize: moderateScale(16),
+    },
+    errorText: {
+        color: '#ff4444',
+        fontSize: moderateScale(12),
+        marginTop: moderateVerticalScale(5),
     },
 });
 

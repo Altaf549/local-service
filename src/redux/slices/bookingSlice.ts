@@ -14,7 +14,7 @@ interface Booking {
   address: string;
   mobile_number: string;
   notes?: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rejected';
   payment_status: 'pending' | 'paid' | 'failed';
   payment_method: string;
   total_amount: string;
@@ -62,10 +62,33 @@ export const createServiceBookingThunk = createAsyncThunk(
       if (response.success) {
         return response.data.booking;
       } else {
-        return rejectWithValue(response.message || 'Failed to create service booking');
+        // Handle structured error responses
+        let errorMessage = response.message || 'Failed to create service booking';
+        
+        console.log('Service booking creation failed:', response);
+        return rejectWithValue(errorMessage);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || 'An error occurred while creating service booking');
+      console.log('Service booking creation error:', error);
+      
+      // Handle different error structures
+      let errorMessage = 'An error occurred while creating service booking';
+      
+      if (error.response?.data?.errors?.service_id) {
+        errorMessage = error.response.data.errors.service_id[0];
+      } else if (error.response?.data?.errors?.serviceman_id) {
+        errorMessage = error.response.data.errors.serviceman_id[0];
+      } else if (error.response?.data?.errors?.booking_date) {
+        errorMessage = error.response.data.errors.booking_date[0];
+      } else if (error.response?.data?.errors?.booking_time) {
+        errorMessage = error.response.data.errors.booking_time[0];
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -87,10 +110,33 @@ export const createPujaBookingThunk = createAsyncThunk(
       if (response.success) {
         return response.data.booking;
       } else {
-        return rejectWithValue(response.message || 'Failed to create puja booking');
+        // Handle structured error responses
+        let errorMessage = response.message || 'Failed to create puja booking';
+        
+        console.log('Puja booking creation failed:', response);
+        return rejectWithValue(errorMessage);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || 'An error occurred while creating puja booking');
+      console.log('Puja booking creation error:', error);
+      
+      // Handle different error structures
+      let errorMessage = 'An error occurred while creating puja booking';
+      
+      if (error.response?.data?.errors?.puja_id) {
+        errorMessage = error.response.data.errors.puja_id[0];
+      } else if (error.response?.data?.errors?.brahman_id) {
+        errorMessage = error.response.data.errors.brahman_id[0];
+      } else if (error.response?.data?.errors?.booking_date) {
+        errorMessage = error.response.data.errors.booking_date[0];
+      } else if (error.response?.data?.errors?.booking_time) {
+        errorMessage = error.response.data.errors.booking_time[0];
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -151,7 +197,7 @@ const bookingSlice = createSlice({
       .addCase(createServiceBookingThunk.pending, (state) => {
         state.createBookingLoading = true;
         state.createBookingSuccess = false;
-        state.error = null;
+        // Don't reset error here to prevent race conditions
       })
       .addCase(createServiceBookingThunk.fulfilled, (state, action) => {
         state.createBookingLoading = false;
@@ -169,7 +215,7 @@ const bookingSlice = createSlice({
       .addCase(createPujaBookingThunk.pending, (state) => {
         state.createBookingLoading = true;
         state.createBookingSuccess = false;
-        state.error = null;
+        // Don't reset error here to prevent race conditions
       })
       .addCase(createPujaBookingThunk.fulfilled, (state, action) => {
         state.createBookingLoading = false;
