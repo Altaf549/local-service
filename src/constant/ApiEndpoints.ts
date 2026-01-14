@@ -22,5 +22,8 @@ export const API_ENDPOINTS = {
   TERMS_AND_CONDITIONS: '/terms-and-conditions',
   PRIVACY_POLICY: '/privacy-policy',
   ABOUT_US: '/about-us',
+  BOOKINGS: '/bookings',
+  SERVICE_BOOKING: '/bookings/service',
+  PUJA_BOOKING: '/bookings/puja',
 } as const;
 

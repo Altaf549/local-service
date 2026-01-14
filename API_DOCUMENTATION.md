@@ -99,7 +99,9 @@ Login with user credentials.
             "email": "john@example.com",
             "mobile_number": "1234567890",
             "role": "user",
-            "status": "active"
+            "status": "active",
+            "profile_photo": "profile.jpg",
+            "profile_photo_url": "http://your-domain.com/storage/profile.jpg"
         },
         "token": "2|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     }
@@ -194,7 +196,11 @@ Login with serviceman credentials.
             "email": "serviceman@example.com",
             "mobile_number": "9876543210",
             "status": "inactive",
-            "availability_status": "available"
+            "availability_status": "available",
+            "profile_photo": "serviceman.jpg",
+            "profile_photo_url": "http://your-domain.com/storage/serviceman.jpg",
+            "id_proof_image": "id_proof.jpg",
+            "id_proof_image_url": "http://your-domain.com/storage/id_proof.jpg"
         },
         "token": "3|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     }
@@ -273,7 +279,11 @@ Login with brahman credentials.
             "email": "brahman@example.com",
             "mobile_number": "9876543211",
             "status": "inactive",
-            "availability_status": "available"
+            "availability_status": "available",
+            "profile_photo": "brahman.jpg",
+            "profile_photo_url": "http://your-domain.com/storage/brahman.jpg",
+            "id_proof_image": "brahman_id.jpg",
+            "id_proof_image_url": "http://your-domain.com/storage/brahman_id.jpg"
         },
         "token": "4|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     }
@@ -1648,6 +1658,421 @@ Logout and revoke current access token.
 
 ---
 
+## Delete User Account
+
+Permanently delete the authenticated user's account and all associated data.
+
+**Endpoint:** `DELETE /api/user/delete-account`
+
+**Authentication:** Required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "message": "User account deleted successfully"
+}
+```
+
+**Note:**
+- This action is irreversible
+- All user tokens will be revoked
+- User account will be permanently deleted
+
+---
+
+## Delete Serviceman Account
+
+Permanently delete the authenticated serviceman's account and all associated data.
+
+**Endpoint:** `DELETE /api/serviceman/delete-account`
+
+**Authentication:** Required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "message": "Serviceman account deleted successfully"
+}
+```
+
+**Note:**
+- This action is irreversible
+- All serviceman tokens will be revoked
+- All related data will be deleted:
+  - Service prices
+  - Experiences
+  - Achievements
+  - Service associations
+- Serviceman account will be permanently deleted
+
+---
+
+## Delete Brahman Account
+
+Permanently delete the authenticated brahman's account and all associated data.
+
+**Endpoint:** `DELETE /api/brahman/delete-account`
+
+**Authentication:** Required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "message": "Brahman account deleted successfully"
+}
+```
+
+**Note:**
+- This action is irreversible
+- All brahman tokens will be revoked
+- All related data will be deleted:
+  - Experiences
+  - Achievements
+- Brahman account will be permanently deleted
+
+---
+
+## Create Service Booking
+
+Create a new service booking.
+
+**Endpoint:** `POST /api/bookings/service`
+
+**Authentication:** Required
+
+**Note:** The `total_amount` is automatically calculated from the `serviceman_service_prices` table based on the selected serviceman and service combination. If no price is found, it defaults to 0.
+
+**Request Body:**
+```json
+{
+    "service_id": 1,
+    "serviceman_id": 1,
+    "booking_date": "2024-12-25",
+    "booking_time": "10:00 AM",
+    "address": "123 Main St, City, State",
+    "mobile_number": "9876543210",
+    "notes": "Special instructions for service"
+}
+```
+
+**Response (201):**
+```json
+{
+    "success": true,
+    "message": "Service booking created successfully",
+    "data": {
+        "booking": {
+            "id": 1,
+            "user_id": 1,
+            "booking_type": "service",
+            "service_id": 1,
+            "serviceman_id": 1,
+            "booking_date": "2024-12-25T00:00:00.000000Z",
+            "booking_time": "10:00 AM",
+            "address": "123 Main St, City, State",
+            "mobile_number": "9876543210",
+            "notes": "Special instructions for service",
+            "status": "pending",
+            "payment_status": "pending",
+            "payment_method": "cod",
+            "total_amount": "1500.00",
+            "created_at": "2024-01-01T10:00:00.000000Z",
+            "updated_at": "2024-01-01T10:00:00.000000Z",
+            "user": {...},
+            "service": {...},
+            "serviceman": {...}
+        }
+    }
+}
+```
+
+---
+
+## Create Puja Booking
+
+Create a new puja booking.
+
+**Endpoint:** `POST /api/bookings/puja`
+
+**Authentication:** Required
+
+**Note:** The `total_amount` is automatically calculated from the `brahman_puja_prices` table based on the selected brahman and puja combination. If no price is found, it defaults to 0.
+
+**Request Body:**
+```json
+{
+    "puja_id": 1,
+    "brahman_id": 1,
+    "booking_date": "2024-12-25",
+    "booking_time": "10:00 AM",
+    "address": "123 Main St, City, State",
+    "mobile_number": "9876543210",
+    "notes": "Special instructions for puja"
+}
+```
+
+**Response (201):**
+```json
+{
+    "success": true,
+    "message": "Puja booking created successfully",
+    "data": {
+        "booking": {
+            "id": 1,
+            "user_id": 1,
+            "booking_type": "puja",
+            "puja_id": 1,
+            "brahman_id": 1,
+            "booking_date": "2024-12-25T00:00:00.000000Z",
+            "booking_time": "10:00 AM",
+            "address": "123 Main St, City, State",
+            "mobile_number": "9876543210",
+            "notes": "Special instructions for puja",
+            "status": "pending",
+            "payment_status": "pending",
+            "payment_method": "cod",
+            "total_amount": "1500.00",
+            "created_at": "2024-01-01T10:00:00.000000Z",
+            "updated_at": "2024-01-01T10:00:00.000000Z",
+            "user": {...},
+            "puja": {...},
+            "brahman": {...}
+        }
+    }
+}
+```
+
+---
+
+## Get User Bookings
+
+Get all bookings for the authenticated user.
+
+**Endpoint:** `GET /api/bookings`
+
+**Authentication:** Required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": {
+        "bookings": [
+            {
+                "id": 1,
+                "booking_type": "service",
+                "status": "pending",
+                "booking_date": "2024-12-25T00:00:00.000000Z",
+                "booking_time": "10:00 AM",
+                "total_amount": "0.00",
+                "user": {...},
+                "service": {...},
+                "serviceman": {...}
+            }
+        ]
+    }
+}
+```
+
+---
+
+## Get Booking Details
+
+Get details of a specific booking.
+
+**Endpoint:** `GET /api/bookings/{id}`
+
+**Authentication:** Required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": {
+        "booking": {
+            "id": 1,
+            "user_id": 1,
+            "booking_type": "service",
+            "service_id": 1,
+            "serviceman_id": 1,
+            "booking_date": "2024-12-25T00:00:00.000000Z",
+            "booking_time": "10:00 AM",
+            "address": "123 Main St, City, State",
+            "mobile_number": "9876543210",
+            "notes": "Special instructions",
+            "status": "pending",
+            "payment_status": "pending",
+            "payment_method": "cod",
+            "total_amount": "1500.00",
+            "created_at": "2024-01-01T10:00:00.000000Z",
+            "updated_at": "2024-01-01T10:00:00.000000Z",
+            "user": {...},
+            "service": {...},
+            "puja": {...},
+            "serviceman": {...},
+            "brahman": {...}
+        }
+    }
+}
+```
+
+---
+
+## Update Booking
+
+Update an existing booking (only pending bookings can be updated).
+
+**Endpoint:** `PUT /api/bookings/{id}`
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+    "booking_date": "2024-12-26",
+    "booking_time": "11:00 AM",
+    "address": "456 New Address, City, State",
+    "mobile_number": "9876543211",
+    "notes": "Updated notes"
+}
+```
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "message": "Booking updated successfully",
+    "data": {
+        "booking": {
+            "id": 1,
+            "booking_date": "2024-12-26T00:00:00.000000Z",
+            "booking_time": "11:00 AM",
+            "address": "456 New Address, City, State",
+            "mobile_number": "9876543211",
+            "notes": "Updated notes",
+            "status": "pending",
+            "user": {...},
+            "service": {...},
+            "serviceman": {...}
+        }
+    }
+}
+```
+
+---
+
+## Cancel Booking
+
+Cancel an existing booking (only pending or confirmed bookings can be cancelled).
+
+**Endpoint:** `PUT /api/bookings/cancel/{id}`
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+    "cancellation_reason": "Need to reschedule due to emergency"
+}
+```
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "message": "Booking cancelled successfully",
+    "data": {
+        "booking": {
+            "id": 1,
+            "status": "cancelled",
+            "notes": "Original notes\n\nCancellation Reason: Need to reschedule due to emergency",
+            "user": {...},
+            "service": {...},
+            "serviceman": {...}
+        }
+    }
+}
+```
+
+**Note:**
+- Only pending or confirmed bookings can be cancelled
+- Cancellation reason is optional but recommended
+- Cancellation reason will be appended to notes field
+
+---
+
+## Accept Booking
+
+Accept a pending booking (for assigned serviceman or brahman).
+
+**Endpoint:** `PUT /api/bookings/accept/{id}`
+
+**Authentication:** Required
+
+**Request Body:** (Empty)
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "message": "Booking accepted successfully",
+    "data": {
+        "booking": {
+            "id": 1,
+            "status": "confirmed",
+            "user": {...},
+            "service": {...},
+            "serviceman": {...}
+        }
+    }
+}
+```
+
+**Note:**
+- Only the assigned serviceman or brahman can accept the booking
+- Booking status changes from "pending" to "confirmed"
+- Empty request body - only booking ID in URL is needed
+
+---
+
+## Complete Booking
+
+Mark a confirmed booking as completed (for assigned serviceman or brahman).
+
+**Endpoint:** `PUT /api/bookings/complete/{id}`
+
+**Authentication:** Required
+
+**Request Body:** (Empty)
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "message": "Booking completed successfully",
+    "data": {
+        "booking": {
+            "id": 1,
+            "status": "completed",
+            "user": {...},
+            "service": {...},
+            "serviceman": {...}
+        }
+    }
+}
+```
+
+**Note:**
+- Only the assigned serviceman or brahman can complete the booking
+- Booking status changes from "confirmed" to "completed"
+- Empty request body - only booking ID in URL is needed
+- Only confirmed bookings can be completed
+
+---
+
 ## Error Responses
 
 ### 400 Bad Request
@@ -1748,17 +2173,16 @@ Get complete brahman profile including experiences, achievements, and services w
                 "achieved_date": "2024-12-31"
             }
         ],
-       "services": [
+        "services": [
             {
-                "id": 2,
-                "puja_id": 2,
-                "puja_name": "Griha Pravesh Puja",
-                "image": "http://192.168.1.36:8000/storage/pujas/yjAEory35SdU3XDtWACzu0rOIB8zhTwYwdokdJrU.jpg",
-                "puja_type": "Home Puja",
-                "duration": "2hr",
-                "price": "16300.00",
-                "description": "Griha Pravesh Puja",
-                "material_file": "http://192.168.1.36:8000/storage/pujas/materials/5kUGNpPttTDhUIboohCbawzgaxDEwCkJKZtdjKIH.pdf"
+                "id": 1,
+                "puja_id": 1,
+                "puja_name": "Ganesh Puja",
+                "puja_type": "Festival",
+                "duration": "2 hours",
+                "price": "1500.00",
+                "description": "Ganesh Puja description",
+                "material_file": "http://your-domain.com/storage/pujas/materials/file.pdf"
             }
         ]
     }

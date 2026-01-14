@@ -16,9 +16,10 @@ import { Header } from '../../components/Header/Header';
 import { Button } from '../../components/Button/Button';
 import { CustomImage } from '../../components/CustomImage/CustomImage';
 import { ProviderCard } from '../../components/ProviderCard/ProviderCard';
+import BookingModal from '../../components/BookingModal/BookingModal';
 import { fetchServiceDetails } from '../../redux/slices/serviceDetailsSlice';
+import { createServiceBookingThunk } from '../../redux/slices/bookingSlice';
 import { RootState } from '../../redux/store';
-import { ServiceWithServicemen } from '../../types/home';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList, SERVICEMAN_DETAILS, LOGIN } from '../../constant/Routes';
@@ -62,6 +63,11 @@ const ServiceDetailsScreen: React.FC = () => {
   const { userData, isUser } = useSelector(
     (state: RootState) => state.user,
   );
+
+  // Booking state
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedServiceman, setSelectedServiceman] = useState<any>(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     Console.log('ServiceDetailsScreen', 'useEffect called, serviceId:', serviceId);
@@ -155,8 +161,40 @@ const ServiceDetailsScreen: React.FC = () => {
       return;
     }
 
-    // Navigate to booking screen or handle booking logic
-    Alert.alert('Booking', 'Booking functionality will be implemented');
+    // Show booking modal for the service
+    setSelectedServiceman(null); // Reset selected serviceman
+    setShowBookingModal(true);
+  };
+
+  const handleBookingSubmit = async (bookingData: any) => {
+    try {
+      const result = await dispatch(createServiceBookingThunk({
+        ...bookingData,
+        service_id: serviceId,
+        serviceman_id: selectedServiceman?.id || serviceDetails?.servicemen?.[0]?.id,
+      }) as any);
+
+      if (createServiceBookingThunk.fulfilled.match(result)) {
+        Alert.alert(
+          'Booking Successful',
+          'Your service booking has been created successfully!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setShowBookingModal(false);
+                setSelectedServiceman(null);
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Booking Failed', result.error?.message || 'Failed to create booking');
+      }
+    } catch (error: any) {
+      Console.error('Booking error:', error);
+      Alert.alert('Booking Failed', error.message || 'An error occurred while creating booking');
+    }
   };
 
   const renderServiceman = (serviceman: any) => (
@@ -172,9 +210,12 @@ const ServiceDetailsScreen: React.FC = () => {
       availabilityStatus={serviceman.availability_status}
       type="serviceman"
       onCall={handleCallPress}
-      onBook={handleBookingPress}
       onPress={(id) => {
         navigation.navigate(SERVICEMAN_DETAILS, { id: id });
+      }}
+      onBook={() => {
+        setSelectedServiceman(serviceman);
+        setShowBookingModal(true);
       }}
     />
   );
@@ -294,6 +335,19 @@ const ServiceDetailsScreen: React.FC = () => {
           </View>
         )}
       </ScrollView>
+
+      <BookingModal
+        visible={showBookingModal}
+        onClose={() => {
+          setShowBookingModal(false);
+          setSelectedServiceman(null);
+        }}
+        onSubmit={handleBookingSubmit}
+        loading={bookingLoading}
+        bookingType="service"
+        providerId={serviceId}
+        providerName={serviceDetails?.service_name || 'Service'}
+      />
     </SafeAreaView>
   );
 };

@@ -18,8 +18,10 @@ import {CustomImage} from '../../components/CustomImage/CustomImage';
 import {ProviderCard} from '../../components/ProviderCard/ProviderCard';
 import {AchievementCard} from '../../components/AchievementCard/AchievementCard';
 import {ExperienceCard} from '../../components/ExperienceCard/ExperienceCard';
+import BookingModal from '../../components/BookingModal/BookingModal';
 import {Paragraph} from '../../components';
 import {fetchServicemanDetails} from '../../redux/slices/servicemanDetailsSlice';
+import {createServiceBookingThunk} from '../../redux/slices/bookingSlice';
 import {RootState} from '../../redux/store';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -63,6 +65,10 @@ const ServicemanDetailsScreen: React.FC = () => {
     (state: RootState) => state.user,
   );
 
+  // Booking state
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+
   useEffect(() => {
     Console.log('ServicemanDetailsScreen', 'useEffect called, servicemanId:', servicemanId);
     if (servicemanId) {
@@ -98,6 +104,36 @@ const ServicemanDetailsScreen: React.FC = () => {
     Linking.openURL(`tel:${phoneNumber}`).catch(() => {
       Alert.alert('Error', 'Unable to make a call');
     });
+  };
+
+  const handleBookingSubmit = async (bookingData: any) => {
+    try {
+      const result = await dispatch(createServiceBookingThunk({
+        ...bookingData,
+        service_id: servicemanDetails?.services?.[0]?.service_id,
+        serviceman_id: servicemanId,
+      }) as any);
+
+      if (createServiceBookingThunk.fulfilled.match(result)) {
+        Alert.alert(
+          'Booking Successful',
+          'Your service booking has been created successfully!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setShowBookingModal(false);
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Booking Failed', result.error?.message || 'Failed to create booking');
+      }
+    } catch (error: any) {
+      Console.error('Booking error:', error);
+      Alert.alert('Booking Failed', error.message || 'An error occurred while creating booking');
+    }
   };
 
   const handleEmailPress = (email: string) => {
@@ -200,6 +236,9 @@ const ServicemanDetailsScreen: React.FC = () => {
       onCall={handleCallPress}
       onPress={() => {
         navigation.navigate(SERVICE_DETAILS, {id: service.service_id});
+      }}
+      onBook={() => {
+        setShowBookingModal(true);
       }}
     />
   );
@@ -352,6 +391,18 @@ if (!servicemanId) {
           </View>
         )}
       </ScrollView>
+
+      <BookingModal
+        visible={showBookingModal}
+        onClose={() => {
+          setShowBookingModal(false);
+        }}
+        onSubmit={handleBookingSubmit}
+        loading={bookingLoading}
+        bookingType="service"
+        providerId={servicemanId}
+        providerName={servicemanDetails?.name || 'Serviceman'}
+      />
     </SafeAreaView>
   );
 };

@@ -16,6 +16,7 @@ import { Header } from '../../components/Header/Header';
 import { Button } from '../../components/Button/Button';
 import { CustomImage } from '../../components/CustomImage/CustomImage';
 import { ProviderCard } from '../../components/ProviderCard/ProviderCard';
+import BookingModal from '../../components/BookingModal/BookingModal';
 import { RootState } from '../../redux/store';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -33,6 +34,7 @@ import {
   width,
 } from '../../utils/scaling';
 import { fetchPujaDetails } from '../../redux/slices/pujaDetailsSlice';
+import { createPujaBookingThunk } from '../../redux/slices/bookingSlice';
 import { Paragraph } from '../../components';
 
 type PujaDetailsNavigationProp = StackNavigationProp<AppStackParamList, 'PujaDetails'>;
@@ -59,6 +61,11 @@ const PujaDetailsScreen: React.FC = () => {
   const { userData, isUser } = useSelector(
     (state: RootState) => state.user,
   );
+
+  // Booking state
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedBrahman, setSelectedBrahman] = useState<any>(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     Console.log('PujaDetailsScreen', 'useEffect called, pujaId:', pujaId);
@@ -170,7 +177,40 @@ const PujaDetailsScreen: React.FC = () => {
       return;
     }
 
-    Alert.alert('Booking', 'Booking functionality will be implemented');
+    // Show booking modal for the puja
+    setSelectedBrahman(null); // Reset selected brahman
+    setShowBookingModal(true);
+  };
+
+  const handleBookingSubmit = async (bookingData: any) => {
+    try {
+      const result = await dispatch(createPujaBookingThunk({
+        ...bookingData,
+        puja_id: pujaId,
+        brahman_id: selectedBrahman?.id || pujaDetails?.brahmans?.[0]?.id,
+      }) as any);
+
+      if (createPujaBookingThunk.fulfilled.match(result)) {
+        Alert.alert(
+          'Booking Successful',
+          'Your puja booking has been created successfully!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setShowBookingModal(false);
+                setSelectedBrahman(null);
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Booking Failed', result.error?.message || 'Failed to create booking');
+      }
+    } catch (error: any) {
+      Console.error('Booking error:', error);
+      Alert.alert('Booking Failed', error.message || 'An error occurred while creating booking');
+    }
   };
 
   const renderBrahman = (brahman: any) => (
@@ -190,9 +230,12 @@ const PujaDetailsScreen: React.FC = () => {
       type="brahman"
       onCall={handleCallPress}
       onDownload={handleDownloadPress}
-      onBook={handleBookingPress}
       onPress={(id) => {
         navigation.navigate(BRAHMAN_DETAILS, { id: id });
+      }}
+      onBook={() => {
+        setSelectedBrahman(brahman);
+        setShowBookingModal(true);
       }}
     />
   );
@@ -311,6 +354,19 @@ const PujaDetailsScreen: React.FC = () => {
           </View>
         )}
       </ScrollView>
+
+      <BookingModal
+        visible={showBookingModal}
+        onClose={() => {
+          setShowBookingModal(false);
+          setSelectedBrahman(null);
+        }}
+        onSubmit={handleBookingSubmit}
+        loading={bookingLoading}
+        bookingType="puja"
+        providerId={pujaId}
+        providerName={pujaDetails?.puja_name || 'Puja'}
+      />
     </SafeAreaView>
   );
 };

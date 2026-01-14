@@ -18,8 +18,10 @@ import {CustomImage} from '../../components/CustomImage/CustomImage';
 import {ProviderCard} from '../../components/ProviderCard/ProviderCard';
 import {AchievementCard} from '../../components/AchievementCard/AchievementCard';
 import {ExperienceCard} from '../../components/ExperienceCard/ExperienceCard';
+import BookingModal from '../../components/BookingModal/BookingModal';
 import {Paragraph} from '../../components';
 import {fetchBrahmanDetails} from '../../redux/slices/brahmanDetailsSlice';
+import {createPujaBookingThunk} from '../../redux/slices/bookingSlice';
 import {RootState} from '../../redux/store';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -61,6 +63,10 @@ const BrahmanDetailsScreen: React.FC = () => {
   const { userData, isUser } = useSelector(
     (state: RootState) => state.user,
   );
+
+  // Booking state
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     Console.log('BrahmanDetailsScreen', 'useEffect called, brahmanId:', brahmanId);
@@ -152,7 +158,38 @@ const BrahmanDetailsScreen: React.FC = () => {
       return;
     }
 
-    Alert.alert('Booking', 'Booking functionality will be implemented');
+    // Show booking modal for the brahman
+    setShowBookingModal(true);
+  };
+
+  const handleBookingSubmit = async (bookingData: any) => {
+    try {
+      const result = await dispatch(createPujaBookingThunk({
+        ...bookingData,
+        puja_id: brahmanDetails?.services?.[0]?.puja_id,
+        brahman_id: brahmanId,
+      }) as any);
+
+      if (createPujaBookingThunk.fulfilled.match(result)) {
+        Alert.alert(
+          'Booking Successful',
+          'Your puja booking has been created successfully!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setShowBookingModal(false);
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Booking Failed', result.error?.message || 'Failed to create booking');
+      }
+    } catch (error: any) {
+      Console.error('Booking error:', error);
+      Alert.alert('Booking Failed', error.message || 'An error occurred while creating booking');
+    }
   };
 
   const handleDownloadPress = (materialFile: string) => {
@@ -234,6 +271,9 @@ const renderExperience = (experience: any) => (
       materialFile={service.material_file}
       onPress={() => {
         navigation.navigate(PUJA_DETAILS, {id: service.puja_id});
+      }}
+      onBook={() => {
+        setShowBookingModal(true);
       }}
     />
   );
@@ -386,6 +426,18 @@ if (!brahmanId) {
           </View>
         )}
       </ScrollView>
+
+      <BookingModal
+        visible={showBookingModal}
+        onClose={() => {
+          setShowBookingModal(false);
+        }}
+        onSubmit={handleBookingSubmit}
+        loading={bookingLoading}
+        bookingType="puja"
+        providerId={brahmanId}
+        providerName={brahmanDetails?.name || 'Brahman'}
+      />
     </SafeAreaView>
   );
 };

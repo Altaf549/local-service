@@ -313,3 +313,62 @@ export const deleteAccount = async () => {
   }
 };
 
+// Booking API functions
+export const createServiceBooking = async (bookingData: {
+  service_id: number;
+  serviceman_id: number;
+  booking_date: string;
+  booking_time: string;
+  address: string;
+  mobile_number: string;
+  notes?: string;
+}) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.SERVICE_BOOKING, bookingData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createPujaBooking = async (bookingData: {
+  puja_id: number;
+  brahman_id: number;
+  booking_date: string;
+  booking_time: string;
+  address: string;
+  mobile_number: string;
+  notes?: string;
+}) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.PUJA_BOOKING, bookingData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getUserBookings = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.BOOKINGS);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch bookings');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getBookingDetails = async (id: number) => {
+  try {
+    const response = await axios.get(`${API_ENDPOINTS.BOOKINGS}/${id}`);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch booking details');
+  } catch (error) {
+    throw error;
+  }
+};
+
