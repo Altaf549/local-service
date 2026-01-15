@@ -551,9 +551,9 @@ export const getAllPujaPrices = async () => {
 };
 
 // Update Service Price API function
-export const updateServicePrice = async (serviceId: number, price: string) => {
+export const addServicePrice = async (serviceId: number, price: string) => {
   try {
-    const response = await axios.post(`${API_ENDPOINTS.SERVICE_PRICE_UPDATE}/${serviceId}`, {
+    const response = await axios.post(`${API_ENDPOINTS.SERVICE_PRICE_ADD}/${serviceId}`, {
       price
     });
     return response.data;
@@ -563,7 +563,7 @@ export const updateServicePrice = async (serviceId: number, price: string) => {
 };
 
 // Update Puja Price API function
-export const updatePujaPrice = async (pujaId: number, price: string, materialFile?: any) => {
+export const addPujaPrice = async (pujaId: number, price: string, materialFile?: any) => {
   try {
     const formData = new FormData();
     formData.append('price', price);
@@ -576,7 +576,7 @@ export const updatePujaPrice = async (pujaId: number, price: string, materialFil
       } as any);
     }
     
-    const response = await axios.post(`${API_ENDPOINTS.PUJA_PRICE_UPDATE}/${pujaId}`, formData, {
+    const response = await axios.post(`${API_ENDPOINTS.PUJA_PRICE_ADD}/${pujaId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

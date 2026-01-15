@@ -33,6 +33,6 @@ export const API_ENDPOINTS = {
   PUJA_BOOKING: '/bookings/puja',
   SERVICE_PRICES_ALL: '/services/price/all',
   PUJA_PRICES_ALL: '/pujas/price/all',
-  SERVICE_PRICE_UPDATE: '/services/price/add',
-  PUJA_PRICE_UPDATE: '/pujas/price/add',
+  SERVICE_PRICE_ADD: '/services/price/add',
+  PUJA_PRICE_ADD: '/pujas/price/add',
 } as const;

@@ -15,7 +15,11 @@ import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../Header/Header';
 import { Dropdown } from '../Dropdown/Dropdown';
 import { Button } from '../Button/Button';
-import { getServices, getPujas, updateServicePrice, updatePujaPrice } from '../../services/api';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../redux/store';
+import { addServicePriceThunk } from '../../redux/slices/servicePricesSlice';
+import { addPujaPriceThunk } from '../../redux/slices/pujaPricesSlice';
+import { getServices, getPujas } from '../../services/api';
 import { Service, Puja } from '../../types/home';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
@@ -35,6 +39,7 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
   onSuccess 
 }) => {
   const { theme } = useTheme();
+  const dispatch = useDispatch<AppDispatch>();
   const [items, setItems] = useState<Service[] | Puja[]>([]);
   const [selectedItem, setSelectedItem] = useState<Service | Puja | null>(null);
   const [price, setPrice] = useState('');
@@ -74,14 +79,14 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
     try {
       setLoading(true);
       
-      let response;
+      let result;
       if (itemType === 'service') {
-        response = await updateServicePrice(selectedItem.id, price);
+        result = await dispatch(addServicePriceThunk({ serviceId: selectedItem.id, price }));
       } else {
-        response = await updatePujaPrice(selectedItem.id, price, materialFile);
+        result = await dispatch(addPujaPriceThunk({ pujaId: selectedItem.id, price, materialFile }));
       }
       
-      if (response.success) {
+      if (result.meta.requestStatus === 'fulfilled') {
         Alert.alert(
           'Success',
           `${itemType === 'service' ? 'Service' : 'Puja'} price added successfully!`,
@@ -96,7 +101,7 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
           ]
         );
       } else {
-        Alert.alert('Error', response.message || `Failed to add ${itemType} price.`);
+        Alert.alert('Error', result.payload as string || `Failed to add ${itemType} price.`);
       }
     } catch (error) {
       console.error('Error updating price:', error);
