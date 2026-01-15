@@ -12,6 +12,7 @@ import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../constant/Routes';
+import Console from '../../utils/Console';
 
 interface BookingDetails {
   id: number;
@@ -75,6 +76,7 @@ const BookingDetailsScreen: React.FC = () => {
 
   useEffect(() => {
     if (bookingId) {
+      Console.log("Fetching booking details for ID:", bookingId);
       dispatch(fetchBookingDetails(bookingId));
     }
   }, [bookingId, dispatch]);

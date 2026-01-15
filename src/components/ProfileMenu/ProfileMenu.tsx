@@ -9,6 +9,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {AppStackParamList, LOGIN, MAIN_TABS, PROFILE, SETTINGS, BOOKING, SERVICEMAN_PROFILE, BOOKING_SERVICEMAN, USER_ROLES} from '../../constant/Routes';
 import {logoutUser} from '../../redux/slices/authSlice';
 import {clearUserData} from '../../redux/slices/userSlice';
+import Console from '../../utils/Console';
 
 interface ProfileMenuProps {
   visible: boolean;

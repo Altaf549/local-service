@@ -32,7 +32,7 @@ const ServicemanHomeScreen: React.FC = () => {
   useFocusEffect(
     React.useCallback(() => {
       const checkUserStatus = async () => {
-        if (userData?.id && (userData?.role === USER_ROLES.SERVICEMAN || userData?.role === USER_ROLES.BRAHMAN)) {
+        if (userData?.id && (userData?.role === USER_ROLES.SERVICEMAN || userData?.role === USER_ROLES.BRAHMAN) && userData.status === 'inactive') {
           try {
             let statusData;
             if (userData?.role === USER_ROLES.SERVICEMAN) {

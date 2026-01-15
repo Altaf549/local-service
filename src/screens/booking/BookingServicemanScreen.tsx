@@ -1,110 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-  ActivityIndicator,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, View, Text, FlatList, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
-import { Header } from '../../components/Header/Header';
-import { ProfileMenu } from '../../components/ProfileMenu/ProfileMenu';
+import { Header, BookingCard } from '../../components';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
+import { fetchAllBookings } from '../../redux/slices/bookingSlice';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList, BOOKING_DETAILS_SERVICEMAN } from '../../constant/Routes';
+import { AppStackParamList, BOOKING_DETAILS, BOOKING_DETAILS_SERVICEMAN } from '../../constant/Routes';
+import { Booking } from '../../redux/slices/bookingSlice';
 
-interface Booking {
-  id: number;
-  customer_name: string;
-  service_name: string;
-  booking_date: string;
-  booking_time: string;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
-  total_amount: number;
-  address: string;
-  customer_phone: string;
-}
+type BookingServicemanScreenNavigationProp = StackNavigationProp<AppStackParamList, 'BookingServiceman'>;
 
 const BookingServicemanScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userData } = useAppSelector((state: RootState) => state.user);
-  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
-  const [profileMenuVisible, setProfileMenuVisible] = useState(false);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { bookings, loading, error } = useAppSelector((state: RootState) => state.bookings);
+  const dispatch = useAppDispatch();
+  const navigation = useNavigation<BookingServicemanScreenNavigationProp>();
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'pending' | 'confirmed' | 'in_progress' | 'completed'>('all');
-
-  const handleProfilePress = () => {
-    setProfileMenuVisible(true);
-  };
-
-  const handleProfileMenuClose = () => {
-    setProfileMenuVisible(false);
-  };
 
   const fetchBookings = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await getServicemanBookings();
-      
-      // Mock data for now
-      const mockBookings: Booking[] = [
-        {
-          id: 1,
-          customer_name: 'John Doe',
-          service_name: 'Plumbing Service',
-          booking_date: '2024-01-15',
-          booking_time: '10:00 AM',
-          status: 'pending',
-          total_amount: 150,
-          address: '123 Main St, City',
-          customer_phone: '+1234567890',
-        },
-        {
-          id: 2,
-          customer_name: 'Jane Smith',
-          service_name: 'Electrical Repair',
-          booking_date: '2024-01-14',
-          booking_time: '2:00 PM',
-          status: 'confirmed',
-          total_amount: 200,
-          address: '456 Oak Ave, City',
-          customer_phone: '+0987654321',
-        },
-        {
-          id: 3,
-          customer_name: 'Bob Johnson',
-          service_name: 'AC Maintenance',
-          booking_date: '2024-01-13',
-          booking_time: '11:00 AM',
-          status: 'completed',
-          total_amount: 100,
-          address: '789 Pine Rd, City',
-          customer_phone: '+1122334455',
-        },
-      ];
-
-      setBookings(mockBookings);
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
+      const result = await dispatch(fetchAllBookings()).unwrap();
+    } catch (error: any) {
+      const errorMessage = error || 'Failed to fetch bookings';
+      Alert.alert('Error', errorMessage);
     } finally {
-      setLoading(false);
       setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    dispatch(fetchAllBookings());
+  }, [dispatch]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -114,189 +46,129 @@ const BookingServicemanScreen: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return theme.colors.warning;
+        return theme.colors.warning || '#FFA500';
       case 'confirmed':
-        return theme.colors.primary;
-      case 'in_progress':
-        return theme.colors.info;
+        return theme.colors.success || '#4CAF50';
       case 'completed':
-        return theme.colors.success;
+        return theme.colors.info || '#2196F3';
       case 'cancelled':
-        return theme.colors.error;
+        return theme.colors.error || '#F44336';
+      case 'rejected':
+        return theme.colors.error || '#F44336';
       default:
         return theme.colors.textSecondary;
     }
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'confirmed':
-        return 'Confirmed';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
-  const filteredBookings = bookings.filter(booking => {
-    if (selectedFilter === 'all') return true;
-    return booking.status === selectedFilter;
-  });
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
-  const renderBookingItem = ({ item }: { item: Booking }) => (
-    <TouchableOpacity
-      style={[styles.bookingCard, { backgroundColor: theme.colors.card }]}
-      onPress={() => navigation.navigate(BOOKING_DETAILS_SERVICEMAN, { bookingId: item.id })}
-    >
-      <View style={styles.bookingHeader}>
-        <View style={styles.bookingInfo}>
-          <Text style={[styles.customerName, { color: theme.colors.text }]}>
-            {item.customer_name}
-          </Text>
-          <Text style={[styles.serviceName, { color: theme.colors.textSecondary }]}>
-            {item.service_name}
-          </Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-          <Text style={[styles.statusText, { color: theme.colors.background }]}>
-            {getStatusText(item.status)}
-          </Text>
-        </View>
-      </View>
-      
-      <View style={styles.bookingDetails}>
-        <View style={styles.detailRow}>
-          <MaterialIcons name="calendar-today" size={16} color={theme.colors.textSecondary} />
-          <Text style={[styles.detailText, { color: theme.colors.textSecondary }]}>
-            {item.booking_date} at {item.booking_time}
-          </Text>
-        </View>
-        <View style={styles.detailRow}>
-          <MaterialIcons name="location-on" size={16} color={theme.colors.textSecondary} />
-          <Text style={[styles.detailText, { color: theme.colors.textSecondary }]} numberOfLines={1}>
-            {item.address}
-          </Text>
-        </View>
-        <View style={styles.detailRow}>
-          <MaterialIcons name="attach-money" size={16} color={theme.colors.textSecondary} />
-          <Text style={[styles.detailText, { color: theme.colors.text }]}>
-            ${item.total_amount}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  const handleBookingPress = (bookingId: number) => {
+    navigation.navigate(BOOKING_DETAILS, { bookingId });
+  };
 
-  const renderFilterButton = (filter: typeof selectedFilter, label: string) => (
-    <TouchableOpacity
-      style={[
-        styles.filterButton,
-        {
-          backgroundColor: selectedFilter === filter ? theme.colors.primary : theme.colors.surface,
-          borderColor: theme.colors.border,
-        },
-      ]}
-      onPress={() => setSelectedFilter(filter)}
-    >
-      <Text
-        style={[
-          styles.filterButtonText,
-          {
-            color: selectedFilter === filter ? theme.colors.background : theme.colors.text,
-          },
-        ]}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-
-  if (loading) {
+  if (!userData) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Header 
-          title="My Bookings" 
-          rightIcon={
-            <MaterialIcons 
-              name="account-circle" 
-              size={40} 
-              color={theme.colors.background} 
-            />
-          }
-          onRightIconPress={handleProfilePress}
-        />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+      <SafeAreaView edges={['left', 'right']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Header title="My Bookings" />
+        <View style={styles.content}>
+          <Text style={[styles.message, { color: theme.colors.text }]}>
+            Please login to view your bookings
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header 
-        title="My Bookings" 
-        rightIcon={
-          <MaterialIcons 
-            name="account-circle" 
-            size={40} 
-            color={theme.colors.background} 
-          />
-        }
-        onRightIconPress={handleProfilePress}
-      />
-      
-      {/* Filter Buttons */}
-      <View style={styles.filterContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {renderFilterButton('all', 'All')}
-          {renderFilterButton('pending', 'Pending')}
-          {renderFilterButton('confirmed', 'Confirmed')}
-          {renderFilterButton('in_progress', 'In Progress')}
-          {renderFilterButton('completed', 'Completed')}
-        </ScrollView>
-      </View>
+  const getScreenTitle = () => {
+    if (userData?.role === 'admin') {
+      return 'All Bookings';
+    } else if (userData?.role === 'serviceman') {
+      return 'Service Bookings';
+    } else if (userData?.role === 'brahman') {
+      return 'Puja Bookings';
+    }
+    return 'My Bookings';
+  };
 
-      {/* Bookings List */}
-      <FlatList
-        data={filteredBookings}
-        renderItem={renderBookingItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[theme.colors.primary]}
-            tintColor={theme.colors.primary}
-          />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <MaterialIcons 
-              name="event-busy" 
-              size={64} 
-              color={theme.colors.textSecondary} 
-            />
-            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
-              No bookings found
-            </Text>
-          </View>
-        }
-      />
+  const getEmptyMessage = () => {
+    if (userData?.role === 'admin') {
+      return 'No bookings found in the system';
+    } else if (userData?.role === 'serviceman') {
+      return 'No service bookings assigned to you';
+    } else if (userData?.role === 'brahman') {
+      return 'No puja bookings assigned to you';
+    }
+    return 'No bookings found';
+  };
+
+  const getEmptySubMessage = () => {
+    if (userData?.role === 'admin') {
+      return 'There are no bookings in the system yet.';
+    } else if (userData?.role === 'serviceman') {
+      return 'You haven\'t been assigned any service bookings yet.';
+    } else if (userData?.role === 'brahman') {
+      return 'You haven\'t been assigned any puja bookings yet.';
+    }
+    return 'You haven\'t made any bookings yet.';
+  };
+
+  return (
+    <SafeAreaView edges={['left', 'right']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Header title={getScreenTitle()} />
       
-      <ProfileMenu
-        visible={profileMenuVisible}
-        onClose={handleProfileMenuClose}
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+            Loading bookings...
+          </Text>
+        </View>
+      ) : bookings.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <MaterialIcons 
+            name="event-busy" 
+            size={moderateScale(64)} 
+            color={theme.colors.textSecondary} 
+          />
+          <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
+            No Bookings Found
+          </Text>
+          <Text style={[styles.emptyMessage, { color: theme.colors.textSecondary }]}>
+            {getEmptySubMessage()}
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={bookings}
+          renderItem={({ item }) => (
+            <BookingCard 
+              booking={item} 
+              onPress={handleBookingPress}
+            />
+          )}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[theme.colors.primary]}
+              tintColor={theme.colors.primary}
+            />
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -305,89 +177,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  content: {
+    flex: 1,
+    padding: moderateScale(20),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  filterContainer: {
-    paddingVertical: moderateVerticalScale(8),
-    paddingHorizontal: moderateScale(16),
-  },
-  filterButton: {
-    paddingHorizontal: moderateScale(16),
-    paddingVertical: moderateVerticalScale(8),
-    borderRadius: moderateScale(20),
-    marginRight: moderateScale(8),
-    borderWidth: 1,
-  },
-  filterButtonText: {
-    fontSize: moderateScale(14),
-    fontWeight: '500',
-  },
-  listContainer: {
-    padding: moderateScale(16),
-  },
-  bookingCard: {
-    borderRadius: moderateScale(12),
-    padding: moderateScale(16),
-    marginBottom: moderateVerticalScale(12),
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-  },
-  bookingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: moderateVerticalScale(12),
-  },
-  bookingInfo: {
-    flex: 1,
-  },
-  customerName: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
-    marginBottom: moderateVerticalScale(4),
-  },
-  serviceName: {
-    fontSize: moderateScale(14),
-  },
-  statusBadge: {
-    paddingHorizontal: moderateScale(8),
-    paddingVertical: moderateVerticalScale(4),
-    borderRadius: moderateScale(12),
-  },
-  statusText: {
-    fontSize: moderateScale(12),
-    fontWeight: '600',
-  },
-  bookingDetails: {
-    gap: moderateVerticalScale(8),
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: moderateScale(8),
-  },
-  detailText: {
-    fontSize: moderateScale(14),
-    flex: 1,
+  loadingText: {
+    fontSize: moderateScale(16),
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: moderateVerticalScale(60),
+    paddingHorizontal: moderateScale(40),
   },
-  emptyText: {
-    fontSize: moderateScale(16),
+  emptyTitle: {
+    fontSize: moderateScale(20),
+    fontWeight: 'bold',
     marginTop: moderateVerticalScale(16),
+    marginBottom: moderateVerticalScale(8),
+  },
+  emptyMessage: {
+    fontSize: moderateScale(16),
+    textAlign: 'center',
+    lineHeight: moderateVerticalScale(24),
+  },
+  listContainer: {
+    padding: moderateScale(16),
+  },
+  message: {
+    fontSize: moderateScale(18),
     textAlign: 'center',
   },
 });

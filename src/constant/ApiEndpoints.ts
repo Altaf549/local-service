@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
   PRIVACY_POLICY: '/privacy-policy',
   ABOUT_US: '/about-us',
   BOOKINGS: '/bookings',
+  ADMIN_BOOKINGS: '/admin/bookings',
   SERVICE_BOOKING: '/bookings/service',
   PUJA_BOOKING: '/bookings/puja',
   SERVICE_PRICES_ALL: '/services/price/all',

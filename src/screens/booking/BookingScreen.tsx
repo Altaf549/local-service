@@ -10,7 +10,7 @@ import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 import { fetchUserBookings } from '../../redux/slices/bookingSlice';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList } from '../../constant/Routes';
+import { AppStackParamList, BOOKING_DETAILS } from '../../constant/Routes';
 import { Booking } from '../../redux/slices/bookingSlice';
 
 type BookingScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Booking'>;
@@ -74,7 +74,7 @@ const BookingScreen: React.FC = () => {
   };
 
   const handleBookingPress = (bookingId: number) => {
-    navigation.navigate('BookingDetails', { bookingId });
+    navigation.navigate(BOOKING_DETAILS, { bookingId });
   };
 
   if (!userData) {

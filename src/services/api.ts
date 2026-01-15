@@ -2,6 +2,7 @@ import axios from '../network/axiosConfig';
 import {API_ENDPOINTS} from '../constant/ApiEndpoints';
 import {HomeData, HomeApiResponse, ServiceCategory, PujaType, Service, ServiceWithServicemen, Puja, Serviceman, Brahman} from '../types/home';
 import {ImagePickerResult} from '../utils/imagePicker';
+import Console from '../utils/Console';
 
 export type {
   Banner,
@@ -352,7 +353,7 @@ export const getUserBookings = async () => {
   try {
     const response = await axios.get(API_ENDPOINTS.BOOKINGS);
     if (response.data.success) {
-      return response.data.data;
+      return response.data;
     }
     throw new Error('Failed to fetch bookings');
   } catch (error) {
@@ -360,11 +361,24 @@ export const getUserBookings = async () => {
   }
 };
 
+export const getAllBookings = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.ADMIN_BOOKINGS);
+    if (response.data.success) {
+      return response.data;
+    }
+    throw new Error('Failed to fetch all bookings');
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getBookingDetails = async (id: number) => {
   try {
+    Console.log("Fetching booking details for ID:", id);
     const response = await axios.get(`${API_ENDPOINTS.BOOKINGS}/${id}`);
     if (response.data.success) {
-      return response.data.data;
+      return response.data;
     }
     throw new Error('Failed to fetch booking details');
   } catch (error) {

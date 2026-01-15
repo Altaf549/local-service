@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { createServiceBooking, createPujaBooking, getUserBookings, getBookingDetails, updateBooking, cancelBooking } from '../../services/api';
+import { createServiceBooking, createPujaBooking, getUserBookings, getAllBookings, getBookingDetails, updateBooking, cancelBooking } from '../../services/api';
+import Console from '../../utils/Console';
 
 interface Booking {
   id: number;
@@ -166,11 +167,29 @@ export const fetchUserBookings = createAsyncThunk(
   }
 );
 
+// Async thunk for fetching all bookings (admin/serviceman/brahman)
+export const fetchAllBookings = createAsyncThunk(
+  'bookings/fetchAllBookings',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getAllBookings();
+      if (response.success) {
+        return response.data.bookings;
+      } else {
+        return rejectWithValue(response.message || 'Failed to fetch all bookings');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'An error occurred while fetching all bookings');
+    }
+  }
+);
+
 // Async thunk for fetching booking details
 export const fetchBookingDetails = createAsyncThunk(
   'bookings/fetchBookingDetails',
   async (bookingId: number, { rejectWithValue }) => {
     try {
+      Console.log("Fetching booking details for ID:", bookingId);
       const response = await getBookingDetails(bookingId);
       if (response.success) {
         return response.data.booking;
@@ -289,6 +308,20 @@ const bookingSlice = createSlice({
         state.bookings = action.payload;
       })
       .addCase(fetchUserBookings.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      
+      // Fetch all bookings
+      .addCase(fetchAllBookings.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllBookings.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bookings = action.payload;
+      })
+      .addCase(fetchAllBookings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
