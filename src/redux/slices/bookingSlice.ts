@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { createServiceBooking, createPujaBooking, getUserBookings, getAllBookings, getBookingDetails, updateBooking, cancelBooking } from '../../services/api';
+import { createServiceBooking, createPujaBooking, getUserBookings, getAllBookings, getBookingDetails, updateBooking, cancelBooking, acceptBooking, completeBooking } from '../../services/api';
 import Console from '../../utils/Console';
 
 interface Booking {
@@ -15,7 +15,7 @@ interface Booking {
   address: string;
   mobile_number: string;
   notes?: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rejected';
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
   payment_status: 'pending' | 'paid' | 'failed';
   payment_method: string;
   total_amount: string;
@@ -39,6 +39,10 @@ interface BookingState {
   updateError: string | null;
   cancelLoading: boolean;
   cancelError: string | null;
+  acceptLoading: boolean;
+  acceptError: string | null;
+  completeLoading: boolean;
+  completeError: string | null;
 }
 
 const initialState: BookingState = {
@@ -52,6 +56,10 @@ const initialState: BookingState = {
   updateError: null,
   cancelLoading: false,
   cancelError: null,
+  acceptLoading: false,
+  acceptError: null,
+  completeLoading: false,
+  completeError: null,
 };
 
 // Async thunk for creating service booking
@@ -211,6 +219,7 @@ export const updateBookingThunk = createAsyncThunk(
     address?: string;
     mobile_number?: string;
     notes?: string;
+    status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
   }}, { rejectWithValue }) => {
     try {
       const response = await updateBooking(id, bookingData);
@@ -242,6 +251,40 @@ export const cancelBookingThunk = createAsyncThunk(
   }
 );
 
+// Async thunk for accepting booking
+export const acceptBookingThunk = createAsyncThunk(
+  'bookings/acceptBooking',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await acceptBooking(id);
+      if (response.success) {
+        return response.data.booking;
+      } else {
+        return rejectWithValue(response.message || 'Failed to accept booking');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to accept booking');
+    }
+  }
+);
+
+// Async thunk for completing booking
+export const completeBookingThunk = createAsyncThunk(
+  'bookings/completeBooking',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await completeBooking(id);
+      if (response.success) {
+        return response.data.booking;
+      } else {
+        return rejectWithValue(response.message || 'Failed to complete booking');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to complete booking');
+    }
+  }
+);
+
 const bookingSlice = createSlice({
   name: 'bookings',
   initialState,
@@ -252,6 +295,8 @@ const bookingSlice = createSlice({
       state.error = null;
       state.updateError = null;
       state.cancelError = null;
+      state.acceptError = null;
+      state.completeError = null;
     },
     clearCreateBookingSuccess: (state) => {
       state.createBookingSuccess = false;
@@ -384,6 +429,52 @@ const bookingSlice = createSlice({
       .addCase(cancelBookingThunk.rejected, (state, action) => {
         state.cancelLoading = false;
         state.cancelError = action.payload as string;
+      })
+      
+      // Accept booking
+      .addCase(acceptBookingThunk.pending, (state) => {
+        state.acceptLoading = true;
+        state.acceptError = null;
+      })
+      .addCase(acceptBookingThunk.fulfilled, (state, action) => {
+        state.acceptLoading = false;
+        state.acceptError = null;
+        // Update booking in the list
+        const index = state.bookings.findIndex(booking => booking.id === action.payload.id);
+        if (index !== -1) {
+          state.bookings[index] = action.payload;
+        }
+        // Update current booking if it's the same
+        if (state.currentBooking?.id === action.payload.id) {
+          state.currentBooking = action.payload;
+        }
+      })
+      .addCase(acceptBookingThunk.rejected, (state, action) => {
+        state.acceptLoading = false;
+        state.acceptError = action.payload as string;
+      })
+      
+      // Complete booking
+      .addCase(completeBookingThunk.pending, (state) => {
+        state.completeLoading = true;
+        state.completeError = null;
+      })
+      .addCase(completeBookingThunk.fulfilled, (state, action) => {
+        state.completeLoading = false;
+        state.completeError = null;
+        // Update booking in the list
+        const index = state.bookings.findIndex(booking => booking.id === action.payload.id);
+        if (index !== -1) {
+          state.bookings[index] = action.payload;
+        }
+        // Update current booking if it's the same
+        if (state.currentBooking?.id === action.payload.id) {
+          state.currentBooking = action.payload;
+        }
+      })
+      .addCase(completeBookingThunk.rejected, (state, action) => {
+        state.completeLoading = false;
+        state.completeError = action.payload as string;
       });
   },
 });

@@ -32,6 +32,8 @@ export const API_ENDPOINTS = {
   ADMIN_BOOKINGS: '/admin/bookings',
   SERVICE_BOOKING: '/bookings/service',
   PUJA_BOOKING: '/bookings/puja',
+  BOOKING_ACCEPT: '/bookings/accept',
+  BOOKING_COMPLETE: '/bookings/complete',
   SERVICE_PRICES_ALL: '/services/price/all',
   PUJA_PRICES_ALL: '/pujas/price/all',
   SERVICE_PRICE_ADD: '/services/price/add',

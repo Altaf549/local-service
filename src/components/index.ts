@@ -87,3 +87,6 @@ export type {PriceCardProps, PriceCardData, ServicePrice, PujaPrice} from './Pri
 
 // Add Price Modal
 export {default as AddPriceModal} from './AddPriceModal/AddPriceModal';
+
+// Cancel Modal
+export {default as CancelModal} from './CancelModal/CancelModal';

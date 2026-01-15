@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, TextInput, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
-import { Header } from '../../components/Header/Header';
+import { Header, CancelModal } from '../../components';
 import { Button } from '../../components/Button/Button';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
@@ -27,7 +27,7 @@ interface BookingDetails {
   address: string;
   mobile_number: string;
   notes?: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'rejected';
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
   payment_status: 'pending' | 'paid' | 'refunded';
   payment_method: 'cod' | 'online';
   total_amount: string;
@@ -87,8 +87,10 @@ const BookingDetailsScreen: React.FC = () => {
         return theme.colors.warning || '#FFA500';
       case 'confirmed':
         return theme.colors.success || '#4CAF50';
-      case 'completed':
+      case 'in_progress':
         return theme.colors.info || '#2196F3';
+      case 'completed':
+        return theme.colors.primary || '#1976D2';
       case 'cancelled':
         return theme.colors.error || '#F44336';
       default:
@@ -419,47 +421,22 @@ const BookingDetailsScreen: React.FC = () => {
       </ScrollView>
 
       {/* Cancellation Modal */}
-      {showCancelModal && (
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
-            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
-              Cancel Booking
-            </Text>
-            <Text style={[styles.modalMessage, { color: theme.colors.textSecondary }]}>
-              Please provide a reason for cancellation (optional):
-            </Text>
-            <TextInput
-              style={[styles.modalInput, { color: theme.colors.text, borderColor: theme.colors.border }]}
-              value={cancellationReason}
-              onChangeText={setCancellationReason}
-              placeholder="Enter cancellation reason..."
-              placeholderTextColor={theme.colors.textSecondary}
-              multiline
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: theme.colors.surface }]}
-                onPress={() => {
-                  setShowCancelModal(false);
-                  setCancellationReason('');
-                }}
-              >
-                <Text style={[styles.modalButtonText, { color: theme.colors.text }]}>
-                  Back
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: theme.colors.error }]}
-                onPress={handleCancelBooking}
-              >
-                <Text style={[styles.modalButtonText, { color: theme.colors.background }]}>
-                  Cancel Booking
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
+      <CancelModal
+        visible={showCancelModal}
+        title="Cancel Booking"
+        message="Please provide a reason for cancellation (optional):"
+        placeholder="Enter cancellation reason..."
+        cancelButtonTitle="Back"
+        confirmButtonTitle="Cancel Booking"
+        cancellationReason={cancellationReason}
+        onCancel={() => {
+          setShowCancelModal(false);
+          setCancellationReason('');
+        }}
+        onConfirm={handleCancelBooking}
+        onReasonChange={setCancellationReason}
+        loading={cancelLoading}
+      />
     </SafeAreaView>
   );
 };
@@ -586,57 +563,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     textAlign: 'center',
     lineHeight: moderateVerticalScale(20),
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    borderRadius: moderateScale(12),
-    padding: moderateScale(24),
-    margin: moderateScale(20),
-    maxHeight: '80%',
-  },
-  modalTitle: {
-    fontSize: moderateScale(20),
-    fontWeight: 'bold',
-    marginBottom: moderateVerticalScale(16),
-    textAlign: 'center',
-  },
-  modalMessage: {
-    fontSize: moderateScale(16),
-    marginBottom: moderateVerticalScale(16),
-    textAlign: 'center',
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderRadius: moderateScale(8),
-    padding: moderateScale(12),
-    fontSize: moderateScale(16),
-    minHeight: moderateVerticalScale(80),
-    textAlignVertical: 'top',
-    marginBottom: moderateVerticalScale(20),
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  modalButton: {
-    borderRadius: moderateScale(8),
-    paddingVertical: moderateVerticalScale(12),
-    paddingHorizontal: moderateScale(24),
-    minWidth: moderateScale(120),
-  },
-  modalButtonText: {
-    fontSize: moderateScale(16),
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
 });
 

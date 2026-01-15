@@ -1,274 +1,169 @@
 import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, TextInput, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
-import { Header } from '../../components/Header/Header';
-import { ProfileMenu } from '../../components/ProfileMenu/ProfileMenu';
+import { Header, CancelModal } from '../../components';
 import { Button } from '../../components/Button/Button';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
+import { fetchBookingDetails, updateBookingThunk, cancelBookingThunk, acceptBookingThunk, completeBookingThunk } from '../../redux/slices/bookingSlice';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../constant/Routes';
-import { CustomImage } from '../../components/CustomImage/CustomImage';
+import Console from '../../utils/Console';
 
 interface BookingDetails {
   id: number;
-  customer_name: string;
-  customer_phone: string;
-  customer_email?: string;
-  service_name: string;
-  service_description?: string;
+  user_id: number;
+  booking_type: 'service' | 'puja';
+  service_id?: number;
+  puja_id?: number;
+  serviceman_id?: number;
+  brahman_id?: number;
   booking_date: string;
   booking_time: string;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
-  total_amount: number;
   address: string;
-  city?: string;
-  state?: string;
-  postal_code?: string;
-  special_instructions?: string;
+  mobile_number: string;
+  notes?: string;
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
+  payment_status: 'pending' | 'paid' | 'refunded';
+  payment_method: 'cod' | 'online';
+  total_amount: string;
   created_at: string;
   updated_at: string;
-  customer_profile_photo?: string;
+  user: any;
+  service?: any;
+  puja?: any;
+  serviceman?: any;
+  brahman?: any;
 }
+
+type BookingDetailsServicemanRouteProp = RouteProp<AppStackParamList, 'BookingDetailsServiceman'>;
+type BookingDetailsServicemanNavigationProp = StackNavigationProp<AppStackParamList, 'BookingDetailsServiceman'>;
 
 const BookingDetailsServicemanScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userData } = useAppSelector((state: RootState) => state.user);
-  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
-  const route = useRoute();
-  const [profileMenuVisible, setProfileMenuVisible] = useState(false);
-  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
+  const navigation = useNavigation<BookingDetailsServicemanNavigationProp>();
+  const route = useRoute<BookingDetailsServicemanRouteProp>();
+  const { bookingId } = route.params;
 
-  const { bookingId } = route.params as { bookingId: number };
-
-  const handleProfilePress = () => {
-    setProfileMenuVisible(true);
-  };
-
-  const handleProfileMenuClose = () => {
-    setProfileMenuVisible(false);
-  };
-
-  const fetchBookingDetails = async () => {
-    try {
-      // TODO: Replace with actual API call
-      // const response = await getBookingDetails(bookingId);
-      
-      // Mock data for now
-      const mockBookingDetails: BookingDetails = {
-        id: bookingId,
-        customer_name: 'John Doe',
-        customer_phone: '+1234567890',
-        customer_email: 'john.doe@example.com',
-        service_name: 'Plumbing Service',
-        service_description: 'Fix leaking kitchen sink and check water pressure',
-        booking_date: '2024-01-15',
-        booking_time: '10:00 AM',
-        status: 'pending',
-        total_amount: 150,
-        address: '123 Main Street, Apt 4B',
-        city: 'New York',
-        state: 'NY',
-        postal_code: '10001',
-        special_instructions: 'Please call before arriving. Building has secure entrance.',
-        created_at: '2024-01-10T10:00:00Z',
-        updated_at: '2024-01-10T10:00:00Z',
-        customer_profile_photo: 'https://picsum.photos/seed/customer1/200/200.jpg',
-      };
-
-      setBookingDetails(mockBookingDetails);
-    } catch (error) {
-      console.error('Error fetching booking details:', error);
-      Alert.alert('Error', 'Failed to load booking details');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const dispatch = useAppDispatch();
+  const { currentBooking, loading, cancelLoading, acceptLoading } = useAppSelector((state: RootState) => state.bookings);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   useEffect(() => {
-    fetchBookingDetails();
-  }, [bookingId]);
-
-  const updateBookingStatus = async (newStatus: BookingDetails['status']) => {
-    if (!bookingDetails) return;
-
-    Alert.alert(
-      'Update Status',
-      `Are you sure you want to change the status to ${newStatus.replace('_', ' ')}?`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Update',
-          onPress: async () => {
-            setUpdating(true);
-            try {
-              // TODO: Replace with actual API call
-              // await updateBookingStatus(bookingId, newStatus);
-              
-              setBookingDetails({
-                ...bookingDetails,
-                status: newStatus,
-                updated_at: new Date().toISOString(),
-              });
-              
-              Alert.alert('Success', 'Booking status updated successfully');
-            } catch (error) {
-              console.error('Error updating booking status:', error);
-              Alert.alert('Error', 'Failed to update booking status');
-            } finally {
-              setUpdating(false);
-            }
-          },
-        },
-      ]
-    );
-  };
+    if (bookingId) {
+      Console.log("Fetching booking details for ID:", bookingId);
+      dispatch(fetchBookingDetails(bookingId));
+    }
+  }, [bookingId, dispatch]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return theme.colors.warning;
+        return theme.colors.warning || '#FFA500';
       case 'confirmed':
-        return theme.colors.primary;
-      case 'in_progress':
-        return theme.colors.info;
+        return theme.colors.success || '#4CAF50';
       case 'completed':
-        return theme.colors.success;
+        return theme.colors.info || '#2196F3';
       case 'cancelled':
-        return theme.colors.error;
+        return theme.colors.error || '#F44336';
       default:
         return theme.colors.textSecondary;
     }
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'confirmed':
-        return 'Confirmed';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const handleCancelBooking = async () => {
+    if (!currentBooking) return;
+
+    try {
+      await dispatch(cancelBookingThunk({ id: currentBooking.id, cancellationReason })).unwrap();
+      Alert.alert('Success', 'Booking cancelled successfully');
+      setShowCancelModal(false);
+      setCancellationReason('');
+    } catch (error: any) {
+      Alert.alert('Error', error || 'Failed to cancel booking');
     }
   };
 
-  const renderStatusActions = () => {
-    if (!bookingDetails) return null;
+  const handleAcceptBooking = async () => {
+    if (!currentBooking) return;
 
-    switch (bookingDetails.status) {
-      case 'pending':
-        return (
-          <View style={styles.actionButtons}>
-            <Button
-              title="Confirm Booking"
-              onPress={() => updateBookingStatus('confirmed')}
-              loading={updating}
-              style={styles.actionButton}
-            />
-            <Button
-              title="Cancel Booking"
-              onPress={() => updateBookingStatus('cancelled')}
-              variant="outline"
-              style={styles.actionButton}
-            />
-          </View>
-        );
-      case 'confirmed':
-        return (
-          <View style={styles.actionButtons}>
-            <Button
-              title="Start Service"
-              onPress={() => updateBookingStatus('in_progress')}
-              loading={updating}
-              style={styles.actionButton}
-            />
-            <Button
-              title="Cancel Booking"
-              onPress={() => updateBookingStatus('cancelled')}
-              variant="outline"
-              style={styles.actionButton}
-            />
-          </View>
-        );
-      case 'in_progress':
-        return (
-          <View style={styles.actionButtons}>
-            <Button
-              title="Complete Service"
-              onPress={() => updateBookingStatus('completed')}
-              loading={updating}
-              style={styles.actionButton}
-            />
-          </View>
-        );
-      case 'completed':
-      case 'cancelled':
-        return null;
-      default:
-        return null;
+    try {
+      await dispatch(acceptBookingThunk(currentBooking.id)).unwrap();
+      Alert.alert('Success', 'Booking accepted successfully');
+    } catch (error: any) {
+      Alert.alert('Error', error || 'Failed to accept booking');
     }
   };
+
+  const handleContactCustomer = () => {
+    if (!currentBooking) return;
+
+    const phoneNumber = currentBooking.user?.mobile_number;
+    const customerName = currentBooking.user?.name || 'Customer';
+
+    if (phoneNumber) {
+      Alert.alert(
+        `Contact ${customerName}`,
+        `Would you like to call ${customerName} at ${phoneNumber}?`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Call',
+            onPress: () => {
+              Linking.openURL(`tel:${phoneNumber}`).catch(() => {
+                Alert.alert('Error', 'Unable to make a call');
+              });
+            },
+          },
+        ]
+      );
+    } else {
+      Alert.alert('Error', 'Contact number not available');
+    }
+  };
+
+  const canContact = currentBooking?.status === 'confirmed' || currentBooking?.status === 'completed';
 
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Header 
-          title="Booking Details" 
-          rightIcon={
-            <MaterialIcons 
-              name="account-circle" 
-              size={40} 
-              color={theme.colors.background} 
-            />
-          }
-          onRightIconPress={handleProfilePress}
-        />
+        <Header title="Booking Details" />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+            Loading booking details...
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  if (!bookingDetails) {
+  if (!currentBooking) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Header 
-          title="Booking Details" 
-          rightIcon={
-            <MaterialIcons 
-              name="account-circle" 
-              size={40} 
-              color={theme.colors.background} 
-            />
-          }
-          onRightIconPress={handleProfilePress}
-        />
+      <SafeAreaView edges={['left', 'right']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Header title="Booking Details" />
         <View style={styles.errorContainer}>
-          <MaterialIcons name="error" size={64} color={theme.colors.error} />
           <Text style={[styles.errorText, { color: theme.colors.text }]}>
             Booking not found
           </Text>
@@ -277,142 +172,192 @@ const BookingDetailsServicemanScreen: React.FC = () => {
     );
   }
 
+  const serviceName = currentBooking.service?.service_name || currentBooking.puja?.puja_name || 'Unknown Service';
+  const customerName = currentBooking.user?.name || 'Unknown Customer';
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header 
-        title="Booking Details" 
-        rightIcon={
-          <MaterialIcons 
-            name="account-circle" 
-            size={40} 
-            color={theme.colors.background} 
-          />
-        }
-        onRightIconPress={handleProfilePress}
-      />
-      
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Status Badge */}
-        <View style={styles.statusContainer}>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(bookingDetails.status) }]}>
-            <Text style={[styles.statusText, { color: theme.colors.background }]}>
-              {getStatusText(bookingDetails.status)}
+    <SafeAreaView edges={['left', 'right']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Header title="Booking Details" />
+
+      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Status Card */}
+        <View style={[styles.statusCard, { backgroundColor: theme.colors.card }]}>
+          <View style={styles.statusHeader}>
+            <Text style={[styles.serviceName, { color: theme.colors.text }]}>
+              {serviceName}
             </Text>
+            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(currentBooking.status) }]}>
+              <Text style={[styles.statusText, { color: theme.colors.background }]}>
+                {getStatusText(currentBooking.status)}
+              </Text>
+            </View>
           </View>
+          <Text style={[styles.customerName, { color: theme.colors.textSecondary }]}>
+            Customer: {customerName}
+          </Text>
+          <Text style={[styles.bookingType, { color: theme.colors.textSecondary }]}>
+            {currentBooking.booking_type === 'service' ? 'Service Booking' : 'Puja Booking'}
+          </Text>
         </View>
 
         {/* Customer Information */}
-        <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.card }]}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
             Customer Information
           </Text>
-          <View style={styles.customerInfo}>
-            <View style={styles.customerHeader}>
-              {bookingDetails.customer_profile_photo ? (
-                <CustomImage
-                  source={{ uri: bookingDetails.customer_profile_photo }}
-                  style={styles.customerPhoto}
-                />
-              ) : (
-                <View style={[styles.avatarPlaceholder, { backgroundColor: theme.colors.primary }]}>
-                  <MaterialIcons name="person" size={24} color={theme.colors.background} />
-                </View>
-              )}
-              <View style={styles.customerDetails}>
-                <Text style={[styles.customerName, { color: theme.colors.text }]}>
-                  {bookingDetails.customer_name}
-                </Text>
-                <Text style={[styles.customerContact, { color: theme.colors.textSecondary }]}>
-                  {bookingDetails.customer_phone}
-                </Text>
-                {bookingDetails.customer_email && (
-                  <Text style={[styles.customerContact, { color: theme.colors.textSecondary }]}>
-                    {bookingDetails.customer_email}
-                  </Text>
-                )}
-              </View>
-            </View>
-          </View>
-        </View>
 
-        {/* Service Information */}
-        <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Service Information
-          </Text>
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>
-              Service
-            </Text>
+            <MaterialIcons name="person" size={moderateScale(20)} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Name:</Text>
             <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-              {bookingDetails.service_name}
+              {customerName}
             </Text>
           </View>
-          {bookingDetails.service_description && (
+
+          <View style={styles.infoRow}>
+            <MaterialIcons name="phone" size={moderateScale(20)} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Phone:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>
+              {currentBooking.mobile_number}
+            </Text>
+          </View>
+
+          {currentBooking.user?.email && (
             <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>
-                Description
-              </Text>
+              <MaterialIcons name="email" size={moderateScale(20)} color={theme.colors.textSecondary} />
+              <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Email:</Text>
               <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-                {bookingDetails.service_description}
+                {currentBooking.user.email}
               </Text>
             </View>
           )}
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>
-              Date & Time
-            </Text>
-            <Text style={[styles.infoValue, { color: theme.colors.text }]}>
-              {bookingDetails.booking_date} at {bookingDetails.booking_time}
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>
-              Total Amount
-            </Text>
-            <Text style={[styles.infoValue, { color: theme.colors.primary }]}>
-              ${bookingDetails.total_amount}
-            </Text>
-          </View>
         </View>
 
-        {/* Location Information */}
-        <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Service Location
+        {/* Booking Information */}
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.card }]}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
+            Booking Information
           </Text>
-          <View style={styles.locationInfo}>
-            <View style={styles.addressRow}>
-              <MaterialIcons name="location-on" size={20} color={theme.colors.primary} />
-              <Text style={[styles.addressText, { color: theme.colors.text }]}>
-                {bookingDetails.address}
-                {bookingDetails.city && `, ${bookingDetails.city}`}
-                {bookingDetails.state && `, ${bookingDetails.state}`}
-                {bookingDetails.postal_code && ` ${bookingDetails.postal_code}`}
+
+          <View style={styles.infoRow}>
+            <MaterialIcons name="calendar-today" size={moderateScale(20)} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Date:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>
+              {formatDate(currentBooking.booking_date)}
+            </Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <MaterialIcons name="schedule" size={moderateScale(20)} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Time:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>
+              {currentBooking.booking_time}
+            </Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <MaterialIcons name="location-on" size={moderateScale(20)} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Address:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text, flex: 1 }]}>
+              {currentBooking.address}
+            </Text>
+          </View>
+
+          {currentBooking.notes && (
+            <View style={styles.infoRow}>
+              <MaterialIcons name="notes" size={moderateScale(20)} color={theme.colors.textSecondary} />
+              <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Notes:</Text>
+              <Text style={[styles.infoValue, { color: theme.colors.text, flex: 1 }]}>
+                {currentBooking.notes}
               </Text>
             </View>
+          )}
+        </View>
+
+        {/* Payment Information */}
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.card }]}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
+            Payment Information
+          </Text>
+
+          <View style={styles.infoRow}>
+            <MaterialIcons name="payments" size={moderateScale(20)} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Amount:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>
+              ₹{currentBooking.total_amount}
+            </Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <MaterialIcons name="account-balance-wallet" size={moderateScale(20)} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Method:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>
+              {currentBooking.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
+            </Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <MaterialIcons name="credit-card" size={moderateScale(20)} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Status:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>
+              {getStatusText(currentBooking.payment_status)}
+            </Text>
           </View>
         </View>
 
-        {/* Special Instructions */}
-        {bookingDetails.special_instructions && (
-          <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-              Special Instructions
-            </Text>
-            <Text style={[styles.instructionsText, { color: theme.colors.text }]}>
-              {bookingDetails.special_instructions}
-            </Text>
-          </View>
-        )}
-
         {/* Action Buttons */}
-        {renderStatusActions()}
+        <View style={styles.actionButtons}>
+          {currentBooking.status === 'pending' && (
+            <>
+              <Button
+                title="Accept Booking"
+                onPress={handleAcceptBooking}
+                loading={acceptLoading}
+                style={styles.actionButton}
+              />
+              <Button
+                title="Cancel Booking"
+                onPress={() => setShowCancelModal(true)}
+                loading={cancelLoading}
+                style={{ ...styles.actionButton, backgroundColor: theme.colors.error }}
+              />
+            </>
+          )}
+
+          {canContact && (
+            <Button
+              title="Contact Customer"
+              onPress={handleContactCustomer}
+              style={{ ...styles.actionButton, backgroundColor: theme.colors.success }}
+            />
+          )}
+
+          {currentBooking.status === 'cancelled' && (
+            <View style={[styles.infoMessage, { backgroundColor: theme.colors.surface }]}>
+              <Text style={[styles.infoMessageText, { color: theme.colors.textSecondary }]}>
+                This booking has been cancelled.
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
-      
-      <ProfileMenu
-        visible={profileMenuVisible}
-        onClose={handleProfileMenuClose}
+
+      {/* Cancellation Modal */}
+      <CancelModal
+        visible={showCancelModal}
+        title="Cancel Booking"
+        message="Please provide a reason for cancellation (optional):"
+        placeholder="Enter cancellation reason..."
+        cancelButtonTitle="Back"
+        confirmButtonTitle="Cancel Booking"
+        cancellationReason={cancellationReason}
+        onCancel={() => {
+          setShowCancelModal(false);
+          setCancellationReason('');
+        }}
+        onConfirm={handleCancelBooking}
+        onReasonChange={setCancellationReason}
+        loading={cancelLoading}
       />
     </SafeAreaView>
   );
@@ -427,6 +372,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingText: {
+    fontSize: moderateScale(16),
+  },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -434,29 +382,14 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: moderateScale(18),
-    marginTop: moderateVerticalScale(16),
-    textAlign: 'center',
   },
-  content: {
+  scrollContent: {
     flex: 1,
     padding: moderateScale(16),
   },
-  statusContainer: {
-    alignItems: 'center',
-    marginBottom: moderateVerticalScale(20),
-  },
-  statusBadge: {
-    paddingHorizontal: moderateScale(16),
-    paddingVertical: moderateVerticalScale(8),
-    borderRadius: moderateScale(20),
-  },
-  statusText: {
-    fontSize: moderateScale(14),
-    fontWeight: '600',
-  },
-  section: {
+  statusCard: {
     borderRadius: moderateScale(12),
-    padding: moderateScale(16),
+    padding: moderateScale(20),
     marginBottom: moderateVerticalScale(16),
     elevation: 3,
     shadowColor: '#000',
@@ -467,79 +400,83 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
   },
-  sectionTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
-    marginBottom: moderateVerticalScale(12),
-  },
-  customerInfo: {
-    gap: moderateVerticalScale(12),
-  },
-  customerHeader: {
+  statusHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: moderateVerticalScale(8),
   },
-  customerPhoto: {
-    width: moderateScale(60),
-    height: moderateScale(60),
-    borderRadius: moderateScale(30),
-    marginRight: moderateScale(12),
-  },
-  avatarPlaceholder: {
-    width: moderateScale(60),
-    height: moderateScale(60),
-    borderRadius: moderateScale(30),
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: moderateScale(12),
-  },
-  customerDetails: {
+  serviceName: {
+    fontSize: moderateScale(20),
+    fontWeight: 'bold',
     flex: 1,
   },
+  statusBadge: {
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateVerticalScale(4),
+    borderRadius: moderateScale(12),
+  },
+  statusText: {
+    fontSize: moderateScale(12),
+    fontWeight: 'bold',
+  },
   customerName: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
+    fontSize: moderateScale(16),
     marginBottom: moderateVerticalScale(4),
   },
-  customerContact: {
+  bookingType: {
     fontSize: moderateScale(14),
-    marginBottom: moderateVerticalScale(2),
+    fontStyle: 'italic',
+  },
+  infoCard: {
+    borderRadius: moderateScale(12),
+    padding: moderateScale(20),
+    marginBottom: moderateVerticalScale(16),
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+  },
+  cardTitle: {
+    fontSize: moderateScale(18),
+    fontWeight: 'bold',
+    marginBottom: moderateVerticalScale(16),
   },
   infoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     marginBottom: moderateVerticalScale(12),
   },
   infoLabel: {
     fontSize: moderateScale(14),
-    marginBottom: moderateVerticalScale(4),
+    width: moderateScale(80),
+    marginLeft: moderateScale(8),
   },
   infoValue: {
-    fontSize: moderateScale(16),
-    fontWeight: '500',
-  },
-  locationInfo: {
-    gap: moderateVerticalScale(8),
-  },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: moderateScale(8),
-  },
-  addressText: {
-    flex: 1,
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
-  },
-  instructionsText: {
     fontSize: moderateScale(14),
-    lineHeight: moderateScale(20),
+    fontWeight: '500',
+    flex: 1,
   },
   actionButtons: {
-    gap: moderateVerticalScale(12),
     marginTop: moderateVerticalScale(20),
     marginBottom: moderateVerticalScale(40),
   },
   actionButton: {
-    marginBottom: moderateVerticalScale(8),
+    marginBottom: moderateVerticalScale(12),
+  },
+  infoMessage: {
+    borderRadius: moderateScale(8),
+    padding: moderateScale(16),
+    marginTop: moderateVerticalScale(8),
+  },
+  infoMessageText: {
+    fontSize: moderateScale(14),
+    textAlign: 'center',
+    lineHeight: moderateVerticalScale(20),
   },
 });
 

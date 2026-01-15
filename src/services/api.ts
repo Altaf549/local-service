@@ -538,6 +538,24 @@ export const cancelBooking = async (id: number, cancellationReason?: string) => 
   }
 };
 
+export const acceptBooking = async (id: number) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.BOOKING_ACCEPT}/${id}`, {});
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const completeBooking = async (id: number) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.BOOKING_COMPLETE}/${id}`, {});
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Service Prices API functions
 export const getAllServicePrices = async () => {
   try {

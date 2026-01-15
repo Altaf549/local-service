@@ -7,7 +7,7 @@ import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 interface Booking {
   id: number;
   booking_type: 'service' | 'puja';
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'rejected';
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
   booking_date: string;
   booking_time: string;
   total_amount: string;
@@ -32,8 +32,10 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onPress }) => {
         return theme.colors.warning || '#FFA500';
       case 'confirmed':
         return theme.colors.success || '#4CAF50';
-      case 'completed':
+      case 'in_progress':
         return theme.colors.info || '#2196F3';
+      case 'completed':
+        return theme.colors.primary || '#1976D2';
       case 'cancelled':
         return theme.colors.error || '#F44336';
       default:

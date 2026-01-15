@@ -74,7 +74,7 @@ const BookingServicemanScreen: React.FC = () => {
   };
 
   const handleBookingPress = (bookingId: number) => {
-    navigation.navigate(BOOKING_DETAILS, { bookingId });
+    navigation.navigate(BOOKING_DETAILS_SERVICEMAN, { bookingId });
   };
 
   if (!userData) {
