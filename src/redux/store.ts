@@ -24,6 +24,7 @@ import servicemanExperienceReducer from './slices/servicemanExperienceSlice';
 import brahmanExperienceReducer from './slices/brahmanExperienceSlice';
 import servicemanAchievementReducer from './slices/servicemanAchievementSlice';
 import brahmanAchievementReducer from './slices/brahmanAchievementSlice';
+import profileReducer from './slices/profileSlice';
 
 export const store = configureStore({
   reducer: {
@@ -52,6 +53,7 @@ export const store = configureStore({
     brahmanExperience: brahmanExperienceReducer,
     servicemanAchievements: servicemanAchievementReducer,
     brahmanAchievements: brahmanAchievementReducer,
+    profile: profileReducer,
   },
 });
 

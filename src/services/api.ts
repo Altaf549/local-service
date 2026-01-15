@@ -454,6 +454,64 @@ export const getServicemanProfileData = async () => {
   }
 };
 
+// Serviceman Simple Profile Update API function
+export const updateServicemanSimpleProfile = async (profileData: {
+  current_password: string;
+  name?: string;
+  email?: string;
+  mobile_number?: string;
+  address?: string;
+  new_password?: string;
+  profile_photo?: ImagePickerResult;
+}) => {
+  try {
+    const formData = new FormData();
+    
+    // Add required fields
+    formData.append('current_password', profileData.current_password);
+    
+    // Add optional fields
+    if (profileData.name) formData.append('name', profileData.name);
+    if (profileData.email) formData.append('email', profileData.email);
+    if (profileData.mobile_number) formData.append('mobile_number', profileData.mobile_number);
+    if (profileData.address) formData.append('address', profileData.address);
+    if (profileData.new_password) formData.append('new_password', profileData.new_password);
+    
+    // Add profile photo if provided
+    if (profileData.profile_photo) {
+      const photoUri = profileData.profile_photo.uri;
+      const photoName = photoUri.split('/').pop() || 'profile_photo.jpg';
+      const photoType = profileData.profile_photo.type || 'image/jpeg';
+      
+      formData.append('profile_photo', {
+        uri: photoUri,
+        name: photoName,
+        type: photoType,
+      } as any);
+    }
+    
+    const response = await axios.post(API_ENDPOINTS.SERVICEMAN_SIMPLE_PROFILE_UPDATE, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete Serviceman Account API function
+export const deleteServicemanAccount = async () => {
+  try {
+    const response = await axios.delete(API_ENDPOINTS.SERVICEMAN_DELETE_ACCOUNT);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Brahman Profile Update API function
 export const updateBrahmanProfile = async (profileData: {
   government_id: string;
@@ -501,6 +559,64 @@ export const updateBrahmanProfile = async (profileData: {
 export const getBrahmanProfileData = async () => {
   try {
     const response = await axios.get(API_ENDPOINTS.BRAHMAN_PROFILE_DATA);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Brahman Simple Profile Update API function
+export const updateBrahmanSimpleProfile = async (profileData: {
+  current_password: string;
+  name?: string;
+  email?: string;
+  mobile_number?: string;
+  address?: string;
+  new_password?: string;
+  profile_photo?: ImagePickerResult;
+}) => {
+  try {
+    const formData = new FormData();
+    
+    // Add required fields
+    formData.append('current_password', profileData.current_password);
+    
+    // Add optional fields
+    if (profileData.name) formData.append('name', profileData.name);
+    if (profileData.email) formData.append('email', profileData.email);
+    if (profileData.mobile_number) formData.append('mobile_number', profileData.mobile_number);
+    if (profileData.address) formData.append('address', profileData.address);
+    if (profileData.new_password) formData.append('new_password', profileData.new_password);
+    
+    // Add profile photo if provided
+    if (profileData.profile_photo) {
+      const photoUri = profileData.profile_photo.uri;
+      const photoName = photoUri.split('/').pop() || 'profile_photo.jpg';
+      const photoType = profileData.profile_photo.type || 'image/jpeg';
+      
+      formData.append('profile_photo', {
+        uri: photoUri,
+        name: photoName,
+        type: photoType,
+      } as any);
+    }
+    
+    const response = await axios.post(API_ENDPOINTS.BRAHMAN_SIMPLE_PROFILE_UPDATE, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete Brahman Account API function
+export const deleteBrahmanAccount = async () => {
+  try {
+    const response = await axios.delete(API_ENDPOINTS.BRAHMAN_DELETE_ACCOUNT);
     return response.data;
   } catch (error) {
     throw error;

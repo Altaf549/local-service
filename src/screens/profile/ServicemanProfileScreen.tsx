@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,26 +11,156 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
-import { updateUserProfile, deleteAccount } from '../../services/api';
+import { updateServicemanSimpleProfile, deleteServicemanAccount, updateBrahmanSimpleProfile, deleteBrahmanAccount } from '../../services/api';
+import {
+  updateServicemanProfileThunk,
+  deleteServicemanAccountThunk,
+  clearServicemanUpdateState,
+  clearServicemanDeleteState,
+  fetchServicemanProfile,
+  updateBrahmanProfileThunk,
+  deleteBrahmanAccountThunk,
+  clearBrahmanUpdateState,
+  clearBrahmanDeleteState,
+  fetchBrahmanProfile
+} from '../../redux/slices/profileSlice';
 import { setUserData } from '../../redux/slices/userSlice';
 import { setIsUser } from '../../redux/slices/userSlice';
 import { setAuthToken } from '../../network/axiosConfig';
 import { CustomImage } from '../../components/CustomImage/CustomImage';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList, MAIN_TABS } from '../../constant/Routes';
+import { AppStackParamList, BOOKING_SERVICEMAN, MAIN_TABS } from '../../constant/Routes';
+import Console from '../../utils/Console';
 
 const ServicemanProfileScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userData } = useAppSelector((state: RootState) => state.user);
+  const {
+    servicemanProfile,
+    servicemanUpdateLoading,
+    servicemanUpdateError,
+    servicemanUpdateSuccess,
+    servicemanDeleteLoading,
+    servicemanDeleteError,
+    servicemanDeleteSuccess,
+    brahmanProfile,
+    brahmanUpdateLoading,
+    brahmanUpdateError,
+    brahmanUpdateSuccess,
+    brahmanDeleteLoading,
+    brahmanDeleteError,
+    brahmanDeleteSuccess,
+  } = useAppSelector((state: RootState) => state.profile);
   const dispatch = useAppDispatch();
   const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
   const [editModalVisible, setEditModalVisible] = React.useState(false);
   const [editMode, setEditMode] = React.useState<'profile' | 'email' | 'phone' | 'password'>('profile');
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
 
+  // Determine user role and corresponding states
+  const isServiceman = userData?.role === 'serviceman';
+  const isBrahman = userData?.role === 'brahman';
+
+  // Get role-specific states
+  const profileData = isServiceman ? servicemanProfile : brahmanProfile;
+  const updateLoading = isServiceman ? servicemanUpdateLoading : brahmanUpdateLoading;
+  const updateError = isServiceman ? servicemanUpdateError : brahmanUpdateError;
+  const updateSuccess = isServiceman ? servicemanUpdateSuccess : brahmanUpdateSuccess;
+  const deleteLoading = isServiceman ? servicemanDeleteLoading : brahmanDeleteLoading;
+  const deleteError = isServiceman ? servicemanDeleteError : brahmanDeleteError;
+  const deleteSuccess = isServiceman ? servicemanDeleteSuccess : brahmanDeleteSuccess;
+
   // Debug: Log userData to see what we're working with
   console.log('ServicemanProfileScreen userData:', userData);
+
+  // Handle profile update success
+  useEffect(() => {
+    if (updateSuccess && profileData) {
+      const updatedUserData = {
+        ...userData,
+        ...profileData,
+      };
+
+      dispatch(setUserData(updatedUserData));
+      AsyncStorage.setItem('user_info', JSON.stringify(updatedUserData));
+
+      Alert.alert('Success', 'Profile updated successfully');
+      setEditModalVisible(false);
+
+      // Clear role-specific state
+      if (isServiceman) {
+        dispatch(clearServicemanUpdateState());
+      } else {
+        dispatch(clearBrahmanUpdateState());
+      }
+    }
+  }, [updateSuccess, profileData, userData, dispatch, isServiceman]);
+
+  // Handle profile update error
+  useEffect(() => {
+    if (updateError) {
+      Alert.alert('Error', updateError);
+
+      // Clear role-specific state
+      if (isServiceman) {
+        dispatch(clearServicemanUpdateState());
+      } else {
+        dispatch(clearBrahmanUpdateState());
+      }
+    }
+  }, [updateError, dispatch, isServiceman]);
+
+  // Handle account delete success
+  useEffect(() => {
+    if (deleteSuccess) {
+      // Clear all stored data
+      AsyncStorage.multiRemove(['user_info', 'user_token']);
+
+      // Clear Redux state
+      dispatch(setUserData(null as any));
+      dispatch(setIsUser(false));
+      setAuthToken(null);
+
+      Alert.alert(
+        'Account Deleted',
+        'Your account has been successfully deleted.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate to home screen
+              navigation.reset({
+                index: 0,
+                routes: [{ name: MAIN_TABS }],
+              });
+            },
+          },
+        ]
+      );
+
+      // Clear role-specific state
+      if (isServiceman) {
+        dispatch(clearServicemanDeleteState());
+      } else {
+        dispatch(clearBrahmanDeleteState());
+      }
+    }
+  }, [deleteSuccess, dispatch, navigation, isServiceman]);
+
+  // Handle account delete error
+  useEffect(() => {
+    if (deleteError) {
+      Alert.alert('Error', deleteError);
+
+      // Clear role-specific state
+      if (isServiceman) {
+        dispatch(clearServicemanDeleteState());
+      } else {
+        dispatch(clearBrahmanDeleteState());
+      }
+    }
+  }, [deleteError, dispatch, isServiceman]);
 
   const handleProfilePress = () => {
     setProfileMenuVisible(true);
@@ -80,124 +210,77 @@ const ServicemanProfileScreen: React.FC = () => {
 
   const confirmDeleteAccount = async () => {
     try {
-      const response = await deleteAccount();
-      
-      if (response.success) {
-        // Clear all stored data
-        await AsyncStorage.multiRemove(['user_info', 'user_token']);
-        
-        // Clear Redux state
-        dispatch(setUserData(null as any));
-        dispatch(setIsUser(false));
-        setAuthToken(null);
-        
-        Alert.alert(
-          'Account Deleted',
-          'Your account has been successfully deleted.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Navigate to home screen
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: MAIN_TABS }],
-                });
-              },
-            },
-          ]
-        );
+      if (isServiceman) {
+        await dispatch(deleteServicemanAccountThunk()).unwrap();
       } else {
-        Alert.alert('Error', response.message || 'Failed to delete account');
+        await dispatch(deleteBrahmanAccountThunk()).unwrap();
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete account';
-      Alert.alert('Error', errorMessage);
+      // Error is handled by useEffect hooks
+      Console.error('Delete account error:', error);
     }
   };
 
   const handleSaveProfile = async (data: any) => {
-  try {
-    const updateData: any = {
-      current_password: data.currentPassword,
-    };
-
-    if (data.editMode === 'profile') {
-      updateData.name = data.name;
-      
-      if (data.address && data.address.trim()) {
-        updateData.address = data.address.trim();
-      }
-
-      const currentPhoto = userData?.profile_photo_url || userData?.profile_photo;
-      if (data.profilePhoto && data.profilePhoto !== currentPhoto) {
-        updateData.profile_photo = {
-          uri: data.profilePhoto,
-          fileName: data.profilePhoto.split('/').pop() || 'profile_photo.jpg',
-          type: 'image/jpeg',
-        };
-      }
-    } else if (data.editMode === 'email') {
-      updateData.email = data.email;
-    } else if (data.editMode === 'phone') {
-      updateData.mobile_number = data.phone;
-    } else if (data.editMode === 'password') {
-      updateData.new_password = data.newPassword;
-    }
-
-    const response = await updateUserProfile(updateData);
-    
-    if (response.success) {
-      const updatedUserData = {
-        ...userData,
-        ...response.data,
+    try {
+      const updateData: any = {
+        current_password: data.currentPassword,
       };
-      
-      dispatch(setUserData(updatedUserData));
-      await AsyncStorage.setItem('user_info', JSON.stringify(updatedUserData));
-      
-      if (response.data.token) {
-        await AsyncStorage.setItem('user_token', response.data.token);
-        setAuthToken(response.data.token);
+
+      if (data.editMode === 'profile') {
+        updateData.name = data.name;
+
+        if (data.address && data.address.trim()) {
+          updateData.address = data.address.trim();
+        }
+
+        const currentPhoto = userData?.profile_photo_url || userData?.profile_photo;
+        if (data.profilePhoto && data.profilePhoto !== currentPhoto) {
+          updateData.profile_photo = {
+            uri: data.profilePhoto,
+            fileName: data.profilePhoto.split('/').pop() || 'profile_photo.jpg',
+            type: 'image/jpeg',
+          };
+        }
+      } else if (data.editMode === 'email') {
+        updateData.email = data.email;
+      } else if (data.editMode === 'phone') {
+        updateData.mobile_number = data.phone;
+      } else if (data.editMode === 'password') {
+        updateData.new_password = data.newPassword;
       }
-      
-      Alert.alert('Success', 'Profile updated successfully');
-      // Close modal only after successful save
-      console.log('Profile update success - closing modal. Current editModalVisible:', editModalVisible);
-      setEditModalVisible(false);
-    } else {
-      Alert.alert('Error', response.message || 'Failed to update profile');
-      // Keep modal open on error so user can retry
+
+      if (isServiceman) {
+        await dispatch(updateServicemanProfileThunk(updateData)).unwrap();
+      } else {
+        await dispatch(updateBrahmanProfileThunk(updateData)).unwrap();
+      }
+    } catch (error: any) {
+      // Error is handled by useEffect hooks
+      Console.error('Profile update error:', error);
     }
-  } catch (error: any) {
-      console.log('Profile update error details:', {
-        error,
-        errorResponse: error.response,
-        errorMessage: error.response?.data?.message || error.message,
-        editModalVisibleBefore: editModalVisible
-      });
-      
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
-      Alert.alert('Error', errorMessage);
-      // Don't throw error to prevent multiple alerts
-    }
-};
+  };
 
   const handleCloseModal = () => {
     console.log('handleCloseModal called - current editModalVisible:', editModalVisible);
     setEditModalVisible(false);
   };
 
+  // Get role-specific title
+  const getHeaderTitle = () => {
+    return 'Profile';
+  };
+
   if (!userData) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Header 
-          title="Service Profile" 
+        <Header
+          title={getHeaderTitle()}
           rightIcon={
-            <MaterialIcons 
-              name="account-circle" 
-              size={40} 
-              color={theme.colors.background} 
+            <MaterialIcons
+              name="account-circle"
+              size={40}
+              color={theme.colors.background}
             />
           }
           onRightIconPress={handleProfilePress}
@@ -213,15 +296,8 @@ const ServicemanProfileScreen: React.FC = () => {
 
   return (
     <SafeAreaView edges={['left', 'right']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header 
-        title="Service Profile" 
-        rightIcon={
-          <MaterialIcons 
-            name="account-circle" 
-            size={40} 
-            color={theme.colors.background} 
-          />
-        }
+      <Header
+        title={getHeaderTitle()}
         onRightIconPress={handleProfilePress}
       />
       <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -235,22 +311,22 @@ const ServicemanProfileScreen: React.FC = () => {
               />
             ) : (
               <View style={[styles.avatarPlaceholder, { backgroundColor: theme.colors.primary }]}>
-                <MaterialIcons 
-                  name="account-circle" 
-                  size={moderateScale(60)} 
-                  color={theme.colors.background} 
+                <MaterialIcons
+                  name="account-circle"
+                  size={moderateScale(60)}
+                  color={theme.colors.background}
                 />
               </View>
             )}
             <View style={styles.editImageOverlay}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.editImageButton, { backgroundColor: theme.colors.surface }]}
                 onPress={handleEditProfile}
               >
-                <MaterialIcons 
-                  name="edit" 
-                  size={moderateScale(16)} 
-                  color={theme.colors.primary} 
+                <MaterialIcons
+                  name="edit"
+                  size={moderateScale(16)}
+                  color={theme.colors.primary}
                 />
               </TouchableOpacity>
             </View>
@@ -265,7 +341,7 @@ const ServicemanProfileScreen: React.FC = () => {
           )}
           <View style={styles.statusContainer}>
             <View style={[
-              styles.statusBadge, 
+              styles.statusBadge,
               { backgroundColor: userData?.availability_status === 'available' ? theme.colors.success : theme.colors.warning }
             ]}>
               <Text style={[styles.statusText, { color: theme.colors.background }]}>
@@ -286,14 +362,14 @@ const ServicemanProfileScreen: React.FC = () => {
                 {userData?.email || 'N/A'}
               </Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
               onPress={handleEditEmail}
             >
-              <MaterialIcons 
-                name="edit" 
-                size={moderateScale(16)} 
-                color={theme.colors.background} 
+              <MaterialIcons
+                name="edit"
+                size={moderateScale(16)}
+                color={theme.colors.background}
               />
             </TouchableOpacity>
           </View>
@@ -310,14 +386,14 @@ const ServicemanProfileScreen: React.FC = () => {
                 {userData?.mobile_number || 'N/A'}
               </Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
               onPress={handleEditPhone}
             >
-              <MaterialIcons 
-                name="edit" 
-                size={moderateScale(16)} 
-                color={theme.colors.background} 
+              <MaterialIcons
+                name="edit"
+                size={moderateScale(16)}
+                color={theme.colors.background}
               />
             </TouchableOpacity>
           </View>
@@ -334,14 +410,14 @@ const ServicemanProfileScreen: React.FC = () => {
                 ••••••••
               </Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
               onPress={handleEditPassword}
             >
-              <MaterialIcons 
-                name="edit" 
-                size={moderateScale(16)} 
-                color={theme.colors.background} 
+              <MaterialIcons
+                name="edit"
+                size={moderateScale(16)}
+                color={theme.colors.background}
               />
             </TouchableOpacity>
           </View>
@@ -355,23 +431,47 @@ const ServicemanProfileScreen: React.FC = () => {
                 Delete Account
               </Text>
               <Text style={[styles.infoValue, { color: theme.colors.textSecondary }]}>
-                Permanently delete your account and all data
+                {deleteLoading ? 'Deleting account...' : 'Permanently delete your account and all data'}
               </Text>
             </View>
-            <TouchableOpacity 
-              style={[styles.editButtonSmall, { backgroundColor: theme.colors.error }]}
+            <TouchableOpacity
+              style={[styles.editButtonSmall, { backgroundColor: deleteLoading ? theme.colors.border : theme.colors.error }]}
               onPress={handleDeleteAccount}
+              disabled={deleteLoading}
             >
-              <MaterialIcons 
-                name="delete" 
-                size={moderateScale(16)} 
-                color={theme.colors.background} 
+              <MaterialIcons
+                name={deleteLoading ? "hourglass-empty" : "delete"}
+                size={moderateScale(16)}
+                color={theme.colors.background}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        {/* My Bookings Card */}
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.card }]}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoContent}>
+              <Text style={[styles.infoLabel, { color: theme.colors.text }]}>
+                My Bookings
+              </Text>
+              <Text style={[styles.infoValue, { color: theme.colors.textSecondary }]}>
+                View and manage your bookings
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
+              onPress={() => navigation.navigate(BOOKING_SERVICEMAN)}
+            >
+              <MaterialIcons
+                name="event"
+                size={moderateScale(16)}
+                color={theme.colors.background}
               />
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-      
+
       <EditProfileModal
         visible={editModalVisible}
         onClose={handleCloseModal}
@@ -382,8 +482,9 @@ const ServicemanProfileScreen: React.FC = () => {
         currentPhone={userData?.mobile_number || ''}
         editMode={editMode}
         onSave={handleSaveProfile}
+        loading={updateLoading}
       />
-      
+
       <ProfileMenu
         visible={profileMenuVisible}
         onClose={handleProfileMenuClose}
@@ -402,6 +503,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: moderateVerticalScale(16),
+    paddingBottom: moderateVerticalScale(30),
   },
   profileHeader: {
     alignItems: 'center',

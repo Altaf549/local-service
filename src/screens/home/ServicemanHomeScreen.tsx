@@ -162,7 +162,7 @@ const ServicemanHomeScreen: React.FC = () => {
         { backgroundColor: theme.colors.background },
       ]}>
       <Header 
-        title="Serviceman Home" 
+        title="Dashboard" 
         rightIcon={
           <MaterialIcons 
             name="account-circle" 

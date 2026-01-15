@@ -18,7 +18,7 @@ import { setAuthToken } from '../../network/axiosConfig';
 import { CustomImage } from '../../components/CustomImage/CustomImage';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList, MAIN_TABS } from '../../constant/Routes';
+import { AppStackParamList, BOOKING, MAIN_TABS } from '../../constant/Routes';
 
 const ProfileScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -336,7 +336,7 @@ const ProfileScreen: React.FC = () => {
             </View>
             <TouchableOpacity 
               style={[styles.editButtonSmall, { backgroundColor: theme.colors.primary }]}
-              onPress={() => navigation.navigate('Booking')}
+              onPress={() => navigation.navigate(BOOKING)}
             >
               <MaterialIcons 
                 name="event" 
