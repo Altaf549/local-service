@@ -15,28 +15,32 @@ import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../Header/Header';
 import { Dropdown } from '../Dropdown/Dropdown';
 import { Button } from '../Button/Button';
+import { TextInputWithLabel } from '../TextInputWithLabel/TextInputWithLabel';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../redux/store';
-import { addServicePriceThunk } from '../../redux/slices/servicePricesSlice';
-import { addPujaPriceThunk } from '../../redux/slices/pujaPricesSlice';
+import { addServicePriceThunk, updateServicePriceThunk } from '../../redux/slices/servicePricesSlice';
+import { addPujaPriceThunk, updatePujaPriceThunk } from '../../redux/slices/pujaPricesSlice';
 import { getServices, getPujas } from '../../services/api';
 import { Service, Puja } from '../../types/home';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 import { pickPdfDocument, PdfPickerResult } from '../../utils/pdfPicker';
+import { PriceCardData } from '../PriceCard/PriceCard';
 
 interface AddPriceModalProps {
   visible: boolean;
   onClose: () => void;
   itemType: 'service' | 'puja';
   onSuccess: () => void;
+  editingItem?: any;
 }
 
 const AddPriceModal: React.FC<AddPriceModalProps> = ({ 
   visible, 
   onClose, 
   itemType, 
-  onSuccess 
+  onSuccess,
+  editingItem
 }) => {
   const { theme } = useTheme();
   const dispatch = useDispatch<AppDispatch>();
@@ -47,7 +51,10 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
   const [fetchLoading, setFetchLoading] = useState(false);
   const [materialFile, setMaterialFile] = useState<PdfPickerResult | null>(null);
 
-  const modalTitle = itemType === 'service' ? 'Add Service Price' : 'Add Puja Price';
+  const isEdit = !!editingItem;
+  const modalTitle = isEdit 
+    ? (itemType === 'service' ? 'Update Service Price' : 'Update Puja Price')
+    : (itemType === 'service' ? 'Add Service Price' : 'Add Puja Price');
   const placeholderText = itemType === 'service' ? 'Select a service' : 'Select a puja';
   const priceLabel = itemType === 'service' ? 'Service Price (₹)' : 'Puja Price (₹)';
 
@@ -56,6 +63,20 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
       fetchItems();
     }
   }, [visible, itemType]);
+
+  useEffect(() => {
+    if (editingItem) {
+      // Pre-populate form when editing
+      setPrice(editingItem.price);
+      // For editing, we don't need to fetch items or set selected item
+      // Just use the existing item data
+    } else {
+      // Reset form when adding
+      setPrice('');
+      setSelectedItem(null);
+      setMaterialFile(null);
+    }
+  }, [editingItem]);
 
   const fetchItems = async () => {
     try {
@@ -71,8 +92,13 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!selectedItem || !price) {
+    if (!isEdit && !selectedItem) {
       Alert.alert('Error', 'Please select an item and enter a price.');
+      return;
+    }
+
+    if (!price) {
+      Alert.alert('Error', 'Please enter a price.');
       return;
     }
 
@@ -80,16 +106,26 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
       setLoading(true);
       
       let result;
-      if (itemType === 'service') {
-        result = await dispatch(addServicePriceThunk({ serviceId: selectedItem.id, price }));
+      if (isEdit) {
+        // Update existing price
+        if (itemType === 'service') {
+          result = await dispatch(updateServicePriceThunk({ serviceId: editingItem.id, price }) as any);
+        } else {
+          result = await dispatch(updatePujaPriceThunk({ pujaId: editingItem.id, price, materialFile }) as any);
+        }
       } else {
-        result = await dispatch(addPujaPriceThunk({ pujaId: selectedItem.id, price, materialFile }));
+        // Add new price
+        if (itemType === 'service') {
+          result = await dispatch(addServicePriceThunk({ serviceId: selectedItem!.id, price }) as any);
+        } else {
+          result = await dispatch(addPujaPriceThunk({ pujaId: selectedItem!.id, price, materialFile }) as any);
+        }
       }
       
       if (result.meta.requestStatus === 'fulfilled') {
         Alert.alert(
           'Success',
-          `${itemType === 'service' ? 'Service' : 'Puja'} price added successfully!`,
+          `${isEdit ? 'Updated' : 'Added'} ${itemType === 'service' ? 'Service' : 'Puja'} price successfully!`,
           [
             {
               text: 'OK',
@@ -101,11 +137,11 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
           ]
         );
       } else {
-        Alert.alert('Error', result.payload as string || `Failed to add ${itemType} price.`);
+        Alert.alert('Error', result.payload as string || `Failed to ${isEdit ? 'update' : 'add'} ${itemType} price.`);
       }
     } catch (error) {
       console.error('Error updating price:', error);
-      Alert.alert('Error', `Failed to add ${itemType} price. Please try again.`);
+      Alert.alert('Error', `Failed to ${isEdit ? 'update' : 'add'} ${itemType} price. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -179,37 +215,51 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
         <Header title={modalTitle} />
         
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.section}>
-            <Text style={[styles.label, { color: theme.colors.text }]}>
-              Select {itemType === 'service' ? 'Service' : 'Puja'}
-            </Text>
-            <Dropdown
-              options={formatDropdownOptions()}
-              selectedValue={selectedItem?.id || 0}
-              onSelect={handleDropdownSelect}
-              placeholder={placeholderText}
-              disabled={fetchLoading}
-            />
-          </View>
+          {!isEdit && (
+            <View style={styles.section}>
+              <Text style={[styles.label, { color: theme.colors.text }]}>
+                Select {itemType === 'service' ? 'Service' : 'Puja'}
+              </Text>
+              <Dropdown
+                options={formatDropdownOptions()}
+                selectedValue={selectedItem?.id || 0}
+                onSelect={handleDropdownSelect}
+                placeholder={placeholderText}
+                disabled={fetchLoading}
+              />
+            </View>
+          )}
 
-          <View style={styles.section}>
-            <Text style={[styles.label, { color: theme.colors.text }]}>
-              {priceLabel}
-            </Text>
-            <TextInput
-              style={[
+          {isEdit && (
+            <View style={styles.section}>
+              <Text style={[styles.label, { color: theme.colors.text }]}>
+                {itemType === 'service' ? 'Service' : 'Puja'}
+              </Text>
+              <View style={[
                 styles.priceInput,
                 { 
                   backgroundColor: theme.colors.card,
-                  color: theme.colors.text,
                   borderColor: theme.colors.border
                 }
-              ]}
+              ]}>
+                <Text style={[styles.selectedItemText, { color: theme.colors.text }]}>
+                  {itemType === 'service' 
+                    ? editingItem?.service_name || 'Selected Service'
+                    : editingItem?.puja_name || 'Selected Puja'
+                  }
+                </Text>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.section}>
+            <TextInputWithLabel
+              label={priceLabel}
               value={price}
               onChangeText={setPrice}
               placeholder="Enter price"
-              keyboardType="decimal-pad"
-              returnKeyType="done"
+              keyboardType="numeric"
+              inputStyle={styles.priceInput}
             />
           </View>
 
@@ -325,6 +375,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: moderateScale(12),
     marginTop: moderateVerticalScale(32),
+  },
+  selectedItemText: {
+    fontSize: moderateScale(16),
+    padding: moderateScale(16),
+    borderWidth: 1,
+    borderRadius: moderateScale(8),
+    borderColor: '#e1e5e9',
+    backgroundColor: '#f8f9fa',
   },
 });
 

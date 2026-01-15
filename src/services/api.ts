@@ -562,6 +562,28 @@ export const addServicePrice = async (serviceId: number, price: string) => {
   }
 };
 
+// Update existing Service Price API function
+export const updateServicePrice = async (serviceId: number, price: string) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.SERVICE_PRICE_UPDATE}/${serviceId}`, {
+      price
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete Service Price API function
+export const deleteServicePrice = async (serviceId: number) => {
+  try {
+    const response = await axios.delete(`${API_ENDPOINTS.SERVICE_PRICE_UPDATE}/${serviceId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Update Puja Price API function
 export const addPujaPrice = async (pujaId: number, price: string, materialFile?: any) => {
   try {
@@ -582,6 +604,42 @@ export const addPujaPrice = async (pujaId: number, price: string, materialFile?:
       },
     });
     
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update existing Puja Price API function
+export const updatePujaPrice = async (pujaId: number, price: string, materialFile?: any) => {
+  try {
+    const formData = new FormData();
+    formData.append('price', price);
+    
+    if (materialFile) {
+      formData.append('material_file', {
+        uri: materialFile.uri,
+        type: materialFile.type || 'application/pdf',
+        name: materialFile.fileName || 'material_file.pdf',
+      } as any);
+    }
+    
+    const response = await axios.put(`${API_ENDPOINTS.PUJA_PRICE_UPDATE}/${pujaId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete Puja Price API function
+export const deletePujaPrice = async (pujaId: number) => {
+  try {
+    const response = await axios.delete(`${API_ENDPOINTS.PUJA_PRICE_UPDATE}/${pujaId}`);
     return response.data;
   } catch (error) {
     throw error;

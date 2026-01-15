@@ -16,7 +16,7 @@ interface UserData {
   [key: string]: any;
 }
 
-interface UserState {
+export interface UserState {
   userData: UserData | null;
   isUser: boolean;
   updateProfileLoading: boolean;

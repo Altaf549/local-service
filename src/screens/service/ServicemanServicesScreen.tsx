@@ -7,8 +7,8 @@ import { Header } from '../../components/Header/Header';
 import PriceCard, { PriceCardData } from '../../components/PriceCard/PriceCard';
 import AddPriceModal from '../../components/AddPriceModal/AddPriceModal';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { fetchServicePrices } from '../../redux/slices/servicePricesSlice';
-import { fetchPujaPrices } from '../../redux/slices/pujaPricesSlice';
+import { fetchServicePrices, updateServicePriceThunk, deleteServicePriceThunk } from '../../redux/slices/servicePricesSlice';
+import { fetchPujaPrices, updatePujaPriceThunk, deletePujaPriceThunk } from '../../redux/slices/pujaPricesSlice';
 import { RootState } from '../../redux/store';
 
 const ServicemanServicesScreen: React.FC = () => {
@@ -33,6 +33,8 @@ const ServicemanServicesScreen: React.FC = () => {
   const data = isServiceman ? servicePrices : pujaPrices;
   const refreshing = false; // TODO: Implement refreshing state in slices
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<PriceCardData | null>(null);
 
   useEffect(() => {
     if (userData?.role) {
@@ -62,8 +64,11 @@ const ServicemanServicesScreen: React.FC = () => {
   };
 
   const handleEditItem = (itemId: number) => {
-    console.log(`Edit ${isServiceman ? 'service' : 'puja'}:`, itemId);
-    // TODO: Navigate to edit screen or open modal
+    const item = data.find(item => item.id === itemId);
+    if (item) {
+      setEditingItem(item);
+      setShowEditModal(true);
+    }
   };
 
   const handleDeleteItem = (itemId: number) => {
@@ -79,9 +84,16 @@ const ServicemanServicesScreen: React.FC = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            console.log(`Delete ${itemType.toLowerCase()}:`, itemId);
-            // TODO: Call delete API and refresh list
+          onPress: async () => {
+            try {
+              if (isServiceman) {
+                await dispatch(deleteServicePriceThunk({ serviceId: itemId }) as any);
+              } else {
+                await dispatch(deletePujaPriceThunk({ pujaId: itemId }) as any);
+              }
+            } catch (error) {
+              Alert.alert('Error', `Failed to delete ${itemType.toLowerCase()}. Please try again.`);
+            }
           },
         },
       ]
@@ -94,15 +106,28 @@ const ServicemanServicesScreen: React.FC = () => {
 
   const handleModalClose = () => {
     setShowAddModal(false);
+    setShowEditModal(false);
+    setEditingItem(null);
   };
 
   const handleModalSuccess = () => {
-    // Refresh the data after successful addition
+    // Refresh the data after successful addition/update
     if (isServiceman) {
       dispatch(fetchServicePrices() as any);
     } else if (isBrahman) {
       dispatch(fetchPujaPrices() as any);
     }
+    handleModalClose();
+  };
+
+  const handleEditSuccess = () => {
+    // Refresh the data after successful update
+    if (isServiceman) {
+      dispatch(fetchServicePrices() as any);
+    } else if (isBrahman) {
+      dispatch(fetchPujaPrices() as any);
+    }
+    handleModalClose();
   };
 
   const renderItem = ({ item }: { item: PriceCardData }) => (
@@ -192,6 +217,15 @@ const ServicemanServicesScreen: React.FC = () => {
         onClose={handleModalClose}
         itemType={isServiceman ? 'service' : 'puja'}
         onSuccess={handleModalSuccess}
+      />
+
+      {/* Edit Price Modal */}
+      <AddPriceModal
+        visible={showEditModal}
+        onClose={handleModalClose}
+        itemType={isServiceman ? 'service' : 'puja'}
+        onSuccess={handleEditSuccess}
+        editingItem={editingItem}
       />
     </SafeAreaView>
   );

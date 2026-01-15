@@ -1,5 +1,5 @@
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
-import {getAllServicePrices, addServicePrice} from '../../services/api';
+import {getAllServicePrices, addServicePrice, updateServicePrice, deleteServicePrice} from '../../services/api';
 import {ServicePrice} from '../../components/PriceCard/PriceCard';
 
 // Service Prices State
@@ -45,6 +45,34 @@ export const addServicePriceThunk = createAsyncThunk(
   }
 );
 
+// Async thunk for updating existing service price
+export const updateServicePriceThunk = createAsyncThunk(
+  'servicePrices/updateServicePrice',
+  async ({serviceId, price}: {serviceId: number; price: string}, {rejectWithValue}) => {
+    try {
+      const response = await updateServicePrice(serviceId, price);
+      return response;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update service price';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Async thunk for deleting service price
+export const deleteServicePriceThunk = createAsyncThunk(
+  'servicePrices/deleteServicePrice',
+  async ({serviceId}: {serviceId: number}, {rejectWithValue}) => {
+    try {
+      const response = await deleteServicePrice(serviceId);
+      return {serviceId, response};
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete service price';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // Service Prices Slice
 const servicePricesSlice = createSlice({
   name: 'servicePrices',
@@ -84,6 +112,41 @@ const servicePricesSlice = createSlice({
         // This could be optimized to add the item directly to the array
       })
       .addCase(addServicePriceThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateServicePriceThunk.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateServicePriceThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // Update the item in the array if needed
+        const updatedItem = action.payload.data;
+        if (updatedItem) {
+          const index = state.servicePrices.findIndex(item => item.service_id === updatedItem.service_id);
+          if (index !== -1) {
+            state.servicePrices[index] = updatedItem;
+          }
+        }
+      })
+      .addCase(updateServicePriceThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(deleteServicePriceThunk.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteServicePriceThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // Remove the item from the array
+        const {serviceId} = action.payload;
+        state.servicePrices = state.servicePrices.filter(item => item.service_id !== serviceId);
+      })
+      .addCase(deleteServicePriceThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

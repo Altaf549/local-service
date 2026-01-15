@@ -1,5 +1,5 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import {getAllPujaPrices, addPujaPrice as addPujaPriceApi} from '../../services/api';
+import {getAllPujaPrices, addPujaPrice as addPujaPriceApi, updatePujaPrice, deletePujaPrice} from '../../services/api';
 import {PujaPrice} from '../../components/PriceCard/PriceCard';
 
 // Puja Prices State
@@ -45,6 +45,34 @@ export const addPujaPriceThunk = createAsyncThunk(
   }
 );
 
+// Async thunk for updating existing puja price
+export const updatePujaPriceThunk = createAsyncThunk(
+  'pujaPrices/updatePujaPrice',
+  async ({pujaId, price, materialFile}: {pujaId: number; price: string; materialFile?: any}, {rejectWithValue}) => {
+    try {
+      const response = await updatePujaPrice(pujaId, price, materialFile);
+      return response;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update puja price';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Async thunk for deleting puja price
+export const deletePujaPriceThunk = createAsyncThunk(
+  'pujaPrices/deletePujaPrice',
+  async ({pujaId}: {pujaId: number}, {rejectWithValue}) => {
+    try {
+      const response = await deletePujaPrice(pujaId);
+      return {pujaId, response};
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete puja price';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // Puja Prices Slice
 const pujaPricesSlice = createSlice({
   name: 'pujaPrices',
@@ -84,6 +112,41 @@ const pujaPricesSlice = createSlice({
         // This could be optimized to add the item directly to the array
       })
       .addCase(addPujaPriceThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updatePujaPriceThunk.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updatePujaPriceThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // Update the item in the array if needed
+        const updatedItem = action.payload.data;
+        if (updatedItem) {
+          const index = state.pujaPrices.findIndex(item => item.puja_id === updatedItem.puja_id);
+          if (index !== -1) {
+            state.pujaPrices[index] = updatedItem;
+          }
+        }
+      })
+      .addCase(updatePujaPriceThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(deletePujaPriceThunk.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deletePujaPriceThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // Remove the item from the array
+        const {pujaId} = action.payload;
+        state.pujaPrices = state.pujaPrices.filter(item => item.puja_id !== pujaId);
+      })
+      .addCase(deletePujaPriceThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
