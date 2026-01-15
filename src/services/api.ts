@@ -493,6 +493,26 @@ export const getBrahmanProfileData = async () => {
   }
 };
 
+// Get Serviceman Status API function
+export const getServicemanStatus = async (id: number) => {
+  try {
+    const response = await axios.get(`${API_ENDPOINTS.SERVICEMAN_STATUS}/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get Brahman Status API function
+export const getBrahmanStatus = async (id: number) => {
+  try {
+    const response = await axios.get(`${API_ENDPOINTS.BRAHMAN_STATUS}/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const cancelBooking = async (id: number, cancellationReason?: string) => {
   try {
     const response = await axios.put(`${API_ENDPOINTS.BOOKINGS}/cancel/${id}`, {

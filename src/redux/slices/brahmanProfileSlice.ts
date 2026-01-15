@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { getBrahmanProfileData, updateBrahmanProfile } from '../../services/api';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import { getBrahmanProfileData, updateBrahmanProfile, getBrahmanStatus } from '../../services/api';
 
 interface BrahmanProfileData {
   id: number;
@@ -10,6 +10,10 @@ interface BrahmanProfileData {
   address: string;
   profile_photo?: string;
   id_proof_image?: string;
+  status?: string;
+  availability_status?: string;
+  is_active?: boolean;
+  is_available?: boolean;
 }
 
 interface BrahmanProfileState {
@@ -27,6 +31,23 @@ const initialState: BrahmanProfileState = {
   updateLoading: false,
   updateError: null,
 };
+
+// Async thunk for getting brahman status
+export const getBrahmanStatusThunk = createAsyncThunk(
+  'brahmanProfile/getStatus',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await getBrahmanStatus(id);
+      if (response.success) {
+        return response.data;
+      } else {
+        return rejectWithValue(response.message || 'Failed to get brahman status');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to get brahman status');
+    }
+  }
+);
 
 // Async thunk for getting brahman profile data
 export const fetchBrahmanProfileData = createAsyncThunk(
@@ -74,32 +95,51 @@ const brahmanProfileSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch profile data
     builder
+      // Get brahman profile data
       .addCase(fetchBrahmanProfileData.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBrahmanProfileData.fulfilled, (state, action: PayloadAction<BrahmanProfileData>) => {
+      .addCase(fetchBrahmanProfileData.fulfilled, (state, action) => {
         state.loading = false;
         state.profileData = action.payload;
-        state.error = null;
       })
       .addCase(fetchBrahmanProfileData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
-
-    // Update profile data
-    builder
+      })
+      // Get brahman status
+      .addCase(getBrahmanStatusThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getBrahmanStatusThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update profile data with status information
+        if (state.profileData && action.payload.data) {
+          state.profileData = {
+            ...state.profileData,
+            is_active: action.payload.data.is_active,
+            is_available: action.payload.data.is_available,
+            status: action.payload.data.status,
+            availability_status: action.payload.data.availability_status,
+          };
+        }
+      })
+      .addCase(getBrahmanStatusThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Update brahman profile
       .addCase(updateBrahmanProfileData.pending, (state) => {
         state.updateLoading = true;
         state.updateError = null;
       })
-      .addCase(updateBrahmanProfileData.fulfilled, (state, action: PayloadAction<BrahmanProfileData>) => {
+      .addCase(updateBrahmanProfileData.fulfilled, (state, action) => {
         state.updateLoading = false;
-        state.profileData = action.payload;
         state.updateError = null;
+        state.profileData = action.payload;
       })
       .addCase(updateBrahmanProfileData.rejected, (state, action) => {
         state.updateLoading = false;

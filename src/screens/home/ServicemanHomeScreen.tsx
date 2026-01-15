@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { StyleSheet, View, Text, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
@@ -7,13 +7,16 @@ import { ProfileMenu } from '../../components/ProfileMenu/ProfileMenu';
 import ProfileUpdateCard from '../../components/ProfileUpdateCard/ProfileUpdateCard';
 import ServicemanProfileUpdateModal from '../../components/ServicemanProfileUpdateModal';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { updateServicemanProfile, updateBrahmanProfile, getServicemanProfileData, getBrahmanProfileData } from '../../services/api';
+import { updateServicemanProfile, updateBrahmanProfile, getServicemanProfileData, getBrahmanProfileData, getServicemanStatus, getBrahmanStatus } from '../../services/api';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { RootState } from '../../redux/store';
 import { USER_ROLES, SERVICEMAN_SERVICES, SERVICEMAN_EXPERIENCE, SERVICEMAN_ACHIEVEMENT } from '../../constant/Routes';
 import { useNavigation } from '@react-navigation/native';
-import { fetchServicemanProfileData } from '../../redux/slices/servicemanProfileSlice';
-import { fetchBrahmanProfileData } from '../../redux/slices/brahmanProfileSlice';
+import { fetchServicemanProfileData, getServicemanStatusThunk } from '../../redux/slices/servicemanProfileSlice';
+import { fetchBrahmanProfileData, getBrahmanStatusThunk } from '../../redux/slices/brahmanProfileSlice';
+import { setUserData } from '../../redux/slices/userSlice';
+
+import { useFocusEffect } from '@react-navigation/native';
 
 const ServicemanHomeScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -24,6 +27,57 @@ const ServicemanHomeScreen: React.FC = () => {
   const brahmanProfile = useAppSelector((state: RootState) => state.brahmanProfile);
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
+
+  // Check status when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const checkUserStatus = async () => {
+        if (userData?.id && (userData?.role === USER_ROLES.SERVICEMAN || userData?.role === USER_ROLES.BRAHMAN)) {
+          try {
+            let statusData;
+            if (userData?.role === USER_ROLES.SERVICEMAN) {
+              statusData = await dispatch(getServicemanStatusThunk(userData.id)).unwrap();
+            } else if (userData?.role === USER_ROLES.BRAHMAN) {
+              statusData = await dispatch(getBrahmanStatusThunk(userData.id)).unwrap();
+            }
+            
+            if (statusData?.is_active) {
+              // User is active, update user data in Redux
+              if (userData?.role === USER_ROLES.SERVICEMAN && statusData) {
+                const updatedUserData = {
+                  ...userData,
+                  status: statusData.status,
+                  availability_status: statusData.availability_status,
+                };
+                dispatch(setUserData(updatedUserData));
+              } else if (userData?.role === USER_ROLES.BRAHMAN && statusData) {
+                const updatedUserData = {
+                  ...userData,
+                  status: statusData.status,
+                  availability_status: statusData.availability_status,
+                };
+                dispatch(setUserData(updatedUserData));
+              }
+              
+              console.log('User status verified: Active');
+            } else {
+              const updatedUserData = {
+                ...userData,
+                status: statusData.status,
+                availability_status: statusData.availability_status,
+              };
+              dispatch(setUserData(updatedUserData));
+              console.log('User status verified: Inactive');
+            }
+          } catch (error) {
+            console.error('Error checking status:', error);
+          }
+        }
+      };
+      
+      checkUserStatus();
+    }, [userData, dispatch])
+  );
 
   const handleProfilePress = () => {
     setProfileMenuVisible(true);

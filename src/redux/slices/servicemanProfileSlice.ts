@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { getServicemanProfileData, updateServicemanProfile } from '../../services/api';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import { getServicemanProfileData, updateServicemanProfile, getServicemanStatus } from '../../services/api';
 
 interface ServicemanProfileData {
   id: number;
@@ -10,6 +10,10 @@ interface ServicemanProfileData {
   address: string;
   profile_photo?: string;
   id_proof_image?: string;
+  status?: string;
+  availability_status?: string;
+  is_active?: boolean;
+  is_available?: boolean;
 }
 
 interface ServicemanProfileState {
@@ -27,6 +31,23 @@ const initialState: ServicemanProfileState = {
   updateLoading: false,
   updateError: null,
 };
+
+// Async thunk for getting serviceman status
+export const getServicemanStatusThunk = createAsyncThunk(
+  'servicemanProfile/getStatus',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await getServicemanStatus(id);
+      if (response.success) {
+        return response.data;
+      } else {
+        return rejectWithValue(response.message || 'Failed to get serviceman status');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to get serviceman status');
+    }
+  }
+);
 
 // Async thunk for getting serviceman profile data
 export const fetchServicemanProfileData = createAsyncThunk(
@@ -74,32 +95,51 @@ const servicemanProfileSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch profile data
     builder
+      // Get serviceman profile data
       .addCase(fetchServicemanProfileData.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchServicemanProfileData.fulfilled, (state, action: PayloadAction<ServicemanProfileData>) => {
+      .addCase(fetchServicemanProfileData.fulfilled, (state, action) => {
         state.loading = false;
         state.profileData = action.payload;
-        state.error = null;
       })
       .addCase(fetchServicemanProfileData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
-
-    // Update profile data
-    builder
+      })
+      // Get serviceman status
+      .addCase(getServicemanStatusThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getServicemanStatusThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update profile data with status information
+        if (state.profileData && action.payload.data) {
+          state.profileData = {
+            ...state.profileData,
+            is_active: action.payload.data.is_active,
+            is_available: action.payload.data.is_available,
+            status: action.payload.data.status,
+            availability_status: action.payload.data.availability_status,
+          };
+        }
+      })
+      .addCase(getServicemanStatusThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Update serviceman profile
       .addCase(updateServicemanProfileData.pending, (state) => {
         state.updateLoading = true;
         state.updateError = null;
       })
-      .addCase(updateServicemanProfileData.fulfilled, (state, action: PayloadAction<ServicemanProfileData>) => {
+      .addCase(updateServicemanProfileData.fulfilled, (state, action) => {
         state.updateLoading = false;
-        state.profileData = action.payload;
         state.updateError = null;
+        state.profileData = action.payload;
       })
       .addCase(updateServicemanProfileData.rejected, (state, action) => {
         state.updateLoading = false;

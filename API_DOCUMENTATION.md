@@ -2311,6 +2311,117 @@ Permanently delete the authenticated brahman's account and all associated data.
 
 ---
 
+## 61. Get Serviceman Status
+
+Get complete profile information for a specific serviceman (same data as login response).
+
+**Endpoint:** `GET /api/servicemen/status/{id}`
+
+**Authentication:** Not required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "mobile_number": "9876543210",
+        "phone": "9876543210",
+        "category": {
+            "id": 1,
+            "category_name": "Home Services"
+        },
+        "experience": 5,
+        "profile_photo": "servicemen/profiles/photo.jpg",
+        "profile_photo_url": "http://your-domain.com/storage/servicemen/profiles/photo.jpg",
+        "id_proof_image": "servicemen/id-proofs/photo.jpg",
+        "id_proof_image_url": "http://your-domain.com/storage/servicemen/id-proofs/photo.jpg",
+        "government_id": "AADHAAR123456",
+        "address": "123 Main Street, City, State",
+        "status": "active",
+        "availability_status": "available",
+        "is_active": true,
+        "is_available": true
+    }
+}
+```
+
+**Error Response (404):**
+```json
+{
+    "success": false,
+    "message": "Serviceman not found",
+    "errors": {
+        "id": ["Serviceman not found"]
+    }
+}
+```
+
+**Note:**
+- Returns complete profile information identical to login response
+- `is_active`: Boolean indicating if serviceman is active (status = 'active')
+- `is_available`: Boolean indicating if serviceman is available (availability_status = 'available')
+- Includes profile photo and ID proof URLs for display
+
+---
+
+## 62. Get Brahman Status
+
+Get complete profile information for a specific brahman (same data as login response).
+
+**Endpoint:** `GET /api/brahmans/status/{id}`
+
+**Authentication:** Not required
+
+**Response (200):**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "Rajesh Sharma",
+        "email": "rajesh@example.com",
+        "mobile_number": "9876543211",
+        "specialization": "Vedic Rituals",
+        "languages": "Hindi, English",
+        "experience": 10,
+        "charges": "2000.00",
+        "profile_photo": "brahmans/profiles/photo.jpg",
+        "profile_photo_url": "http://your-domain.com/storage/brahmans/profiles/photo.jpg",
+        "id_proof_image": "brahmans/id-proofs/photo.jpg",
+        "id_proof_image_url": "http://your-domain.com/storage/brahmans/id-proofs/photo.jpg",
+        "government_id": "PAN123456",
+        "address": "123 Temple Road, City, State",
+        "status": "active",
+        "availability_status": "available",
+        "is_active": true,
+        "is_available": true
+    }
+}
+```
+
+**Error Response (404):**
+```json
+{
+    "success": false,
+    "message": "Brahman not found",
+    "errors": {
+        "id": ["Brahman not found"]
+    }
+}
+```
+
+**Note:**
+- Returns complete profile information identical to login response
+- `is_active`: Boolean indicating if brahman is active (status = 'active')
+- `is_available`: Boolean indicating if brahman is available (availability_status = 'available')
+- Includes profile photo and ID proof URLs for display
+
+---
+
+
 ## Error Responses
 
 ### 400 Bad Request (Validation Errors)
