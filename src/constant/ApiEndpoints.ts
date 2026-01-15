@@ -37,4 +37,10 @@ export const API_ENDPOINTS = {
   PUJA_PRICE_ADD: '/pujas/price/add',
   SERVICE_PRICE_UPDATE: '/services/price',
   PUJA_PRICE_UPDATE: '/pujas/price',
+  SERVICEMAN_EXPERIENCES: '/serviceman/experiences',
+  SERVICEMAN_EXPERIENCE_ADD: '/serviceman/experience/add',
+  SERVICEMAN_EXPERIENCE_UPDATE: '/serviceman/experience',
+  BRAHMAN_EXPERIENCES: '/brahman/experiences',
+  BRAHMAN_EXPERIENCE_ADD: '/brahman/experience/add',
+  BRAHMAN_EXPERIENCE_UPDATE: '/brahman/experience',
 } as const;

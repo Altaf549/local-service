@@ -20,6 +20,8 @@ import brahmanProfileReducer from './slices/brahmanProfileSlice';
 import deleteAccountReducer from './slices/deleteAccountSlice';
 import servicePricesReducer from './slices/servicePricesSlice';
 import pujaPricesReducer from './slices/pujaPricesSlice';
+import servicemanExperienceReducer from './slices/servicemanExperienceSlice';
+import brahmanExperienceReducer from './slices/brahmanExperienceSlice';
 
 export const store = configureStore({
   reducer: {
@@ -44,6 +46,8 @@ export const store = configureStore({
     deleteAccount: deleteAccountReducer,
     servicePrices: servicePricesReducer,
     pujaPrices: pujaPricesReducer,
+    servicemanExperience: servicemanExperienceReducer,
+    brahmanExperience: brahmanExperienceReducer,
   },
 });
 

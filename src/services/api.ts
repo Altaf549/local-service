@@ -646,3 +646,83 @@ export const deletePujaPrice = async (pujaId: number) => {
   }
 };
 
+// Serviceman Experience API functions
+export const getServicemanExperiences = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.SERVICEMAN_EXPERIENCES);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch serviceman experiences');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addServicemanExperience = async (experienceData: any) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.SERVICEMAN_EXPERIENCE_ADD, experienceData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateServicemanExperience = async (id: number, experienceData: any) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.SERVICEMAN_EXPERIENCE_UPDATE}/${id}`, experienceData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteServicemanExperience = async (experienceId: number) => {
+  try {
+    const response = await axios.delete(`${API_ENDPOINTS.SERVICEMAN_EXPERIENCE_UPDATE}/${experienceId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Brahman Experience API functions
+export const getBrahmanExperiences = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.BRAHMAN_EXPERIENCES);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch brahman experiences');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addBrahmanExperience = async (experienceData: any) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.BRAHMAN_EXPERIENCE_ADD, experienceData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateBrahmanExperience = async (id: number, experienceData: any) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.BRAHMAN_EXPERIENCE_UPDATE}/${id}`, experienceData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteBrahmanExperience = async (experienceId: number) => {
+  try {
+    const response = await axios.delete(`${API_ENDPOINTS.BRAHMAN_EXPERIENCE_UPDATE}/${experienceId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
