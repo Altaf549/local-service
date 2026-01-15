@@ -40,7 +40,13 @@ export const API_ENDPOINTS = {
   SERVICEMAN_EXPERIENCES: '/serviceman/experiences',
   SERVICEMAN_EXPERIENCE_ADD: '/serviceman/experience/add',
   SERVICEMAN_EXPERIENCE_UPDATE: '/serviceman/experience',
+  SERVICEMAN_ACHIEVEMENTS: '/serviceman/achievements',
+  SERVICEMAN_ACHIEVEMENT_ADD: '/serviceman/achievement/add',
+  SERVICEMAN_ACHIEVEMENT_UPDATE: '/serviceman/achievement',
   BRAHMAN_EXPERIENCES: '/brahman/experiences',
   BRAHMAN_EXPERIENCE_ADD: '/brahman/experience/add',
   BRAHMAN_EXPERIENCE_UPDATE: '/brahman/experience',
+  BRAHMAN_ACHIEVEMENTS: '/brahman/achievements',
+  BRAHMAN_ACHIEVEMENT_ADD: '/brahman/achievement/add',
+  BRAHMAN_ACHIEVEMENT_UPDATE: '/brahman/achievement',
 } as const;

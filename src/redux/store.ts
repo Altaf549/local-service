@@ -22,6 +22,8 @@ import servicePricesReducer from './slices/servicePricesSlice';
 import pujaPricesReducer from './slices/pujaPricesSlice';
 import servicemanExperienceReducer from './slices/servicemanExperienceSlice';
 import brahmanExperienceReducer from './slices/brahmanExperienceSlice';
+import servicemanAchievementReducer from './slices/servicemanAchievementSlice';
+import brahmanAchievementReducer from './slices/brahmanAchievementSlice';
 
 export const store = configureStore({
   reducer: {
@@ -48,6 +50,8 @@ export const store = configureStore({
     pujaPrices: pujaPricesReducer,
     servicemanExperience: servicemanExperienceReducer,
     brahmanExperience: brahmanExperienceReducer,
+    servicemanAchievements: servicemanAchievementReducer,
+    brahmanAchievements: brahmanAchievementReducer,
   },
 });
 

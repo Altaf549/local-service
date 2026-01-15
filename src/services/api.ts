@@ -726,3 +726,82 @@ export const deleteBrahmanExperience = async (experienceId: number) => {
   }
 };
 
+// Achievement API functions
+export const getServicemanAchievements = async (): Promise<any[]> => {
+  try {
+    const response = await axios.get<{success: boolean; data: any[]}>(API_ENDPOINTS.SERVICEMAN_ACHIEVEMENTS);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch serviceman achievements');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addServicemanAchievement = async (achievementData: any) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.SERVICEMAN_ACHIEVEMENT_ADD, achievementData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateServicemanAchievement = async (id: number, achievementData: any) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.SERVICEMAN_ACHIEVEMENT_UPDATE}/${id}`, achievementData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteServicemanAchievement = async (achievementId: number) => {
+  try {
+    const response = await axios.delete(`${API_ENDPOINTS.SERVICEMAN_ACHIEVEMENT_UPDATE}/${achievementId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getBrahmanAchievements = async (): Promise<any[]> => {
+  try {
+    const response = await axios.get<{success: boolean; data: any[]}>(API_ENDPOINTS.BRAHMAN_ACHIEVEMENTS);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch brahman achievements');
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addBrahmanAchievement = async (achievementData: any) => {
+  try {
+    const response = await axios.post(API_ENDPOINTS.BRAHMAN_ACHIEVEMENT_ADD, achievementData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateBrahmanAchievement = async (id: number, achievementData: any) => {
+  try {
+    const response = await axios.put(`${API_ENDPOINTS.BRAHMAN_ACHIEVEMENT_UPDATE}/${id}`, achievementData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteBrahmanAchievement = async (achievementId: number) => {
+  try {
+    const response = await axios.delete(`${API_ENDPOINTS.BRAHMAN_ACHIEVEMENT_UPDATE}/${achievementId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
