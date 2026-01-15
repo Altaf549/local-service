@@ -18,6 +18,8 @@ import bookingReducer from './slices/bookingSlice';
 import servicemanProfileReducer from './slices/servicemanProfileSlice';
 import brahmanProfileReducer from './slices/brahmanProfileSlice';
 import deleteAccountReducer from './slices/deleteAccountSlice';
+import servicePricesReducer from './slices/servicePricesSlice';
+import pujaPricesReducer from './slices/pujaPricesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -40,6 +42,8 @@ export const store = configureStore({
     servicemanProfile: servicemanProfileReducer,
     brahmanProfile: brahmanProfileReducer,
     deleteAccount: deleteAccountReducer,
+    servicePrices: servicePricesReducer,
+    pujaPrices: pujaPricesReducer,
   },
 });
 

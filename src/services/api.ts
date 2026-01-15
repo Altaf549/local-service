@@ -524,3 +524,67 @@ export const cancelBooking = async (id: number, cancellationReason?: string) => 
   }
 };
 
+// Service Prices API functions
+export const getAllServicePrices = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.SERVICE_PRICES_ALL);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch service prices');
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Puja Prices API functions
+export const getAllPujaPrices = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.PUJA_PRICES_ALL);
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error('Failed to fetch puja prices');
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update Service Price API function
+export const updateServicePrice = async (serviceId: number, price: string) => {
+  try {
+    const response = await axios.post(`${API_ENDPOINTS.SERVICE_PRICE_UPDATE}/${serviceId}`, {
+      price
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update Puja Price API function
+export const updatePujaPrice = async (pujaId: number, price: string, materialFile?: any) => {
+  try {
+    const formData = new FormData();
+    formData.append('price', price);
+    
+    if (materialFile) {
+      formData.append('material_file', {
+        uri: materialFile.uri,
+        type: materialFile.type || 'application/pdf',
+        name: materialFile.fileName || 'material_file.pdf',
+      } as any);
+    }
+    
+    const response = await axios.post(`${API_ENDPOINTS.PUJA_PRICE_UPDATE}/${pujaId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+

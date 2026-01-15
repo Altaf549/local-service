@@ -19,7 +19,7 @@ import BookingScreen from '../screens/booking/BookingScreen';
 import BookingServicemanScreen from '../screens/booking/BookingServicemanScreen';
 import BookingDetailsScreen from '../screens/booking/BookingDetailsScreen';
 import BookingDetailsServicemanScreen from '../screens/booking/BookingDetailsServicemanScreen';
-import ServicemanServicesScreen from '../screens/services/ServicemanServicesScreen';
+import ServicemanServicesScreen from '../screens/service/ServicemanServicesScreen';
 import ServicemanExperienceScreen from '../screens/experience/ServicemanExperienceScreen';
 import ServicemanAchievementScreen from '../screens/achievement/ServicemanAchievementScreen';
 import { 

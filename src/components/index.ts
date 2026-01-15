@@ -80,3 +80,10 @@ export {ProfileMenu} from './ProfileMenu/ProfileMenu';
 // Booking Card
 export {default as BookingCard} from './BookingCard/BookingCard';
 export type {BookingCardProps} from './BookingCard/BookingCard';
+
+// Price Card (Unified for Services and Pujas)
+export {default as PriceCard} from './PriceCard/PriceCard';
+export type {PriceCardProps, PriceCardData, ServicePrice, PujaPrice} from './PriceCard/PriceCard';
+
+// Add Price Modal
+export {default as AddPriceModal} from './AddPriceModal/AddPriceModal';
