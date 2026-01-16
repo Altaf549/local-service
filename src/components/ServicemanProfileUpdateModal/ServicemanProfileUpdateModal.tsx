@@ -3,13 +3,14 @@ import { StyleSheet, View, Text, TouchableOpacity, Image, Alert, ActivityIndicat
 import { Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
-import { Button } from '../../components/Button/Button';
-import { TextInputWithLabel } from '../../components/TextInputWithLabel/TextInputWithLabel';
+import { Button } from '../Button/Button';
+import { TextInputWithLabel } from '../TextInputWithLabel/TextInputWithLabel';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 import { pickFromCamera, pickFromGallery } from '../../utils/imagePicker';
 import { useFormValidation, commonValidationRules } from '../../hooks/useFormValidation';
 import { ImagePickerResult } from '../../utils/imagePicker';
+import { USER_ROLES } from '../../constant/Routes';
 
 interface ServicemanProfileUpdateModalProps {
   visible: boolean;
@@ -227,7 +228,7 @@ const ServicemanProfileUpdateModal: React.FC<ServicemanProfileUpdateModalProps> 
   };
 
   const getModalTitle = () => {
-    return userType === 'serviceman' ? 'Update Serviceman Profile' : 'Update Brahman Profile';
+    return userType === USER_ROLES.SERVICEMAN ? 'Update Serviceman Profile' : 'Update Brahman Profile';
   };
 
   return (
@@ -243,7 +244,7 @@ const ServicemanProfileUpdateModal: React.FC<ServicemanProfileUpdateModalProps> 
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.header}>
+            <View style={[styles.header, {borderBottomColor: theme.colors.border}]}>
               <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
                 <MaterialIcons name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
@@ -352,7 +353,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(20),
     paddingVertical: moderateVerticalScale(15),
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   closeButton: {
     padding: moderateScale(8),

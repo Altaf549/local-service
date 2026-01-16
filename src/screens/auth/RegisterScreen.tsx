@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  Dimensions,
   TouchableOpacity,
 } from 'react-native';
 import {useTheme} from '../../theme/ThemeContext';
@@ -21,10 +20,18 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
 import {AppStackParamList, LOGIN, MAIN_TABS, SERVICEMAN_HOME, USER_ROLES} from '../../constant/Routes';
 import {useFormValidation, commonValidationRules} from '../../hooks/useFormValidation';
+import {
+  scale,
+  verticalScale,
+  moderateScale,
+  moderateVerticalScale,
+  scaleFont,
+  scaleSize,
+  scaleHeight,
+  scaleWidth,
+} from '../../utils/scaling';
 
 type RegisterScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Register'>;
-
-const {width, height} = Dimensions.get('window');
 
 type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
 
@@ -248,59 +255,59 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    padding: moderateScale(20),
     flexGrow: 1,
   },
   headerSection: {
     alignItems: 'center',
-    marginTop: height * 0.08,
-    marginBottom: height * 0.06,
+    marginTop: verticalScale(60),
+    marginBottom: verticalScale(50),
   },
   circle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: scaleSize(80),
+    height: scaleSize(80),
+    borderRadius: scaleSize(40),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: verticalScale(20),
   },
   logoText: {
-    fontSize: 28,
+    fontSize: scaleFont(28),
     fontWeight: 'bold',
   },
   title: {
-    fontSize: 32,
+    fontSize: scaleFont(32),
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: verticalScale(22),
   },
   formContainer: {
-    marginBottom: 32,
+    marginBottom: verticalScale(32),
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: verticalScale(20),
   },
   buttonContainer: {
     marginTop: 'auto',
-    paddingBottom: 20,
+    paddingBottom: verticalScale(20),
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: verticalScale(20),
   },
   footerText: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
   },
   footerLink: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     fontWeight: '600',
-    marginLeft: 4,
+    marginLeft: scaleSize(4),
   },
 });
 

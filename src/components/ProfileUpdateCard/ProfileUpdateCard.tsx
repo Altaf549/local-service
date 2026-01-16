@@ -57,14 +57,6 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(12),
     padding: moderateScale(16),
     marginBottom: moderateVerticalScale(12),
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
   },
   cardContent: {
     flexDirection: 'row',
@@ -76,7 +68,6 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(24),
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     marginRight: moderateScale(16),
   },
   textContainer: {

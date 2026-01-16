@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../../components/Header/Header';
 import { ProfileMenu } from '../../components/ProfileMenu/ProfileMenu';
 import ProfileUpdateCard from '../../components/ProfileUpdateCard/ProfileUpdateCard';
-import ServicemanProfileUpdateModal from '../../components/ServicemanProfileUpdateModal';
+import ServicemanProfileUpdateModal from '../../components/ServicemanProfileUpdateModal/ServicemanProfileUpdateModal';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { updateServicemanProfile, updateBrahmanProfile, getServicemanProfileData, getBrahmanProfileData, getServicemanStatus, getBrahmanStatus } from '../../services/api';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { fetchServicemanProfileData, getServicemanStatusThunk } from '../../redux/slices/servicemanProfileSlice';
 import { fetchBrahmanProfileData, getBrahmanStatusThunk } from '../../redux/slices/brahmanProfileSlice';
 import { setUserData } from '../../redux/slices/userSlice';
+import { verticalScale, moderateScale, scaleFont } from '../../utils/scaling';
 
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -22,7 +23,7 @@ const ServicemanHomeScreen: React.FC = () => {
   const { theme } = useTheme();
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
   const [profileUpdateModalVisible, setProfileUpdateModalVisible] = useState(false);
-  const { userData } = useAppSelector((state: RootState) => state.user);
+  const userData = useAppSelector((state: RootState) => state.user.userData);
   const servicemanProfile = useAppSelector((state: RootState) => state.servicemanProfile);
   const brahmanProfile = useAppSelector((state: RootState) => state.brahmanProfile);
   const dispatch = useAppDispatch();
@@ -175,10 +176,10 @@ const ServicemanHomeScreen: React.FC = () => {
       <View style={styles.content}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={[styles.title, { color: theme.colors.text }]}>
-            Welcome to Serviceman Home
+            {userData?.role === USER_ROLES.SERVICEMAN ? "Welcome to Serviceman Dashboard" : "Welcome to Brahman Dashboard"}
           </Text>
           <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-            Manage your profile and services
+            {userData?.role === USER_ROLES.SERVICEMAN ? "Manage your profile and services" : "Manage your profile and puja"}
           </Text>
           
           <ProfileUpdateCard
@@ -189,8 +190,8 @@ const ServicemanHomeScreen: React.FC = () => {
           
           <ProfileUpdateCard
             onPress={handleServicePricePress}
-            title="Service Price"
-            subtitle="Manage your services and pricing"
+            title={userData?.role === USER_ROLES.SERVICEMAN ? "Service Price" : "Puja Price"}
+            subtitle={userData?.role === USER_ROLES.SERVICEMAN ? "Manage your services and pricing" : "Manage your puja and pricing"}
             icon="attach-money"
           />
           
@@ -231,20 +232,20 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: moderateScale(20),
   },
   title: {
-    fontSize: 24,
+    fontSize: scaleFont(20),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 8,
-    marginTop: 20,
+    marginBottom: verticalScale(8),
+    marginTop: verticalScale(20),
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
+    lineHeight: verticalScale(22),
+    marginBottom: verticalScale(24),
   },
 });
 

@@ -147,7 +147,7 @@ export const BannerSection: React.FC<BannerSectionProps> = ({
       onScrollBeginDrag={onScrollBeginDrag}
       onScrollEndDrag={onScrollEndDrag}
       onScrollToIndexFailed={(info) => {
-        const wait = new Promise(resolve => setTimeout(resolve, 100));
+        const wait = new Promise<void>((resolve) => setTimeout(resolve, 100));
         wait.then(() => {
           flatListRef.current?.scrollToIndex({
             index: info.index,

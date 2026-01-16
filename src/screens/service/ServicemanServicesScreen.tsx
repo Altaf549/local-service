@@ -7,14 +7,15 @@ import { Header } from '../../components/Header/Header';
 import PriceCard, { PriceCardData } from '../../components/PriceCard/PriceCard';
 import AddPriceModal from '../../components/AddPriceModal/AddPriceModal';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { fetchServicePrices, updateServicePriceThunk, deleteServicePriceThunk } from '../../redux/slices/servicePricesSlice';
-import { fetchPujaPrices, updatePujaPriceThunk, deletePujaPriceThunk } from '../../redux/slices/pujaPricesSlice';
+import { fetchServicePrices, deleteServicePriceThunk } from '../../redux/slices/servicePricesSlice';
+import { fetchPujaPrices, deletePujaPriceThunk } from '../../redux/slices/pujaPricesSlice';
 import { RootState } from '../../redux/store';
+import { verticalScale, moderateScale, scaleFont, scaleSize} from '../../utils/scaling';
 
 const ServicemanServicesScreen: React.FC = () => {
   const { theme } = useTheme();
   const dispatch = useDispatch();
-  const { userData } = useSelector((state: RootState) => state.user);
+  const userData = useSelector((state: RootState) => state.user.userData);
   const { servicePrices, loading: serviceLoading, error: serviceError } = useSelector((state: RootState) => state.servicePrices);
   const { pujaPrices, loading: pujaLoading, error: pujaError } = useSelector((state: RootState) => state.pujaPrices);
   
@@ -244,12 +245,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
+    marginTop: verticalScale(16),
+    fontSize: scaleFont(16),
   },
   listContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingHorizontal: moderateScale(20),
+    paddingVertical: verticalScale(8),
   },
   emptyListContainer: {
     flexGrow: 1,
@@ -261,35 +262,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: scaleFont(24),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 12,
+    marginTop: verticalScale(20),
+    marginBottom: verticalScale(12),
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 300,
+    lineHeight: verticalScale(22),
+    maxWidth: scaleSize(300),
   },
   fab: {
     position: 'absolute',
-    bottom: 70,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    bottom: verticalScale(70),
+    right: moderateScale(24),
+    width: scaleSize(56),
+    height: scaleSize(56),
+    borderRadius: scaleSize(28),
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: verticalScale(4),
     },
     shadowOpacity: 0.3,
-    shadowRadius: 4.65,
+    shadowRadius: scaleSize(4.65),
   },
 });
 

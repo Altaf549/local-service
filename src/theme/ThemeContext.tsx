@@ -67,7 +67,7 @@ const lightTheme: Theme = {
     surface: '#fffefeff',
     text: '#000000',
     textSecondary: '#666666',
-    border: '#E0E0E0',
+    border: '#787878ff',
     error: '#FF3B30',
     success: '#34C759',
     warning: '#FF9500',
