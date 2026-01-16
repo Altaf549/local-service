@@ -65,7 +65,7 @@ const PriceCard: React.FC<PriceCardProps> = ({ item, itemType, onEdit, onDelete 
   const pujaItem = item as PujaPrice;
 
   const title = isService ? serviceItem.service_name : pujaItem.puja_name;
-  const subtitle = isService ? serviceItem.category.category_name : pujaItem.puja_type?.type_name || 'Unknown Type';
+  const subtitle = isService ? serviceItem.category?.category_name || 'Unknown Category' : pujaItem.puja_type?.type_name || 'Unknown Type';
   const price = isService ? serviceItem.price : pujaItem.price;
   const description = isService ? serviceItem.description : pujaItem.description;
   const updatedAt = isService ? serviceItem.updated_at : pujaItem.updated_at;

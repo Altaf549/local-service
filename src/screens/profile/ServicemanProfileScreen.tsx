@@ -448,7 +448,7 @@ const ServicemanProfileScreen: React.FC = () => {
           </View>
         </View>
         {/* My Bookings Card */}
-        <View style={[styles.infoCard, { backgroundColor: theme.colors.card }]}>
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.card, marginBottom: moderateScale(80) }]}>
           <View style={styles.infoRow}>
             <View style={styles.infoContent}>
               <Text style={[styles.infoLabel, { color: theme.colors.text }]}>
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: moderateVerticalScale(16),
-    paddingBottom: moderateVerticalScale(60),
+    paddingBottom: moderateVerticalScale(20),
   },
   profileHeader: {
     alignItems: 'center',
