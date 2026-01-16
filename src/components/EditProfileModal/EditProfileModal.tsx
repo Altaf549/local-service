@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -45,6 +45,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Reset form when current values change or modal opens
+  useEffect(() => {
+    if (visible) {
+      clearFormFields();
+    }
+  }, [visible, currentName, currentProfilePhoto, currentAddress, currentEmail, currentPhone]);
 
   // Get validation rules based on edit mode
   const getValidationRules = () => {
@@ -172,14 +179,18 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       }
 
       await onSave(saveData);
-      //onClose();
+      
+      // Clear all fields after successful save
+      clearFormFields();
+      
+      onClose();
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to update profile');
       // Don't call onClose() on error to keep modal open
     }
   };
 
-  const handleClose = () => {
+  const clearFormFields = () => {
     setName(currentName);
     setProfilePhoto(currentProfilePhoto);
     setAddress(currentAddress || '');
@@ -188,6 +199,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
+  };
+
+  const handleClose = () => {
+    clearFormFields();
     onClose();
   };
 
@@ -217,7 +232,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.header}>
+            <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
               <MaterialIcons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
@@ -373,7 +388,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(20),
     paddingVertical: moderateVerticalScale(15),
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   closeButton: {
     padding: moderateScale(8),

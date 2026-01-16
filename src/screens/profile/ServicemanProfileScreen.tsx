@@ -320,7 +320,7 @@ const ServicemanProfileScreen: React.FC = () => {
             )}
             <View style={styles.editImageOverlay}>
               <TouchableOpacity
-                style={[styles.editImageButton, { backgroundColor: theme.colors.surface }]}
+                style={[styles.editImageButton, { backgroundColor: theme.colors.surface, shadowColor: theme.colors.primary }]}
                 onPress={handleEditProfile}
               >
                 <MaterialIcons
@@ -352,7 +352,7 @@ const ServicemanProfileScreen: React.FC = () => {
         </View>
 
         {/* Email Card */}
-        <View style={[styles.infoCard, { backgroundColor: theme.colors.card }]}>
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.card, shadowColor: theme.colors.primary }]}>
           <View style={styles.infoRow}>
             <View style={styles.infoContent}>
               <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: moderateVerticalScale(16),
-    paddingBottom: moderateVerticalScale(30),
+    paddingBottom: moderateVerticalScale(60),
   },
   profileHeader: {
     alignItems: 'center',
@@ -532,7 +532,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 1,
@@ -572,7 +571,6 @@ const styles = StyleSheet.create({
     padding: moderateScale(20),
     marginBottom: moderateVerticalScale(15),
     elevation: 3,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -590,7 +588,6 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: moderateScale(14),
-    color: '#666',
     marginBottom: moderateVerticalScale(4),
   },
   infoValue: {
