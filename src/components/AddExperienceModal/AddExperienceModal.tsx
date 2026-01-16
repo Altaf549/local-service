@@ -43,8 +43,8 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
 }) => {
   const { theme } = useTheme();
   const dispatch = useAppDispatch();
-  const { updateLoading, addLoading, updateError, addError } = useAppSelector(state => 
-    itemType === 'serviceman' 
+  const { updateLoading, addLoading, updateError, addError } = useAppSelector(state =>
+    itemType === 'serviceman'
       ? state.servicemanExperience
       : state.brahmanExperience
   );
@@ -66,7 +66,7 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
     start_date?: string;
     end_date?: string;
   }>({});
-  
+
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
@@ -84,13 +84,13 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
       });
     }
     setErrors({
-        title: undefined,
-        company: undefined,
-        description: undefined,
-        years: undefined,
-        start_date: undefined,
-        end_date: undefined,
-      });
+      title: undefined,
+      company: undefined,
+      description: undefined,
+      years: undefined,
+      start_date: undefined,
+      end_date: undefined,
+    });
   }, [editingItem, visible]);
 
   const validateForm = () => {
@@ -112,14 +112,17 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
     }
-    if (!formData.years || formData.years < 1) {
-      newErrors.years = 'Years must be at least 1';
-    }
     if (!formData.start_date) {
       newErrors.start_date = 'Start date is required';
     }
     if (!formData.end_date) {
       newErrors.end_date = 'End date is required';
+    }
+    if (formData.start_date && formData.end_date) {
+      const calculatedYears = calculateYearsOfExperience(formData.start_date, formData.end_date);
+      if (calculatedYears < 0.1) {
+        newErrors.years = 'Experience duration must be at least 0.1 years';
+      }
     }
 
     setErrors(newErrors);
@@ -168,7 +171,7 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
             start_date: formData.start_date,
             end_date: formData.end_date,
           };
-          
+
           if (itemType === 'serviceman') {
             const result = await dispatch(addServicemanExperience(newData));
             if (addServicemanExperience.fulfilled.match(result)) {
@@ -201,6 +204,27 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
+
+  const calculateYearsOfExperience = (startDate: string, endDate: string): number => {
+    if (!startDate || !endDate) return 0;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (start > end) return 0;
+    
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365);
+    
+    return Math.round(diffYears * 10) / 10; // Round to 1 decimal place
+  };
+
+  useEffect(() => {
+    if (formData.start_date && formData.end_date) {
+      const calculatedYears = calculateYearsOfExperience(formData.start_date, formData.end_date);
+      setFormData(prev => ({ ...prev, years: calculatedYears }));
+    }
+  }, [formData.start_date, formData.end_date]);
 
   const getTitle = () => {
     if (editingItem) {
@@ -252,20 +276,9 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
           </View>
 
           <View style={styles.formGroup}>
-            <TextInputWithLabel
-              label="Years of Experience"
-              value={formData.years.toString()}
-              onChangeText={(value) => updateFormData('years', parseInt(value) || 0)}
-              placeholder="e.g., 5"
-              error={errors.years}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
             <Text style={[styles.label, { color: theme.colors.text }]}>Start Date</Text>
             <TouchableOpacity
-              style={[styles.datePickerButton, { borderColor: errors.start_date ? theme.colors.error : theme.colors.border }]}
+              style={[styles.datePickerButton, { borderColor: errors.start_date ? theme.colors.error : theme.colors.border, backgroundColor: theme.colors.card }]}
               onPress={() => setShowStartDatePicker(true)}
             >
               <Text style={[styles.dateText, { color: theme.colors.text }]}>
@@ -283,7 +296,7 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
           <View style={styles.formGroup}>
             <Text style={[styles.label, { color: theme.colors.text }]}>End Date</Text>
             <TouchableOpacity
-              style={[styles.datePickerButton, { borderColor: errors.end_date ? theme.colors.error : theme.colors.border }]}
+              style={[styles.datePickerButton, { borderColor: errors.end_date ? theme.colors.error : theme.colors.border, backgroundColor: theme.colors.card }]}
               onPress={() => setShowEndDatePicker(true)}
             >
               <Text style={[styles.dateText, { color: theme.colors.text }]}>
@@ -297,11 +310,23 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
               </Text>
             )}
           </View>
+
+          <View style={styles.formGroup}>
+            <TextInputWithLabel
+              label="Years of Experience"
+              value={formData.years.toString()}
+              onChangeText={() => {}}
+              placeholder="Calculated from dates"
+              error={errors.years}
+              keyboardType="numeric"
+              disabled={true}
+            />
+          </View>
         </ScrollView>
-        
+
         {/* Date Pickers */}
         {showStartDatePicker && (
-          <View style={styles.datePickerContainer}>
+          <View style={[styles.datePickerContainer, { shadowColor: theme.colors.primary }]}>
             <DateTimePicker
               value={formData.start_date ? new Date(formData.start_date) : new Date()}
               mode="date"
@@ -314,6 +339,7 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
                 setShowStartDatePicker(false);
               }}
               maximumDate={formData.end_date ? new Date(formData.end_date) : undefined}
+              
             />
             <TouchableOpacity
               style={[styles.datePickerButton, { backgroundColor: theme.colors.background }]}
@@ -323,9 +349,9 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
             </TouchableOpacity>
           </View>
         )}
-        
+
         {showEndDatePicker && (
-          <View style={styles.datePickerContainer}>
+          <View style={[styles.datePickerContainer, { shadowColor: theme.colors.primary }]}>
             <DateTimePicker
               value={formData.end_date ? new Date(formData.end_date) : new Date()}
               mode="date"
@@ -347,7 +373,7 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
             </TouchableOpacity>
           </View>
         )}
-        
+
         {/* Bottom Action Buttons */}
         <View style={[styles.bottomActions, { borderTopColor: theme.colors.border }]}>
           <Button
@@ -356,7 +382,7 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
             variant="outline"
             style={{ flex: 1 }}
           />
-          
+
           <Button
             title="Save"
             onPress={handleSubmit}
@@ -366,7 +392,8 @@ const AddExperienceModal: React.FC<AddExperienceModalProps> = ({
         </View>
       </View>
     </Modal>
-)};
+  )
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -376,64 +403,63 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: moderateScale(16),
+    paddingVertical: moderateVerticalScale(12),
     borderBottomWidth: 1,
   },
   closeButton: {
-    padding: 4,
+    padding: moderateScale(4),
   },
   title: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600',
     flex: 1,
     textAlign: 'center',
-    marginHorizontal: 16,
+    marginHorizontal: moderateScale(16),
   },
   placeholder: {
-    width: 40,
+    width: moderateScale(40),
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: moderateScale(16),
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: moderateVerticalScale(20),
   },
   label: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '500',
-    marginBottom: 8,
+    marginBottom: moderateVerticalScale(8),
   },
   datePickerButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderWidth: 1,
-      borderRadius: moderateScale(8),
-      paddingHorizontal: moderateScale(15),
-      paddingVertical: moderateVerticalScale(12),
-      backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderRadius: moderateScale(8),
+    paddingHorizontal: moderateScale(15),
+    paddingVertical: moderateVerticalScale(12),
   },
   dateInput: {
-    height: 48,
+    height: moderateVerticalScale(48),
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderRadius: moderateScale(8),
+    paddingHorizontal: moderateScale(12),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   dateText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     flex: 1,
   },
   dateIcon: {
-    marginLeft: 8,
+    marginLeft: moderateScale(8),
   },
   errorText: {
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: moderateScale(12),
+    marginTop: moderateVerticalScale(4),
   },
   datePickerContainer: {
     position: 'absolute',
@@ -441,28 +467,27 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: 'white',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    shadowColor: '#000',
+    borderTopLeftRadius: moderateScale(16),
+    borderTopRightRadius: moderateScale(16),
     shadowOffset: {
       width: 0,
-      height: -2,
+      height: moderateScale(-2),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: moderateScale(4),
     elevation: 5,
   },
   datePickerButtonText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '600',
     textAlign: 'center',
   },
   bottomActions: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: moderateScale(16),
+    paddingVertical: moderateVerticalScale(12),
     borderTopWidth: 1,
-    gap: 12,
+    gap: moderateScale(12),
   },
 });
 
