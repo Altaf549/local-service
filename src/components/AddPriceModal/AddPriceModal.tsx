@@ -26,6 +26,7 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 import { pickPdfDocument, PdfPickerResult } from '../../utils/pdfPicker';
 import { PriceCardData } from '../PriceCard/PriceCard';
+import Console from '../../utils/Console';
 
 interface AddPriceModalProps {
   visible: boolean;
@@ -138,9 +139,11 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
         // Call onSuccess immediately to refresh parent data and close modal
         onSuccess();
       } else {
+        onClose();
         Alert.alert('Error', result.payload as string || `Failed to ${isEdit ? 'update' : 'add'} ${itemType} price.`);
       }
     } catch (error) {
+      onClose();
       console.error('Error updating price:', error);
       Alert.alert('Error', `Failed to ${isEdit ? 'update' : 'add'} ${itemType} price. Please try again.`);
     } finally {
@@ -149,6 +152,7 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
   };
 
   const handleClose = () => {
+    Console.log("Closing modal");
     setSelectedItem(null);
     setPrice('');
     setMaterialFile(null);

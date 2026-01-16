@@ -11,6 +11,7 @@ import { fetchServicePrices, deleteServicePriceThunk } from '../../redux/slices/
 import { fetchPujaPrices, deletePujaPriceThunk } from '../../redux/slices/pujaPricesSlice';
 import { RootState } from '../../redux/store';
 import { verticalScale, moderateScale, scaleFont, scaleSize, moderateVerticalScale} from '../../utils/scaling';
+import Console from '../../utils/Console';
 
 const ServicemanServicesScreen: React.FC = () => {
   const { theme } = useTheme();
