@@ -206,7 +206,7 @@ const ServicemanServicesScreen: React.FC = () => {
       
       {/* FAB */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        style={[styles.fab, { backgroundColor: theme.colors.primary, shadowColor: theme.colors.primary }]}
         onPress={handleAddItem}
       >
         <MaterialIcons 
@@ -288,7 +288,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: verticalScale(4),

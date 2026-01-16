@@ -5,13 +5,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import {useTheme} from '../../theme/ThemeContext';
-import {
-  scale,
-  verticalScale,
-  moderateScale,
-  scaleFont,
-  scaleSize,
-} from '../../utils/scaling';
+import { scale, verticalScale, moderateScale, scaleFont, scaleSize,} from '../../utils/scaling';
 
 export interface ExperienceCardProps {
   id: number;

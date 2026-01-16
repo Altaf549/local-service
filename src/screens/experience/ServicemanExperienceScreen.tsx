@@ -11,6 +11,7 @@ import { fetchServicemanExperiences, updateServicemanExperience, deleteServicema
 import { fetchBrahmanExperiences, updateBrahmanExperience, deleteBrahmanExperience } from '../../redux/slices/brahmanExperienceSlice';
 import { RootState } from '../../redux/store';
 import { UserState } from '../../redux/slices/userSlice';
+import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
 
 const ServicemanExperienceScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -152,7 +153,7 @@ const ServicemanExperienceScreen: React.FC = () => {
     <View style={styles.emptyContainer}>
       <MaterialIcons 
         name={emptyIcon} 
-        size={80} 
+        size={moderateScale(80)} 
         color={theme.colors.textSecondary} 
       />
       <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
@@ -175,9 +176,9 @@ const ServicemanExperienceScreen: React.FC = () => {
         <Header 
           title={screenTitle} 
         />
-        <View style={styles.loadingContainer}>
+        <View style={[styles.loadingContainer, { padding: moderateScale(20) }]}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary, fontSize: moderateScale(16), marginTop: moderateVerticalScale(16) }]}>
             Loading experiences...
           </Text>
         </View>
@@ -210,7 +211,7 @@ const ServicemanExperienceScreen: React.FC = () => {
       
       {/* FAB */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        style={[styles.fab, { backgroundColor: theme.colors.primary, shadowColor: theme.colors.primary }]}
         onPress={handleAddItem}
       >
         <MaterialIcons 
@@ -253,12 +254,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
+    marginTop: moderateVerticalScale(16),
+    fontSize: moderateScale(16),
   },
   listContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingHorizontal: moderateScale(20),
+    paddingVertical: moderateVerticalScale(8),
   },
   emptyListContainer: {
     flexGrow: 1,
@@ -270,35 +271,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: moderateScale(24),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 12,
+    marginTop: moderateVerticalScale(20),
+    marginBottom: moderateVerticalScale(12),
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 300,
+    lineHeight: moderateScale(22),
+    maxWidth: moderateScale(300),
   },
   fab: {
     position: 'absolute',
-    bottom: 70,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    bottom: moderateVerticalScale(70),
+    right: moderateScale(24),
+    width: moderateScale(56),
+    height: moderateScale(56),
+    borderRadius: moderateScale(28),
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: moderateScale(4),
     },
     shadowOpacity: 0.3,
-    shadowRadius: 4.65,
+    shadowRadius: moderateScale(4.65),
   },
 });
 

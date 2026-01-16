@@ -112,7 +112,7 @@ const darkTheme: Theme = {
     disabled: '#48484A',
     placeholder: '#636366',
     card: '#1C1C1E',
-    shadow: '#000000',
+    shadow: '#FFFFFF',
   },
   spacing: {
     xs: 4,
