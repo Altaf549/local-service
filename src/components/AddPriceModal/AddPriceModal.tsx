@@ -130,12 +130,13 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
             {
               text: 'OK',
               onPress: () => {
-                onSuccess();
-                handleClose();
+                // Just close the alert, modal is already handled
               }
             }
           ]
         );
+        // Call onSuccess immediately to refresh parent data and close modal
+        onSuccess();
       } else {
         Alert.alert('Error', result.payload as string || `Failed to ${isEdit ? 'update' : 'add'} ${itemType} price.`);
       }
@@ -235,20 +236,12 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
               <Text style={[styles.label, { color: theme.colors.text }]}>
                 {itemType === 'service' ? 'Service' : 'Puja'}
               </Text>
-              <View style={[
-                styles.priceInput,
-                { 
-                  backgroundColor: theme.colors.card,
-                  borderColor: theme.colors.border
-                }
-              ]}>
-                <Text style={[styles.selectedItemText, { color: theme.colors.text }]}>
+              <Text style={[styles.selectedItemText, { color: theme.colors.textSecondary, borderColor: theme.colors.border }]}>
                   {itemType === 'service' 
                     ? editingItem?.service_name || 'Selected Service'
                     : editingItem?.puja_name || 'Selected Puja'
                   }
                 </Text>
-              </View>
             </View>
           )}
 
@@ -301,9 +294,9 @@ const AddPriceModal: React.FC<AddPriceModalProps> = ({
             />
             
             <Button
-              title="Add Price"
+              title={isEdit ? "Update Price" : "Add Price"}
               onPress={handleSubmit}
-              disabled={loading || !selectedItem || !price}
+              disabled={loading || (!isEdit && !selectedItem) || !price}
               loading={loading}
               style={{ flex: 2 }}
             />
@@ -342,15 +335,12 @@ const styles = StyleSheet.create({
   dropdownContainer: {
     borderWidth: 1,
     borderRadius: moderateScale(8),
-    borderColor: '#e1e5e9',
-    backgroundColor: '#f8f9fa',
   },
   itemsList: {
     maxHeight: moderateVerticalScale(200),
   },
   itemWrapper: {
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   itemContainer: {
     flexDirection: 'row',
@@ -381,8 +371,6 @@ const styles = StyleSheet.create({
     padding: moderateScale(16),
     borderWidth: 1,
     borderRadius: moderateScale(8),
-    borderColor: '#e1e5e9',
-    backgroundColor: '#f8f9fa',
   },
 });
 
