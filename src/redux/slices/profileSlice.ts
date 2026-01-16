@@ -135,7 +135,25 @@ export const updateServicemanProfileThunk = createAsyncThunk(
       throw new Error(response.message || 'Failed to update serviceman profile');
     } catch (error: any) {
       Console.error('Update serviceman profile error:', error);
-      return rejectWithValue(error.message || 'Failed to update serviceman profile');
+      
+      // Extract structured error message if available
+      let errorMessage = 'Failed to update serviceman profile';
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.errors?.current_password?.[0]) {
+          errorMessage = errorData.errors.current_password[0];
+        } else if (errorData.errors?.email?.[0]) {
+          errorMessage = errorData.errors.email[0];
+        } else if (errorData.errors?.mobile_number?.[0]) {
+          errorMessage = errorData.errors.mobile_number[0];
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -184,7 +202,25 @@ export const updateBrahmanProfileThunk = createAsyncThunk(
       throw new Error(response.message || 'Failed to update brahman profile');
     } catch (error: any) {
       Console.error('Update brahman profile error:', error);
-      return rejectWithValue(error.message || 'Failed to update brahman profile');
+      
+      // Extract structured error message if available
+      let errorMessage = 'Failed to update brahman profile';
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.errors?.current_password?.[0]) {
+          errorMessage = errorData.errors.current_password[0];
+        } else if (errorData.errors?.email?.[0]) {
+          errorMessage = errorData.errors.email[0];
+        } else if (errorData.errors?.mobile_number?.[0]) {
+          errorMessage = errorData.errors.mobile_number[0];
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      Console.log('Update brahman profile error message:', errorMessage);
+      return rejectWithValue(errorMessage);
     }
   }
 );
