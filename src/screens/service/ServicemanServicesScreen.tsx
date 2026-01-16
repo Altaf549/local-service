@@ -89,8 +89,12 @@ const ServicemanServicesScreen: React.FC = () => {
             try {
               if (isServiceman) {
                 await dispatch(deleteServicePriceThunk({ serviceId: itemId }) as any);
+                // Refresh the data after successful deletion
+                dispatch(fetchServicePrices() as any);
               } else {
                 await dispatch(deletePujaPriceThunk({ pujaId: itemId }) as any);
+                // Refresh the data after successful deletion
+                dispatch(fetchPujaPrices() as any);
               }
             } catch (error) {
               Alert.alert('Error', `Failed to delete ${itemType.toLowerCase()}. Please try again.`);
