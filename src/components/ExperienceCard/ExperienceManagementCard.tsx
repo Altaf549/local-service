@@ -60,10 +60,10 @@ const ExperienceManagementCard: React.FC<ExperienceManagementCardProps> = ({ ite
             <MaterialIcons name="edit" size={18} color={theme.colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: '#ef444420' }]}
+            style={[styles.actionButton, { backgroundColor: theme.colors.error + '20' }]}
             onPress={() => onDelete(item.id)}
           >
-            <MaterialIcons name="delete" size={18} color="#ef4444" />
+            <MaterialIcons name="delete" size={18} color={theme.colors.error} />
           </TouchableOpacity>
         </View>
       </View>

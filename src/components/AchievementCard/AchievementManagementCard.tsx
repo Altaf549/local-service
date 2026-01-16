@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
+import { moderateScale, moderateVerticalScale } from '../../utils/scaling';
 
 export interface AchievementCardData {
   id: number;
@@ -48,10 +49,10 @@ const AchievementManagementCard: React.FC<AchievementManagementCardProps> = ({ i
             <MaterialIcons name="edit" size={18} color={theme.colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: '#ef444420' }]}
+            style={[styles.actionButton, { backgroundColor: theme.colors.error + '20' }]}
             onPress={() => onDelete(item.id)}
           >
-            <MaterialIcons name="delete" size={18} color="#ef4444" />
+            <MaterialIcons name="delete" size={18} color={theme.colors.error} />
           </TouchableOpacity>
         </View>
       </View>
@@ -74,17 +75,9 @@ const AchievementManagementCard: React.FC<AchievementManagementCardProps> = ({ i
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(16),
+    marginBottom: moderateVerticalScale(12),
   },
   header: {
     flexDirection: 'row',
@@ -93,32 +86,32 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
-    marginRight: 12,
+    marginRight: moderateScale(12),
   },
   title: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: moderateVerticalScale(4),
   },
   organization: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '500',
   },
   actions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: moderateScale(8),
   },
   actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: moderateScale(18),
     justifyContent: 'center',
     alignItems: 'center',
   },
   description: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
+    fontSize: moderateScale(14),
+    lineHeight: moderateScale(20),
+    marginBottom: moderateVerticalScale(12),
   },
   footer: {
     flexDirection: 'row',
@@ -128,20 +121,20 @@ const styles = StyleSheet.create({
   dateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: moderateScale(4),
     flex: 1,
   },
   dateText: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     fontWeight: '500',
   },
   yearContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: moderateScale(4),
   },
   yearText: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     fontWeight: '500',
   },
 });

@@ -71,10 +71,10 @@ const AddAchievementModal: React.FC<AddAchievementModalProps> = ({
       });
     }
     setErrors({
-        title: undefined,
-        description: undefined,
-        achieved_date: undefined,
-      });
+      title: undefined,
+      description: undefined,
+      achieved_date: undefined,
+    });
   }, [editingItem, visible]);
 
   const validateForm = () => {
@@ -131,7 +131,7 @@ const AddAchievementModal: React.FC<AddAchievementModalProps> = ({
             description: formData.description,
             achieved_date: formData.achieved_date,
           };
-          
+
           if (itemType === 'serviceman') {
             const result = await dispatch(addNewServicemanAchievement(newData));
             if (addNewServicemanAchievement.fulfilled.match(result)) {
@@ -196,7 +196,7 @@ const AddAchievementModal: React.FC<AddAchievementModalProps> = ({
           <View style={styles.formGroup}>
             <Text style={[styles.label, { color: theme.colors.text }]}>Achievement Date</Text>
             <TouchableOpacity
-              style={[styles.datePickerButton, { borderColor: errors.achieved_date ? theme.colors.error : theme.colors.border }]}
+              style={[styles.datePickerButton, { borderColor: errors.achieved_date ? theme.colors.error : theme.colors.border, backgroundColor: theme.colors.card}]}
               onPress={() => setShowDatePicker(true)}
             >
               <Text style={[styles.dateText, { color: theme.colors.text }]}>
@@ -223,10 +223,10 @@ const AddAchievementModal: React.FC<AddAchievementModalProps> = ({
             />
           </View>
         </ScrollView>
-        
+
         {/* Date Picker */}
         {showDatePicker && (
-          <View style={styles.datePickerContainer}>
+          <View style={[styles.datePickerContainer, { shadowColor: theme.colors.primary }]}>
             <DateTimePicker
               value={formData.achieved_date ? new Date(formData.achieved_date) : new Date()}
               mode="date"
@@ -234,14 +234,14 @@ const AddAchievementModal: React.FC<AddAchievementModalProps> = ({
               onChange={handleDateChange}
             />
             <TouchableOpacity
-              style={[styles.datePickerButton, { backgroundColor: theme.colors.background }]}
+              style={[styles.datePickerButton, { backgroundColor: theme.colors.card }]}
               onPress={() => setShowDatePicker(false)}
             >
               <Text style={[styles.datePickerButtonText, { color: theme.colors.primary }]}>Cancel</Text>
             </TouchableOpacity>
           </View>
         )}
-        
+
         {/* Bottom Action Buttons */}
         <View style={[styles.bottomActions, { borderTopColor: theme.colors.border }]}>
           <Button
@@ -250,7 +250,7 @@ const AddAchievementModal: React.FC<AddAchievementModalProps> = ({
             variant="outline"
             style={{ flex: 1 }}
           />
-          
+
           <Button
             title="Save"
             onPress={handleSubmit}
@@ -280,25 +280,24 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   datePickerButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderWidth: 1,
-      borderRadius: moderateScale(8),
-      paddingHorizontal: moderateScale(15),
-      paddingVertical: moderateVerticalScale(12),
-      backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderRadius: moderateScale(8),
+    paddingHorizontal: moderateScale(15),
+    paddingVertical: moderateVerticalScale(12)
   },
   dateText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     flex: 1,
   },
   dateIcon: {
-    marginLeft: 8,
+    marginLeft: moderateScale(8),
   },
   errorText: {
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: moderateScale(12),
+    marginTop: moderateVerticalScale(4),
   },
   datePickerContainer: {
     position: 'absolute',
@@ -306,28 +305,27 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: 'white',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    shadowColor: '#000',
+    borderTopLeftRadius: moderateScale(16),
+    borderTopRightRadius: moderateScale(16),
     shadowOffset: {
       width: 0,
-      height: -2,
+      height: moderateScale(-2),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: moderateScale(4),
     elevation: 5,
   },
   datePickerButtonText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '600',
     textAlign: 'center',
   },
   bottomActions: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: moderateScale(16),
+    paddingVertical: moderateVerticalScale(12),
     borderTopWidth: 1,
-    gap: 12,
+    gap: moderateScale(12),
   },
 });
 

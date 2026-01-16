@@ -10,6 +10,7 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { fetchServicemanAchievements, updateExistingServicemanAchievement, removeServicemanAchievement } from '../../redux/slices/servicemanAchievementSlice';
 import { fetchBrahmanAchievements, updateExistingBrahmanAchievement, removeBrahmanAchievement } from '../../redux/slices/brahmanAchievementSlice';
 import { RootState } from '../../redux/store';
+import {moderateVerticalScale, moderateScale} from '../../utils/scaling';
 
 const ServicemanAchievementScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -190,7 +191,7 @@ const ServicemanAchievementScreen: React.FC = () => {
 
       {/* FAB */}
       <TouchableOpacity 
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        style={[styles.fab, { backgroundColor: theme.colors.primary, shadowColor: theme.colors.primary }]}
         onPress={handleAddItem}
       >
         <MaterialIcons name="add" size={24} color="white" />
@@ -221,14 +222,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
-    paddingBottom: 80, // Add padding to prevent FAB from covering content
+    padding: moderateScale(16),
+    paddingBottom: moderateVerticalScale(80), // Add padding to prevent FAB from covering content
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: moderateScale(20),
   },
   loadingContainer: {
     flex: 1,
@@ -236,42 +237,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
+    marginTop: moderateVerticalScale(16),
+    fontSize: moderateScale(16),
   },
   listContent: {
     flexGrow: 1,
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: moderateScale(24),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 12,
+    marginTop: moderateVerticalScale(20),
+    marginBottom: moderateVerticalScale(12),
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 300,
+    lineHeight: moderateScale(22),
+    maxWidth: moderateScale(300),
   },
   fab: {
     position: 'absolute',
-    bottom: 70,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    bottom: moderateVerticalScale(70),
+    right: moderateScale(24),
+    width: moderateScale(56),
+    height: moderateScale(56),
+    borderRadius: moderateScale(28),
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: moderateScale(4),
     },
     shadowOpacity: 0.3,
-    shadowRadius: 4.65,
+    shadowRadius: moderateScale(4.65),
   },
 });
 
