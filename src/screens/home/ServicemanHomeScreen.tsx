@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { StyleSheet, View, Text, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../theme/ThemeContext';
 import { Header } from '../../components/Header/Header';
 import { ProfileMenu } from '../../components/ProfileMenu/ProfileMenu';
@@ -18,6 +19,7 @@ import { setUserData } from '../../redux/slices/userSlice';
 import { verticalScale, moderateScale, scaleFont } from '../../utils/scaling';
 
 import { useFocusEffect } from '@react-navigation/native';
+import Console from '../../utils/Console';
 
 const ServicemanHomeScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -146,6 +148,18 @@ const ServicemanHomeScreen: React.FC = () => {
       }
 
       if (response.success) {
+        // Update user data in Redux using response data
+        if (response.data) {
+          const updatedUserData = {
+            ...userData,
+            ...response.data
+          };
+          dispatch(setUserData(updatedUserData));
+          Console.log('Updated user data:', updatedUserData);
+          // Update AsyncStorage
+          await AsyncStorage.setItem('user_info', JSON.stringify(updatedUserData));
+        }
+        
         Alert.alert('Success', response.message || 'Profile updated successfully');
       } else {
         throw new Error(response.message || 'Failed to update profile');

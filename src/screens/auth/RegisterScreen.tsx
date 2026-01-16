@@ -94,7 +94,7 @@ const RegisterScreen: React.FC = () => {
       })).unwrap();
 
       if ('needsActivation' in result) {
-        // For serviceman and brahman registration
+        // For serviceman and brahman registration that needs activation (no token)
         Alert.alert(
           'Registration Successful',
           `${result.role === USER_ROLES.SERVICEMAN ? 'Serviceman' : 'Brahman'} account created successfully! Your account needs to be activated by admin before you can access all features.`,
@@ -102,17 +102,14 @@ const RegisterScreen: React.FC = () => {
             {
               text: 'OK',
               onPress: () => {
-                // Navigate to serviceman home screen
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: SERVICEMAN_HOME }],
-                });
+                // Navigate to login screen since they need to login after activation
+                navigation.navigate(LOGIN, {});
               }
             }
           ]
         );
       } else {
-        // For user registration - auto login
+        // For all registrations with token (user, serviceman, brahman)
         dispatch(setUserData(result));
         dispatch(setIsUser(true));
 
@@ -123,6 +120,12 @@ const RegisterScreen: React.FC = () => {
           navigation.reset({
             index: 0,
             routes: [{ name: MAIN_TABS }],
+          });
+        } else {
+          // Serviceman and brahman
+          navigation.reset({
+            index: 0,
+            routes: [{ name: SERVICEMAN_HOME }],
           });
         }
       }

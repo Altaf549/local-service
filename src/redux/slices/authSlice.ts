@@ -258,18 +258,58 @@ export const registerUser = createAsyncThunk(
       }
 
       if (response.success) {
-        // For user registration, we might get a token and can log them in immediately
-        if (response.data.token && response.data.user) {
-          const userData = {
-            id: response.data.user.id,
-            name: response.data.user.name,
-            email: response.data.user.email,
-            mobile_number: response.data.user.mobile_number,
-            address: response.data.user.address,
-            role: credentials.role,
-            status: response.data.user.status,
-            token: response.data.token,
-          };
+        // Check if we have a token (for all user types)
+        if (response.data.token) {
+          let userData;
+          
+          // Handle different response structures for different user types
+          if (response.data.user) {
+            // Regular user registration
+            userData = {
+              id: response.data.user.id,
+              name: response.data.user.name,
+              email: response.data.user.email,
+              mobile_number: response.data.user.mobile_number,
+              address: response.data.user.address,
+              role: credentials.role,
+              status: response.data.user.status,
+              token: response.data.token,
+            };
+          } else if (response.data.brahman) {
+            // Brahman registration
+            userData = {
+              id: response.data.brahman.id,
+              name: response.data.brahman.name,
+              email: response.data.brahman.email,
+              mobile_number: response.data.brahman.mobile_number,
+              address: response.data.brahman.address,
+              role: credentials.role,
+              status: response.data.brahman.status,
+              token: response.data.token,
+            };
+          } else if (response.data.serviceman) {
+            // Serviceman registration
+            userData = {
+              id: response.data.serviceman.id,
+              name: response.data.serviceman.name,
+              email: response.data.serviceman.email,
+              mobile_number: response.data.serviceman.mobile_number,
+              address: response.data.serviceman.address,
+              role: credentials.role,
+              status: response.data.serviceman.status,
+              token: response.data.token,
+            };
+          } else {
+            // Fallback - use registration credentials
+            userData = {
+              id: 0,
+              name: credentials.name,
+              email: credentials.email,
+              mobile_number: credentials.mobile_number,
+              role: credentials.role,
+              token: response.data.token,
+            };
+          }
 
           // Store user data and token in AsyncStorage
           await AsyncStorage.setItem('user_token', response.data.token);
@@ -280,7 +320,7 @@ export const registerUser = createAsyncThunk(
 
           return userData;
         } else {
-          // For serviceman and brahman, registration succeeds but they need admin activation
+          // No token provided - needs activation
           return {
             message: response.message,
             needsActivation: true,
