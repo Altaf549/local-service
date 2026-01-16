@@ -7,6 +7,7 @@ import { Header } from '../../components/Header/Header';
 import { ProfileMenu } from '../../components/ProfileMenu/ProfileMenu';
 import ProfileUpdateCard from '../../components/ProfileUpdateCard/ProfileUpdateCard';
 import ServicemanProfileUpdateModal from '../../components/ServicemanProfileUpdateModal/ServicemanProfileUpdateModal';
+import { CustomImage } from '../../components/CustomImage/CustomImage';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { updateServicemanProfile, updateBrahmanProfile, getServicemanProfileData, getBrahmanProfileData, getServicemanStatus, getBrahmanStatus } from '../../services/api';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
@@ -179,11 +180,19 @@ const ServicemanHomeScreen: React.FC = () => {
       <Header 
         title="Dashboard" 
         rightIcon={
-          <MaterialIcons 
-            name="account-circle" 
-            size={40} 
-            color={theme.colors.background} 
-          />
+          userData?.profile_photo_url || userData?.profile_photo ? (
+            <CustomImage
+              source={{ uri: userData.profile_photo_url || userData.profile_photo }}
+              style={styles.profileImage}
+              type="fast"
+            />
+          ) : (
+            <MaterialIcons 
+              name="account-circle" 
+              size={40} 
+              color={theme.colors.background} 
+            />
+          )
         }
         onRightIconPress={handleProfilePress}
       />
@@ -247,6 +256,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: moderateScale(20),
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   title: {
     fontSize: scaleFont(20),
