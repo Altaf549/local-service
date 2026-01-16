@@ -219,7 +219,6 @@ export const updateBrahmanProfileThunk = createAsyncThunk(
       } else if (error.message) {
         errorMessage = error.message;
       }
-      Console.log('Update brahman profile error message:', errorMessage);
       return rejectWithValue(errorMessage);
     }
   }
