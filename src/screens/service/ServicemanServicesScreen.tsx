@@ -10,7 +10,7 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { fetchServicePrices, deleteServicePriceThunk } from '../../redux/slices/servicePricesSlice';
 import { fetchPujaPrices, deletePujaPriceThunk } from '../../redux/slices/pujaPricesSlice';
 import { RootState } from '../../redux/store';
-import { verticalScale, moderateScale, scaleFont, scaleSize} from '../../utils/scaling';
+import { verticalScale, moderateScale, scaleFont, scaleSize, moderateVerticalScale} from '../../utils/scaling';
 
 const ServicemanServicesScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -242,6 +242,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    marginTop: moderateVerticalScale(16),
   },
   loadingContainer: {
     flex: 1,

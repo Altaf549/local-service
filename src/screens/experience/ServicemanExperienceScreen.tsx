@@ -247,6 +247,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    marginTop: moderateVerticalScale(16),
   },
   loadingContainer: {
     flex: 1,
